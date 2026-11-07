@@ -1,28 +1,46 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: November 7, 2026 by Sage/Codex; clean signed main-based integration._
+_Last updated: 2026-11-07 by Claude (VerificationGate PR). The previous handoff (Sage, signed main-based
+integration of #9/#10) is summarized under "Smoke evidence" and preserved in git history._
 
-## Current contribution
+## State of `main`
+- Landed: #8 (stack #1–#6: substrate, providers, receipts, authority, eggs, live gate, canary), #9 (Sage:
+  bounded smoke acceptance + signed-artifact verifier, which integrated #10's docs), #11 (valve, projection, worker claims).
+- This PR adds the **VerificationGate**. With it, the M1 loop is complete in code:
+  **lay egg → claim (lease + per-egg capability) → witnessed inference → schema-valid delivery → gate →
+  hatched (committed/) or purged (quarantine/, capability revoked)**, with the next eggs unblocked by their parents' hatch.
+- `main` requires signed commits. Engineers use the signed web-editor path or a signed squash (QOS-0026).
 
-`codex/smoke-main-signed` starts directly at main `90b40356c07492df4ee179bd39177b03cb219f75`. It combines the exact provider/verifier/test changes from #9 head `336dfee934299b2d050e7729eb4b3dfea1e882b4` with the overlapping documentation from #10 head `1a1ca6f66868916cb4cbb4465d33906ebdbb8a56`. Historical branches/PRs are preserved. This fixes the squash ancestry conflict without forcing either engineer's branch. New contribution commits use GitHub's signed web-editor path; verify their final signatures and CI before landing.
+## Read first
+`CLAUDE.md` (laws) → `docs/ENGINEERS.md` → `docs/ISSUES.md` → latest `LEDGER.md` entries → `docs/BUILD_MAP.md`.
 
-- QOS-0025 remains the canary answer/evidence issue. QOS-0026 is the separate signing issue. Local CLI signing is still unconfigured; no new key or security-policy change was made.
-- Claude's original landing entry and correction, and Sage's smoke/retention entries, are retained in LEDGER.md. New work branches from main; short explicit dependencies are allowed by docs/ENGINEERS.md.
-- Original #9 had 13 green checks against its former landing-branch base. Those are historical results, not a new main-based integration pass. Final-head CI must be bound to its actual tested commit and base/head.
+## Smoke evidence (Sage's lane; see `docs/SMOKE_ACCEPTANCE.md`)
+- Run 42373449340 was green but its CLI answered `Mosquito.`. Run 42380605862 answered `bee` in pytest and
+  `beeedom` in the CLI. The strict word gate exited 2. **No strict semantic smoke pass is claimed.** Never
+  retry until lucky, and never relabel the preserved wrong answer as a pass.
+- The retention fix uploads the signed CLI bundle first, then checks the `bee` oracle against the pinned ZIP digest.
+- Claude's open suggestion to Sage: separate *harness* liveness (echo oracle, deterministic) from *semantic*
+  quality (factual question, non-blocking), so a 0.5B model's mistakes don't read as harness breakage.
+- Frozen Astra v65 is separate and unchanged. Its containment/fresh-session prerequisites govern its A/B/C study,
+  not ordinary repository engineering.
 
-## Smoke evidence and limits
+## M1 remaining, in order
+1. **Structured output** in providers (QOS-0008): JSON-schema mode per vendor (Anthropic tool-forced JSON,
+   OpenAI `response_format: json_schema`, Gemini `responseSchema`, Ollama `format`). Diploid eggs need it
+   to pass `output_matches_receipt` reliably.
+2. **`comb/capsule.py`:** O(1) resume capsule (egg + parent artifacts by digest), so a worker reads state, not chat.
+3. **`queen/oviposition.py`:** a strategic model decomposes a goal into a DAG of eggs (validated, signed).
+4. **M1 exit test** (live, through `live-inference.yml` under SO-0001): real model decomposes → real workers
+   hatch → gate promotes/purges → `queen ledger verify` green. Record the evidence bundle.
 
-Read docs/SMOKE_ACCEPTANCE.md. Historical run 42373449340 exported the wrong CLI answer `Mosquito.` despite a green job. Corrected run 42380605862 at `9a907655de0f249f5a4001770a6de88e4bc30ab8` returned `bee` in pytest but `beeedom` in the CLI. Producer signatures passed; the strict word gate exited 2. Artifact upload was then skipped. Do not claim a strict semantic smoke pass.
+## Operator commands
+```
+pip install -e ".[dev]"; pytest --ignore=tests/live      # 230 offline (+7 archive-replay skips)
+queen init ./h --node-id dev && queen host probe --hive ./h
+queen eggs --hive ./h                                    # lifecycle fold
+queen gate review <egg_id> --hive ./h                    # exit 0 = hatched, 3 = purged/held
+queen ledger verify ./h
+```
 
-The retention fix admits the signed public CLI bundle, uploads it, then checks the unchanged `bee` oracle against the pinned ZIP digest. Invalid/private/incomplete bundles block upload; a wrong answer keeps the job red. No prompt, model, two-call count, 32/16 output-token caps, inference retry, live trigger, hosted-key policy or environment setting is changed here. Earlier pytest failure/cancellation/structural rejection/upload failure can still leave no CLI artifact; pytest's separate hive remains unexported.
-
-Clean-copy baseline: 203 offline tests with the preserved historical archive, correct fresh-source import, and a verified new local hive genesis. Ordinary CI explicitly skips seven archive replay cases. No new model call was made for this integration. GitHub upload behavior at the final source still needs a live witness. Source signing and producer CI are not independent containment acceptance.
-
-## Next work
-
-1. Check final signatures, CI, exact diff and cross-engineer review before owner landing; originals remain as review history until superseded deliberately.
-2. Record any later bounded canary result separately; never turn the preserved wrong answer into a pass or retry until lucky.
-3. Continue M1 implementation: valve, worker claim with per-worker/per-egg capabilities and fenced writes, structured output, verification gate, projections/capsules and oviposition. See docs/BUILD_MAP.md and docs/ISSUES.md; no worker/model runtime is implemented by this handoff.
-4. Frozen Astra v65 stays separate and unchanged. Its independent containment/fresh-session prerequisites still govern its A/B/C comparison; they do not prohibit ordinary repository engineering.
-
-Read CLAUDE.md, docs/ENGINEERS.md, docs/ISSUES.md, the latest LEDGER.md entry and docs/BUILD_MAP.md. Existing live-inference documentation governs other run paths; documentary labels and historical owner statements do not expand the hourly cadence's read-only scope.
+## Waiting on the owner
+- First SO-0001 hosted dispatch, which also confirms the `live-inference` environment configuration.

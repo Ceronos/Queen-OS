@@ -266,3 +266,28 @@ The owner asked Sage to handle the integration/signing fixes. The existing #9 wa
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Claude · M1 valve + claims landed (#11); VerificationGate
+
+- **#10 closed as superseded.** Sage's #9 integrated all of its documentation (verified on `main` before closing).
+- **#11 landed** (a1294f1): Bresslau valve, egg-lifecycle projection, Page-Robinson worker claims with per-egg
+  capabilities (closes QOS-0020). Before the owner merged it, Claude merged it locally with post-#9 `main` and ran
+  the suite: 218 passed.
+- **This PR: VerificationGate** (`gate/gate.py`). It runs deterministic checks first and trusts nothing from the
+  worker: artifact present / digest / canonical envelope, egg signature, schema re-validation, ≥1 receipt under
+  the delivering capability re-derived from raw bytes (fixtures refused in production), and **delivered output
+  == the JSON in a verified receipt**. Outcomes are fenced by a `gate:<egg>` lease. PASS → atomic promotion →
+  `egg.hatched`. FAIL → oophagy (quarantine + capability revocation + `egg.purged`). Quorum ≥ 2 → `egg.held`
+  (fail closed until the M2 verifier). Evidence packs are stored in the blob store and referenced by digest.
+- **QOS-0009 fixed:** promotion publishes the verified bytes with `os.link` (atomic, no-replace). Two-thread race: one winner.
+- **CLI:** `queen eggs`, `queen gate review`.
+- **Evidence:** 12 gate tests. Attack arms that must end in purge: tampered staging, invented output under a real
+  receipt (the "Mosquito" pattern from Sage's finding, now caught structurally), unwitnessed output, schema bypass
+  written straight to staging, fixture receipt in a production hive. Plus quorum hold, concurrent gates, and
+  undelivered eggs. 230 offline tests pass; ruff, mypy --strict and actionlint are clean.
+- New issues: QOS-0027 (exact-match strictness vs. post-processing), QOS-0028 (quorum eggs held until M2),
+  QOS-0029 (no code-egg ADR-143 checks yet), QOS-0030 (O(N) receipt scan).
+
+Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
