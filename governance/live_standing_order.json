@@ -1,0 +1,17 @@
+{
+  "order_id": "SO-0001",
+  "status": "active",
+  "issued_by": "Ceronos Aethrion (owner)",
+  "issued_utc": "2026-11-07T12:33:00Z",
+  "owner_words": "We can have Sage and you start runs under your own jurisdiction. Explicit via my orders, aka Johnny.",
+  "engineers": ["claude", "sage"],
+  "scope": {
+    "ollama": ["qwen2.5:*", "qwen3:*", "llama3.2:*", "gemma3:*"],
+    "anthropic": ["claude-haiku-*"],
+    "openai": ["gpt-5-mini*", "gpt-5-nano*"],
+    "gemini": ["gemini-*-flash*"]
+  },
+  "max_output_tokens": 128,
+  "max_runs_per_utc_day": 20,
+  "notes": "Changing this file requires a commit on main, so the owner controls scope by merging. Hosted models are limited to the cheapest tier of each vendor. Wider scope needs a new order."
+}

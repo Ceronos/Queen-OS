@@ -46,6 +46,10 @@ LEDGER.md           build ledger, one entry per session
 HANDOFF.md          state for the next engineer
 ```
 
+## License
+
+Proprietary, source-visible. All rights reserved. See [`LICENSE`](LICENSE).
+
 ## Lineage
 
 Queen-OS uses [Hermes Agent](https://github.com/NousResearch/hermes-agent) (MIT,
