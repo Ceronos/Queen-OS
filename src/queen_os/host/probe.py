@@ -97,7 +97,7 @@ def memory(root: Path) -> Sensor:
 
         st = MemStatus()
         st.dwLength = ctypes.sizeof(MemStatus)
-        if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st)):  # type: ignore[attr-defined]
+        if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st)):  # type: ignore[attr-defined,unused-ignore]
             return ok({"total_bytes": int(st.total)})
         return error("GlobalMemoryStatusEx failed")
     return unavailable(f"no memory interface for {sys.platform}")
