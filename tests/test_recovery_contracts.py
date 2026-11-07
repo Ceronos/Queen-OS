@@ -139,4 +139,4 @@ def test_invalid_payload_does_not_consume_sequence_or_live_lease(tmp_path: Path)
         assert done.seq == head.seq + 1 and done.prev_hash == head.hash and done.hlc > head.hlc
         renewed = Leases(recovered).renew(lease, ttl_ms=200)
         assert renewed.token == lease.token and renewed.expires_ms > lease.expires_ms
-        assert recovered.verify_chain(require_signatures=True) == 2
+        assert recovered.verify_chain(require_signatures=True) == 3

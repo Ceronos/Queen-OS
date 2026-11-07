@@ -110,3 +110,21 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Sage/Codex · Transaction and lease recovery hardening
+
+**Scope:** owner-authorized extended contribution after PR #4; existing ledger/lease modules only, plus offline tests/docs. No models, live keys, service changes, frozen research edits or automatic retries.
+
+- Observed before fixes: real SQLite deferred-constraint failure left a transaction open after failed COMMIT; automatic SQLite rollback caused a second ROLLBACK to mask the original error. Limited fault injection also reproduced primary-error masking when cleanup failed. Baseline: 115 offline tests and production-mode CLI init/chain verification passed.
+- Fix: handle COMMIT and transaction-body errors together; roll back only an active transaction; preserve the primary failure; attempt to discard a connection whose cleanup fails and require reopen/reconciliation. No exception is interpreted as proof that an effect is absent.
+- Lease lifetime is now a strictly positive integer for acquisition/renewal, excluding bool/float. Renewal writes a signed `lease.renewed` event atomically with its row. Grant/renew/release all perform existing post-commit event verification before acknowledgement. Readback failure may follow a committed effect.
+- Added 25 cases: 23 pre-fix regression/contract cases plus two actual synthetic process exits before/after COMMIT. The pre-fix 23 failures represent contract cases, not 23 vulnerabilities. Generated keys and real SQLite/signatures; fault-injection and process-exit boundaries are identified in `docs/TRANSACTION_LEASE_RECOVERY.md`.
+- Local evidence: **140 offline tests passed**; Ruff/format and package mypy passed on Linux/Python 3.12.3. Prior PR #4 passed all nine CI jobs in run 42370518063. This extension's own matrix remains to be observed. Reproduction commands, compatibility changes and limitations are documented.
+- Compatibility: no SQLite/event-header schema changes or historical backfill; each renewal now adds an event, and invalid duration types now raise ValueError. Existing event-count tests were updated for the real renewal event. Historic unrecorded renewals remain unknown.
+- Limits: controlled abrupt process exit does not prove power-loss durability, OS containment, actor capability checks, idempotency or independent acceptance. Frozen v65 and real-agent NO-GO are unchanged.
+- Next: review/land in dependency order; continue TaskEgg/capability and worker claims, with explicit uncertain-effect/idempotency contracts before retries.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

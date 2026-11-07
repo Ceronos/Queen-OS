@@ -132,4 +132,4 @@ def test_lease_exclusion_expiry_and_fencing(tmp_path: Path) -> None:
         with pytest.raises(StaleFence):
             led.append("egg.done", "worker:b", {}, fence=b2.fence)
         assert [e.kind for e in led.events()].count("lease.granted") == 2
-        assert led.verify_chain(require_signatures=True) == 5
+        assert led.verify_chain(require_signatures=True) == 6

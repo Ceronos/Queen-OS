@@ -3,7 +3,10 @@
 These are producer regression checks against `comb/ledger.py` and `comb/leases.py`,
 not a second store or a worker runner. All work payloads are synthetic. Keys are
 generated locally by the tests. No provider adapter, model or live credential is
-used. The production implementation is unchanged by this contribution.
+used. The initial test contribution did not change the production implementation.
+The subsequent hardening extension is documented in `TRANSACTION_LEASE_RECOVERY.md`;
+it changes transaction cleanup and lease lifecycle recording/readback, and adds
+controlled abrupt-writer-exit tests.
 
 | Boundary | Negative arm | Recovered positive arm / evidence |
 |---|---|---|
@@ -48,7 +51,8 @@ check this contribution's own CI.
 
 The database, signatures, rollback and connection reopens are real. Faults are
 controlled Python exceptions; reopen is clean. There is no claim of abrupt
-process-kill, power-loss, damaged-media or remote-provider recovery. A fence
+process-kill, power-loss, damaged-media or remote-provider recovery from these
+initial cases. The later extension separately tests abrupt writer exit. A fence
 checks a current resource token/expiry; it is not an actor capability or OS
 boundary. Independent containment acceptance, the separate research fresh-session
 adapter, aggregate budgets and real worker cancellation remain unresolved. Existing

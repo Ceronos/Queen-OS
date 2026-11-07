@@ -35,8 +35,8 @@ class Leases:
         self.ledger = ledger
 
     def acquire(self, resource: str, holder: str, ttl_ms: int) -> Lease:
-        if ttl_ms <= 0:
-            raise ValueError("ttl_ms must be positive")
+        if type(ttl_ms) is not int or ttl_ms <= 0:
+            raise ValueError("ttl_ms must be a positive integer")
         with self.ledger.transaction() as db:
             now = self.ledger.now()
             row = db.execute("SELECT holder, token, expires_ms FROM leases WHERE resource=?", (resource,)).fetchone()
@@ -50,23 +50,34 @@ class Leases:
                 " expires_ms=excluded.expires_ms",
                 (resource, holder, token, expires),
             )
-            self.ledger.append_locked(
+            seq = self.ledger.append_locked(
                 db, "lease.granted", holder, {"resource": resource, "token": token, "expires_ms": expires}
             )
+        self.ledger._post_write_fetch(seq)
         return Lease(resource, holder, token, expires)
 
     def renew(self, lease: Lease, ttl_ms: int) -> Lease:
-        """Extend a live lease without changing its token."""
+        """Set a live lease's lifetime from now, retaining its token and recording the change."""
+        if type(ttl_ms) is not int or ttl_ms <= 0:
+            raise ValueError("ttl_ms must be a positive integer")
         with self.ledger.transaction() as db:
             self.ledger.check_fence(db, *lease.fence)
             expires = self.ledger.now() + ttl_ms
             db.execute("UPDATE leases SET expires_ms=? WHERE resource=?", (expires, lease.resource))
+            seq = self.ledger.append_locked(
+                db,
+                "lease.renewed",
+                lease.holder,
+                {"resource": lease.resource, "token": lease.token, "expires_ms": expires},
+            )
+        self.ledger._post_write_fetch(seq)
         return Lease(lease.resource, lease.holder, lease.token, expires)
 
     def release(self, lease: Lease) -> None:
         with self.ledger.transaction() as db:
             self.ledger.check_fence(db, *lease.fence)
             db.execute("UPDATE leases SET expires_ms=0 WHERE resource=?", (lease.resource,))
-            self.ledger.append_locked(
+            seq = self.ledger.append_locked(
                 db, "lease.released", lease.holder, {"resource": lease.resource, "token": lease.token}
             )
+        self.ledger._post_write_fetch(seq)

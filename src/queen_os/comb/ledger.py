@@ -152,10 +152,20 @@ class Ledger:
         self._db.execute("BEGIN IMMEDIATE")
         try:
             yield self._db
-        except BaseException:
-            self._db.execute("ROLLBACK")
+            self._db.execute("COMMIT")
+        except BaseException as primary:
+            try:
+                # COMMIT can fail with a transaction still open; SQLite can
+                # also roll back on its own before raising from the body.
+                if self._db.in_transaction:
+                    self._db.execute("ROLLBACK")
+            except BaseException:
+                primary.add_note("Transaction cleanup failed; discard this connection and reopen to reconcile effects.")
+                try:
+                    self._db.close()
+                except BaseException:
+                    primary.add_note("Closing the failed connection also failed; do not reuse it.")
             raise
-        self._db.execute("COMMIT")
 
     def _register_signer(self, signer: Signer) -> None:
         with self.transaction() as db:

@@ -1,6 +1,6 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07, Sage/Codex offline-recovery contribution._
+_Last updated: 2026-11-07, Sage/Codex transaction/lease hardening contribution._
 
 ## Read first
 
@@ -15,15 +15,15 @@ _Last updated: 2026-11-07, Sage/Codex offline-recovery contribution._
 ## Current scope and evidence
 
 - M0 contains the signed ledger/HLC, fenced leases, blobs, enclave conventions and CLI. M1 provider adapters/receipts and credential handling are present on the provider branch. Worker execution, TaskEgg/capability integration and the full VerificationGate remain separate M1 work.
-- Existing code baseline: 89 offline tests passed locally. This CI-gate contribution: 110 offline tests passed on Linux / Python 3.12.3; lint/format and package/script type checks passed. The safeguard subsequently passed all nine OS/Python CI jobs (run 42370239866). The next contribution adds five recovery cases: 115 offline tests, lint/format and package types passed locally; its own CI must be checked separately.
+- Existing code baseline: 89 offline tests passed locally. This CI-gate contribution: 110 offline tests passed on Linux / Python 3.12.3; lint/format and package/script type checks passed. The safeguard subsequently passed all nine OS/Python CI jobs (run 42370239866). The next contribution adds five recovery cases: 115 offline tests, lint/format and package types passed locally; its nine CI jobs passed in run 42370518063. The hardening extension now has 140 offline tests, lint/format and package types passing locally; check its own matrix before claiming cross-platform results.
 - Ordinary push/PR CI is offline. A distinct manually dispatched workflow is the only CI inference entry. Read `docs/LIVE_INFERENCE.md` before proposing any live run.
 - Live workflow preflight requires an exact approved main commit, provider/model/token scope and an already configured `live-inference` environment with required reviewers and self-review prevention. No environment, reviewer, key or live-run authorization was created by this change. No live run was dispatched.
 - The review URL/checker does not establish independent containment acceptance or a monetary grant. Actual prerequisites remain the reviewer's responsibility. Existing research NO-GO decisions remain in force.
 
 ## Next engineering work
 
-1. Review/land PR #3 (CI safeguard), then the stacked offline recovery-test PR. Preserve the existing dependency order.
-2. Recovery contracts are now in `tests/test_recovery_contracts.py` and `docs/RECOVERY_CONTRACT.md`. They cover Python interruption/clean reopen only. Read stored evidence before retrying an uncertain append; no idempotency guarantee or runner has been implemented. Do not substitute a parallel store or label fixtures as live inference.
+1. Review/land PR #3 (CI safeguard), PR #4 (offline recovery tests), then the transaction/lease hardening PR stacked on #4. Preserve the existing #1 → #2 dependency order and retarget as bases land.
+2. Recovery contracts are now in `tests/test_recovery_contracts.py` and `docs/RECOVERY_CONTRACT.md`. The later hardening extension adds controlled abrupt writer exits plus transaction and lease fixes; read `docs/TRANSACTION_LEASE_RECOVERY.md`. Renewals now add signed events, all lease operations verify event readback, and invalid duration types are rejected. Read stored evidence before retrying an uncertain append/lease operation; no idempotency guarantee or runner has been implemented. Do not substitute a parallel store or label fixtures as live inference.
 3. Continue M1: TaskEgg and actual capability checks, worker claims, evidence gate, projections/recovery, and then an explicitly scoped integrated run after prerequisites. The build map defines ownership and milestone boundaries.
 4. Keep source-signing, producer tests, independent review and deployed containment as separate evidence classes. Directory permissions are not an OS sandbox.
 

@@ -61,11 +61,11 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 | Concept (source) | Tier | V5 realization | Module | Milestone |
 |---|---|---|---|---|
-| QueenStore append-only hash-chained ledger from `GENESIS_ROOT_0000000000000000` (Thesis §4.3) | T1 | SQLite WAL, `BEGIN IMMEDIATE` serialized appends, SHA-256 chain, full-chain verifier | `comb/ledger.py` | **M0 ✅** |
+| QueenStore append-only hash-chained ledger from `GENESIS_ROOT_0000000000000000` (Thesis §4.3) | T1 | SQLite WAL, `BEGIN IMMEDIATE` serialized appends, SHA-256 chain, full-chain verifier; failed-COMMIT/automatic-rollback cleanup with primary-error preservation | `comb/ledger.py` | **M0 ✅** |
 | HLC `(L, C, node_id)` causal ordering (Thesis §4.3) | T1 | HLC persisted in the ledger so it stays monotonic across restarts. L is the system clock; PTP is optional host infra (T2). | `comb/hlc.py` | **M0 ✅** |
 | State = deterministic fold of the event ledger (Thesis §4.3) | T1 | Pure projection functions over events. Rebuildable at any time. | `comb/projection.py` | M1 |
 | Content-addressed blob store (REMEDY §1.2) | T1 | `blobs/ab/<sha256>` with tmp + fsync + atomic replace + read-back verify | `comb/blobs.py` | **M0 ✅** |
-| Atomic leases + monotonic fencing tokens (V2 remedy table) | T1 | Lease table. Fenced appends reject stale holders. | `comb/leases.py` | **M0 ✅** |
+| Atomic leases + monotonic fencing tokens (V2 remedy table) | T1 | Lease table plus signed grant/renew/release events with post-commit event readback. Positive integer durations; fenced appends reject stale holders. | `comb/leases.py` | **M0 ✅** |
 | 5-tier spatial enclaves `/workspace /staging /committed /quarantine /vault` (Thesis §4.2) | T1 | Per-hive directory tree with in-process policy. Committed files are made read-only, quarantine is a no-exec convention, and vault holds keys. | `comb/enclaves.py` | **M0 ✅** (paths + promote/quarantine) |
 | 256 GB hugepage POSIX shm comb, 65,536 spinlock cells (Thesis §4.1) | T2 | `multiprocessing.shared_memory` hot cache (works on all 3 OSes), sized from config. The ledger stays the source of truth. The 256 GB figure is a deployment parameter, not a constant. | `comb/hotcache.py` | M3 |
 | Hexagonal axial-coordinate comb grid (V2) | T1 | Cell addressing `(q, r)` as an index over task and domain space, used for locality in work stealing | `comb/hexgrid.py` | M2 |
@@ -169,7 +169,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 CI admission for this provider work is separated into offline push/PR checks and a manually authorized live workflow; see `LIVE_INFERENCE.md`. The gate script has synthetic-metadata tests only and is not independent containment acceptance.
 
-Offline interruption/reopen regression contracts now cover the existing ledger and leases; see `RECOVERY_CONTRACT.md`. These tests do not implement M1 projection/capsule recovery or establish process containment.
+Offline interruption/reopen regression contracts now cover the existing ledger and leases; see `RECOVERY_CONTRACT.md`. The subsequent transaction/lease hardening extension adds failed-commit cleanup and controlled abrupt-writer-exit tests; see `TRANSACTION_LEASE_RECOVERY.md`. These changes do not implement M1 projection/capsule recovery or establish process containment.
 
 
 ## Milestones (top-down from the software core)
