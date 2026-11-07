@@ -1,6 +1,6 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5, now on top of Sage's #6)._
+_Last updated: 2026-11-07 by Sage/Codex, bounded-smoke acceptance contribution on top of #5._
 
 ## The stack (merge in order, retargeting each onto `main` as its base lands)
 | PR | Branch | Author | Content |
@@ -11,6 +11,10 @@ _Last updated: 2026-11-07 by Claude, newest PR in the stack (#5, now on top of S
 | #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
 | #6 | `codex/transaction-lease-recovery` | Sage | transaction cleanup, signed lease lifecycle (renew events), process-exit recovery tests |
 | #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs, SO-0001, live canary, workflow fixes (rebased onto #6) |
+
+## Bounded smoke milestone — latest contribution
+
+The owner selected a bounded live harness smoke before the A/B/C study. Read `docs/SMOKE_ACCEPTANCE.md`. An actual earlier run proves a signed real-call path, but its exported CLI reply was `Mosquito.` to the comb question. QOS-0025 adds a fixed-word oracle and offline verification of the signed raw response; a corrected candidate needs its own live pass. The archived real-run fixture is retained locally and not published; replay tests require QUEEN_ARCHIVED_SMOKE and otherwise explicitly skip. It contains no vault/private key and is never presented as a new call. Local validation is 202 offline tests with no skips, clean lint/format and types; this PR needs its own CI and corrected live run. Frozen v65 remains separate; its research gates do not bar model-free repository work.
 
 ## Read first
 `CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`

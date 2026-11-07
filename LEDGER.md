@@ -193,3 +193,19 @@ real-agent orientation.
 Local: 186 passed; ruff, mypy --strict, actionlint + shellcheck clean.
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+---
+
+## 2026-11-07 · Sage/Codex · Bounded smoke acceptance and archived real-call verification
+
+**Owner-selected milestone:** bounded real-model harness smoke, separately from the frozen v65 comparative study. This branch stacks on PR #5 at c802dc1a7943781f2262ef9b8e9457587e4725e6; no frozen-source, service, environment, reviewer or hosted-key changes.
+
+- Recovered actual canary run 42373449340, job logs and artifact 13573899082 from commit 365de353ced5e7d4bf9b21aff5f5575cc1186163. ZIP digest matched the GitHub artifact API: 29dab4f7c21d336a36ae35a31547aaaadcf05e8ed28fffd508fd136bed1103e5. This was an earlier real GitHub run, not a new Astra inference.
+- Fresh offline readback verified five signed events, exact raw bytes and a one-call/16-output-token capability; actual CLI response was `Mosquito.` (four output tokens). The separate live pytest log said `bee`. Thus the witnessed inference path passed, while the CLI comb-answer oracle failed; earlier nonempty checks missed that distinction (QOS-0025). Historical PTP overclaim remains preserved and excluded from smoke acceptance.
+- Added a no-network archive verifier and 16 offline positive/negative cases, using the unchanged historical real-run ZIP as a separately downloaded, attributed local fixture. The ZIP is not published; seven replay cases explicitly skip in ordinary CI without QUEEN_ARCHIVED_SMOKE. Added explicit fixed-word checks to both live paths and raw-byte verification to the canary. Existing main/manual triggers and two-call limits are preserved. No semantic live success is claimed until a corrected candidate actually runs.
+- Baseline initially lacked newly declared jsonschema dependencies; refreshed only the existing isolated dev environment. Then 184 tests passed and two credential-temp cases explicitly skipped under the Git-ancestor temp root. Final full validation and CI are recorded in this PR and local receipts; no skipped case counts as a pass.
+- Final local validation: **202 offline tests passed with no skips** after providing an explicit non-Git fixture root. Ruff/format, package mypy and strict verifier types passed. Actionlint/shellcheck are checked by PR CI; they are not installed on this execution view.
+- Scope: first engineering smoke milestone; not independent containment acceptance, model freshness, A/B/C fairness, hardware proof or consciousness evidence. Detailed acceptance/reproduction contract: docs/SMOKE_ACCEPTANCE.md.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
