@@ -240,6 +240,11 @@ class Ledger:
         row = self._db.execute("SELECT * FROM events WHERE op_id=?", (op_id,)).fetchone()
         return None if row is None else self._row(row)
 
+    def check_fence_now(self, resource: str, token: int) -> None:
+        """Standalone fence check, for refusing work (e.g. staging) before any write happens."""
+        with self.transaction() as db:
+            self.check_fence(db, resource, token)
+
     def check_fence(self, db: sqlite3.Connection, resource: str, token: int) -> None:
         row = db.execute("SELECT token, expires_ms FROM leases WHERE resource=?", (resource,)).fetchone()
         if row is None or row[0] != token or row[1] <= self.now():
