@@ -61,7 +61,9 @@ jobs:
           H="$RUNNER_TEMP/canary-hive"
           queen init "$H" --node-id canary
           queen host probe --hive "$H"
-          queen infer ollama "$CANARY_MODEL" "Reply with exactly one lowercase word: bee." --hive "$H" --max-tokens 16 --temperature 0.0
+          # Same request shape as the pytest step (system + user, T=0). Without the system prompt this model
+          # deterministically answers "beeedom" (runs 42380605862, 42386170198, 42386561400). See QOS-0031.
+          queen infer ollama "$CANARY_MODEL" "Reply with exactly one lowercase word: bee." --system "Return only the requested word." --hive "$H" --max-tokens 16 --temperature 0.0
           queen ledger verify "$H"
           queen ledger tail "$H" -n 4
           mkdir -p "$RUNNER_TEMP/evidence"
