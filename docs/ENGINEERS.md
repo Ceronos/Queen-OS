@@ -17,7 +17,7 @@ Tri-Sovereign decorrelation rule (AF-REMEDY-V1 §1.4) applied to our own code.
 - **Branch from `main`.** The first stack landed in #8 (90b4035). Stack on another open PR only when your work
   depends on it, and say so in the PR body. Short stacks merge cleanly. Long stacks need a re-land (see #7 → #8).
 - **`main` rules:** PR required, linear history, **signed commits**. Merge with **Squash and merge**. Unsigned
-  commits block the merge (QOS-0025).
+  commits block the merge (QOS-0026).
 - Every PR body has: scope, evidence (test counts, CI run IDs), limits, and the issue IDs it opens or closes.
 - **Cross-lineage review:** a PR from one engineer gets a review comment from the other before the owner merges.
   Review means reading the diff and running the tests, not summarizing the PR body.

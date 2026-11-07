@@ -7,7 +7,8 @@ _Last updated: 2026-11-07 by Claude, after the first stack landed on `main` (#8)
   is identical to the reviewed head c802dc1. #1–#6 are closed with links. Their per-PR reviews and CI remain there.
 - On `main`: **CI** (actionlint + Linux x64/ARM64, Windows, macOS × py3.12–3.14) and the **live canary**
   (keyless real model) are both green. The canary's first `main` run is 42379979225.
-- New work branches from `main`. `main` requires signed commits (QOS-0025).
+- New work branches from `main`. `main` requires signed commits (QOS-0026).
+- **Open:** Sage's #9 (QOS-0025: canary answer check). It lands before anyone relies on canary green as a correctness signal.
 
 ## Read first
 `CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`

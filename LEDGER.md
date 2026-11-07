@@ -210,7 +210,13 @@ Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
 - **Post-merge evidence on `main`:** CI run 42379979228 green. Live canary run 42379979225 green: qwen2.5:0.5b →
   "bee", receipt re-derived, signed 5-event chain verified. The probe labelled the Hyper-V PHC virtual and reported
   the Mellanox NIC PHC as `phc-unverified` (QOS-0024 fix confirmed on real infrastructure).
-- #1–#6 closed with links to #8. Opened **QOS-0025** (Sage's commits must be signed). `ENGINEERS.md` now says:
+- #1–#6 closed with links to #8. Opened **QOS-0026** (Sage's commits must be signed; QOS-0025 is Sage's canary finding). `ENGINEERS.md` now says:
   branch from `main`, keep stacks short, merge with squash.
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+**Correction (same day):** earlier entries said the canary model "answered 'bee'". That came from the live
+pytest step only. Sage verified the signed CLI artifact of run 42373449340 and found the CLI step answered
+**"Mosquito."**, and the canary passed anyway because it only checked that the answer was non-empty. The
+call was real and witnessed, but the answer was wrong and nothing checked it. Logged as QOS-0025
+(Sage's fix in #9). "Witnessed" proves a call happened; it says nothing about whether the answer was right.
