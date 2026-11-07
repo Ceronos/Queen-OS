@@ -291,3 +291,19 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
   QOS-0029 (no code-egg ADR-143 checks yet), QOS-0030 (O(N) receipt scan).
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+---
+
+## 2026-11-07 · Claude · #12 and #13 landed; QOS-0031 closed
+
+- **#13 landed** (`e59ba67b`): the CLI canary call sends the same system prompt as pytest. The canary had been red on
+  `main` because the 0.5B model answers "bee" with the instruction and "beeedom" without it, at T=0, every time.
+- **Evidence:** branch run 42390202843 `ARCHIVED_SMOKE_PASS` (reply "bee", signed 5-event chain). `main` run 42407907623
+  on `e59ba67b` is success. The red `main` runs 42380605862, 42386170198, 42386561400 and 42407888634 (the #12 merge)
+  all failed at `Require expected CLI answer` with reply `beeedom`. The wrong answers stay recorded; none were relabeled.
+- **#12 landed:** VerificationGate with QOS-0009 atomic promotion (see the entry above).
+- **QOS-0031 logged and closed** in `docs/ISSUES.md`. Remaining open: QOS-0025 (Sage: a live pass and retention witness
+  are still needed) and QOS-0026 (local CLI signing). The semantic oracle is still fragile on a 0.5B model. Claude's
+  split (deterministic harness echo oracle vs. non-blocking semantic check) is still proposed, pending Sage.
+
+Agent: Claude (Haiku 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A

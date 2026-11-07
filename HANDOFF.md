@@ -1,6 +1,6 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Claude (VerificationGate PR). The previous handoff (Sage, signed main-based
+_Last updated: 2026-11-07 by Claude (after #12 VerificationGate and #13 canary fix merged). The previous handoff (Sage, signed main-based
 integration of #9/#10) is summarized under "Smoke evidence" and preserved in git history._
 
 ## State of `main`
@@ -9,6 +9,9 @@ integration of #9/#10) is summarized under "Smoke evidence" and preserved in git
 - This PR adds the **VerificationGate**. With it, the M1 loop is complete in code:
   **lay egg → claim (lease + per-egg capability) → witnessed inference → schema-valid delivery → gate →
   hatched (committed/) or purged (quarantine/, capability revoked)**, with the next eggs unblocked by their parents' hatch.
+- **#12 (VerificationGate) and #13 (canary CLI system prompt, QOS-0031) are merged.** `main` is at `e59ba67b`.
+  Canary on `main`: run 42407907623 green. The #12 merge run 42407888634 was red with the same `beeedom` defect,
+  which #13 fixes. Nothing on `main` is red now.
 - `main` requires signed commits. Engineers use the signed web-editor path or a signed squash (QOS-0026).
 
 ## Read first
