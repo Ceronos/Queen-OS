@@ -54,6 +54,19 @@ class GateError(RuntimeError):
     pass
 
 
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError("duplicate JSON key")
+        value[key] = item
+    return value
+
+
+def _reject_constant(value: str) -> Any:
+    raise ValueError(f"nonfinite JSON constant: {value}")
+
+
 @dataclass
 class Evidence:
     egg_id: str
@@ -116,7 +129,7 @@ class Gate:
                 not list(jsonschema.Draft202012Validator(egg.schema).iter_errors(output)),
                 "re-validated by the gate",
             )
-        self._check_witness(ev, delivered.payload["token_id"], output)
+        self._check_witness(ev, delivered.payload["token_id"], output, egg.schema if egg is not None else None)
 
         claimed = [e for e in self.hive.ledger.events(kind="egg.claimed") if e.payload["egg_id"] == egg_id]
         quorum = int(claimed[-1].payload["profile"]["quorum"]) if claimed else 0
@@ -159,7 +172,9 @@ class Gate:
         ev.record("egg_signature", True)
         return egg
 
-    def _check_witness(self, ev: Evidence, token_id: str, output: dict[str, Any] | None) -> None:
+    def _check_witness(
+        self, ev: Evidence, token_id: str, output: dict[str, Any] | None, schema: dict[str, Any] | None
+    ) -> None:
         receipts = [e for e in self.hive.ledger.events(kind=RECEIPT_KIND) if e.payload.get("token_id") == token_id]
         if not ev.record("witnessed_inference", bool(receipts), f"{len(receipts)} receipt(s) under {token_id}"):
             return
@@ -171,15 +186,23 @@ class Gate:
                 ev.record("witnessed_inference", False, f"receipt seq {r.seq}: {exc}")
                 return
         ev.record("witnessed_inference", True, f"receipt seqs {[r.seq for r in receipts]} re-derived")
-        if output is None:
+        if output is None or schema is None:
             return
         matched = False
+        validator = jsonschema.Draft202012Validator(schema)
         for text in texts:
             try:
-                matched = matched or json.loads(text) == output
-            except ValueError:
+                value = json.loads(text, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+                if list(validator.iter_errors(value)):
+                    continue
+                # Python equality conflates True/1 (also nested); JCS preserves JSON types.
+                # Canonicalization also rejects nonfinite numbers produced by exponent overflow.
+                matched = canonicalize(value) == canonicalize(output)
+                if matched:
+                    break
+            except (ValueError, TypeError, RecursionError):
                 continue
-        ev.record("output_matches_receipt", matched, "delivered output equals a verified model response")
+        ev.record("output_matches_receipt", matched, "schema-valid, unambiguous model JSON matches canonical delivery")
 
     # -- outcomes ------------------------------------------------------------------
 
