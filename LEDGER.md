@@ -164,3 +164,32 @@ Thelio Astra. Keep building operations. The owner offered an Anthropic key for C
 Local: **147 passed** (Linux/py3.13), ruff + mypy --strict clean. CI: 12/12 green (ubuntu x64, ubuntu ARM64, Windows, macOS × py3.12–3.14) after a Windows-only mypy fix.
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+---
+
+## 2026-11-07 · Claude · Owner decisions: SO-0001, live canary, NO-GO clarified; stack reconciled with #6
+
+**Owner decisions (verbatim in `docs/ISSUES.md`):** (1) Sage and Claude may start live runs on their own
+authority, under the owner's explicit orders. (2) Put the real-model check back in place, and tell Sage
+why in writing. (3) The "NO-GO" is a precautionary artifact still being worked out. Sage is now focused on
+real-agent orientation.
+
+### Stack
+- Sage opened #6 (transaction/lease hardening) as a sibling of #5 on #4. **Rebased #5 onto #6** and resolved
+  the LEDGER/HANDOFF conflicts (LEDGER: both entries kept, append-only). Combined suite **172 passed**
+  before this session's additions. Retargeted PR #5's base to `codex/transaction-lease-recovery`.
+  Stack: #1 → #2 → #3 → #4 → #6 → #5.
+
+### Built
+| Change | Evidence |
+|---|---|
+| SO-0001 standing order (`governance/`), standing-order mode in `live_ci_gate.py` (QOS-0003) | 14 new gate tests. Sage's 20 reviewer-mode tests unchanged. Scope, engineer, tokens, daily budget (API-counted, fail closed, pagination refused), deadlocking env refused, order read at the approved SHA. |
+| `live-canary.yml` keyless canary on push to main (QOS-0004). Rationale for Sage in `docs/LIVE_CANARY.md`. | **Run 42373449340: success.** qwen2.5:0.5b answered "bee" in a production hive, receipt re-derived, signed 5-event chain verified, evidence artifact uploaded without `vault/`. |
+| Ollama runtime pinned to 0.40.15 and asserted (QOS-0005, partial: installer script still unpinned) | canary log `ollama --version` |
+| **QOS-0023:** `live-inference.yml` invalid since #3 (`runner` context in job-level env) | Every push since #3 showed a 0-job failure. Fixed, and **actionlint + shellcheck** now run in CI. |
+| **QOS-0024:** my own probe reported `clock_discipline=ptp` for a Hyper-V virtual PHC | Caught by the canary's evidence. Virtual PHCs are now labelled, and the best possible discipline is `phc-unverified`. Test added. |
+| QOS-0013 resolved by owner clarification | — |
+
+Local: 186 passed; ruff, mypy --strict, actionlint + shellcheck clean.
+
+Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A

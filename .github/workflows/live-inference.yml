@@ -100,7 +100,7 @@ jobs:
           ollama --version
           if ! curl -sf http://127.0.0.1:11434/api/version; then
             ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
-            for i in $(seq 1 30); do
+            for _ in $(seq 1 30); do
               if curl -sf http://127.0.0.1:11434/api/version; then break; fi
               sleep 1
             done

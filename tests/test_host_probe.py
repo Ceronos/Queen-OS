@@ -44,7 +44,7 @@ def test_synthetic_linux_tree_reads_raw_pcr_values(tmp_path: Path) -> None:
     (tmp_path / "sys/class/ptp/ptp0").mkdir(parents=True)
     (tmp_path / "sys/class/ptp/ptp0/clock_name").write_text("igb_ptp\n")
     a = probe(root=tmp_path)
-    assert a["sensors"]["tpm"]["status"] == "OK" and a["clock_discipline"] == "ptp"
+    assert a["sensors"]["tpm"]["status"] == "OK" and a["clock_discipline"] == "phc-unverified"
     assert a["sensors"]["ptp"]["value"]["drift_ns"] is None  # presence is not a clock lock
     (pcr / "7").write_text("F" * 64)  # one PCR changes -> the attested digest changes
     b = probe(root=tmp_path)
@@ -70,3 +70,17 @@ def test_cli_records_signed_probe(tmp_path: Path) -> None:
         ev = hive.ledger.head()
         assert ev is not None and ev.kind == "host.probe" and ev.signer is not None
         assert hive.ledger.verify_chain(require_signatures=True) == 2
+
+
+def test_hypervisor_phc_is_not_reported_as_hardware_ptp(tmp_path: Path) -> None:
+    """QOS-0024, caught by the canary on GitHub's Azure runner: a 'hyperv' PHC is virtual."""
+    for i, label in enumerate(("hyperv", "ptp_kvm")):
+        d = tmp_path / f"sys/class/ptp/ptp{i}"
+        d.mkdir(parents=True)
+        (d / "clock_name").write_text(label + "\n")
+    report = probe(root=tmp_path)
+    assert report["sensors"]["ptp"]["value"]["virtual"] == ["ptp0", "ptp1"]
+    assert report["clock_discipline"] == "system"
+    (tmp_path / "sys/class/ptp/ptp2").mkdir()
+    (tmp_path / "sys/class/ptp/ptp2/clock_name").write_text("mlx5_ptp\n")
+    assert probe(root=tmp_path)["clock_discipline"] == "phc-unverified"

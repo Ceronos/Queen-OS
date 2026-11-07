@@ -6,7 +6,7 @@ name: live canary (keyless local model)
 # nothing here is billable. See docs/LIVE_CANARY.md.
 on:
   push:
-    branches: [main, claude/m1-eggs]   # TEMP: one verification run on the PR branch; removed next commit
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
           grep -q "$OLLAMA_VERSION" "$RUNNER_TEMP/ollama-version.txt" || { echo "runtime is not the pinned version"; exit 1; }
           if ! curl -sf http://127.0.0.1:11434/api/version; then
             (ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &)
-            for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && break; sleep 1; done
+            for _ in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && break; sleep 1; done
           fi
           for attempt in 1 2 3 4 5; do
             ollama pull "$CANARY_MODEL" && break

@@ -153,9 +153,18 @@ def ptp(root: Path) -> Sensor:
     if not clocks:
         return unavailable("no PTP hardware clock (/sys/class/ptp); clock discipline is system time")
     names = {c.name: (_read(c / "clock_name") if (c / "clock_name").exists() else None) for c in clocks}
+    virtual = sorted(n for n, label in names.items() if label and _VIRTUAL_PHC.search(label))
     # A PHC device existing does not mean the clock is disciplined. Drift needs ptp4l/pmc,
-    # so it is reported as unmeasured, never as within the +/-10 ns envelope.
-    return ok({"clocks": names, "drift_ns": None, "drift_note": "unmeasured: requires ptp4l/pmc servo state"})
+    # so it is reported as unmeasured, never as within the +/-10 ns envelope. Hypervisor PHCs
+    # (Hyper-V, KVM, VMware) are paravirtual clocks, not IEEE 1588 hardware (QOS-0024).
+    return ok(
+        {
+            "clocks": names,
+            "virtual": virtual,
+            "drift_ns": None,
+            "drift_note": "unmeasured: requires ptp4l/pmc servo state",
+        }
+    )
 
 
 def hugepages(root: Path) -> Sensor:
@@ -184,6 +193,18 @@ def gpu(root: Path) -> Sensor:
     return unavailable("no NVIDIA GPU detected (other vendors: M3 host provider)")
 
 
+_VIRTUAL_PHC = re.compile(r"hyperv|kvm|ptp_kvm|vmw|vmware|virtio", re.I)
+
+
+def clock_discipline(ptp_sensor: Sensor) -> str:
+    """'system' unless a non-virtual PHC exists. Even then it is only 'phc-unverified': a lock is never assumed."""
+    if ptp_sensor["status"] != "OK":
+        return "system"
+    v = ptp_sensor["value"]
+    hardware = [n for n in v["clocks"] if n not in v["virtual"]]
+    return "phc-unverified" if hardware else "system"
+
+
 SENSORS = {
     "cpu": cpu,
     "memory": memory,
@@ -204,7 +225,7 @@ def probe(root: Path = Path("/")) -> dict[str, Any]:
             sensors[name] = fn(root)
         except Exception as exc:  # noqa: BLE001 - one broken sensor must not hide the others
             sensors[name] = error(f"{type(exc).__name__}: {exc}")
-    discipline = "ptp" if sensors["ptp"]["status"] == "OK" else "system"
+    discipline = clock_discipline(sensors["ptp"])
     return {
         "probe_version": 1,
         "os": sys.platform,

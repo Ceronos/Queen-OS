@@ -1,6 +1,6 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5)._
+_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5, now on top of Sage's #6)._
 
 ## The stack (merge in order, retargeting each onto `main` as its base lands)
 | PR | Branch | Author | Content |
@@ -9,7 +9,8 @@ _Last updated: 2026-11-07 by Claude, newest PR in the stack (#5)._
 | #2 | `claude/m1-providers` | Claude | providers, InferenceReceipts, credential custody |
 | #3 | `codex/gate-live-inference-ci` | Sage | offline PR CI; reviewer-gated live-inference workflow |
 | #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
-| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs |
+| #6 | `codex/transaction-lease-recovery` | Sage | transaction cleanup, signed lease lifecycle (renew events), process-exit recovery tests |
+| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs, SO-0001, live canary, workflow fixes (rebased onto #6) |
 
 ## Read first
 `CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`
@@ -35,16 +36,21 @@ and `queen ledger verify` is green. Live runs go only through `live-inference.ym
 CI admission and live-run authorization, recovery/interruption contracts, Thelio Astra hardware runs
 (`queen host probe --hive …` is the evidence format, see `docs/ENGINEERS.md`), containment evidence.
 
+## Live inference (owner order SO-0001)
+- **Keyless canary** (`live-canary.yml`) runs on every push to `main`. If it goes red, the real provider path is broken.
+- **Engineer-dispatched runs:** `live-inference.yml` with `authorization_ref=standing-order:SO-0001`,
+  `engineer=claude|sage`, within `governance/live_standing_order.json` scope (≤128 tokens, ≤20/day).
+  The gate reads the order at the approved main SHA. The workflow is valid now (QOS-0023 fixed).
+
 ## Waiting on the owner
-- QOS-0003: `prevent_self_review` with one human owner. Add a second reviewer, or have an engineer dispatch while you approve.
-- QOS-0004: whether to restore a keyless local-model check on `main` pushes.
-- QOS-0013: record the text of the "research / real-agent NO-GO" decision Sage references.
-- Put the Anthropic key in **Settings → Environments → `live-inference` → secrets** as `ANTHROPIC_API_KEY`. Not in chat.
-- Review and merge the stack #1 → #5.
+- Create the GitHub environment **`live-inference`** (Settings → Environments). For SO-0001 runs, add **no**
+  required reviewers with self-review prevention. Add the secret `ANTHROPIC_API_KEY` there, not in chat.
+- Review and merge the stack #1 → #2 → #3 → #4 → #6 → #5. The canary and live workflows only become
+  dispatchable once they exist on `main`.
 
 ## Commands
 ```
-pip install -e ".[dev]"; pytest --ignore=tests/live          # 147 offline tests
+pip install -e ".[dev]"; pytest --ignore=tests/live          # 186 offline tests
 queen init ./h --node-id dev && queen host probe --hive ./h && queen ledger verify ./h
 env -u GH_TOKEN gh api repos/Ceronos/Queen-OS/...            # REST only from Claude sessions
 ```
