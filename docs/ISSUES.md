@@ -45,6 +45,7 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0028 | S3 | open (by design until M2) | — | C | Eggs with valve quorum ≥ 2 (G ≥ 0.8, e.g. `shell`) are always **HELD** by the gate, because the cross-lineage quorum verifier doesn't exist yet. Fail closed: they wait, they're never promoted. |
 | QOS-0029 | S3 | open | — | C | Evidence packs cover JSON outputs only. ADR-143 code checks (exit code, tests, lint, CC, mutation) for code-producing eggs aren't collected yet. |
 | QOS-0030 | S3 | open | — | C | The gate finds an egg's receipts by scanning all `inference.receipt` events (O(N)). The same indexing fix as QOS-0022 applies. |
+| QOS-0031 | S2 | **fixed** (#13) | Claude | C | The live canary's pytest step sent a system prompt ("Return only the requested word.") and the `queen infer` CLI step did not. At temperature 0 the 0.5B model answers "bee" under the system prompt and "beeedom" without it, every time. The canary was red on every `main` push (runs 42380605862, 42386170198, 42386561400, and the #12 merge run 42407888634, all failing at `Require expected CLI answer`). Fix: the CLI call now sends the same system prompt. Evidence: branch run 42390202843 (`ARCHIVED_SMOKE_PASS`, reply "bee"); `main` run 42407907623 on `e59ba67b` (success). The strict word gate is unchanged. |
 
 ## Details
 
