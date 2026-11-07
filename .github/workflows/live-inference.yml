@@ -13,9 +13,15 @@ on:
         type: string
         required: true
       authorization_ref:
-        description: HTTPS record of accepted scope, prerequisites and request/money budget
+        description: "HTTPS record reviewed by an environment approver, or standing-order:SO-0001 (governance/)"
         type: string
         required: true
+      engineer:
+        description: Who is dispatching (recorded; must be named in a standing order to use one)
+        type: choice
+        options: [owner, claude, sage]
+        required: true
+        default: owner
       provider:
         description: One provider to exercise
         type: choice
@@ -53,7 +59,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/live-environment.json"
-          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/live-inference.yml/runs?created=>=$(date -u +%F)&per_page=100" \
+            > "$RUNNER_TEMP/live-runs.json"
+          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json" --runs-file "$RUNNER_TEMP/live-runs.json"
 
   live:
     needs: authorize
@@ -75,7 +83,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/live-environment.json"
-          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/live-inference.yml/runs?created=>=$(date -u +%F)&per_page=100" \
+            > "$RUNNER_TEMP/live-runs.json"
+          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json" --runs-file "$RUNNER_TEMP/live-runs.json"
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
@@ -84,7 +94,7 @@ jobs:
       - name: Install local inference runtime only when explicitly selected
         if: inputs.provider == 'ollama'
         run: |
-          curl -fsSL https://ollama.com/install.sh | sh
+          curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION="0.40.15" sh   # QOS-0005 pin
           ollama --version
           if ! curl -sf http://127.0.0.1:11434/api/version; then
             ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &

@@ -93,3 +93,96 @@ def test_unverified_environment_cannot_become_an_approval_by_name(mutation: str)
         environment["protection_rules"][0]["reviewers"] = []
     with pytest.raises(ValueError):
         authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", SHA, environment)
+
+
+# -- standing-order mode (owner order SO-0001, QOS-0003) ---------------------------------
+
+ORDER: dict[str, Any] = {
+    "order_id": "SO-0001",
+    "status": "active",
+    "engineers": ["claude", "sage"],
+    "scope": {"ollama": ["qwen2.5:*"], "anthropic": ["claude-haiku-*"]},
+    "max_output_tokens": 128,
+    "max_runs_per_utc_day": 20,
+}
+
+
+def standing(**inputs: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    event = {
+        "inputs": {
+            "confirm_live_inference": "true",
+            "approved_commit_sha": SHA,
+            "authorization_ref": "standing-order:SO-0001",
+            "engineer": "claude",
+            "provider": "anthropic",
+            "model": "claude-haiku-5-5",
+            "max_tokens": "64",
+            **inputs,
+        }
+    }
+    return event, {"name": "live-inference", "protection_rules": []}
+
+
+def test_standing_order_admits_in_scope_engineer_dispatch() -> None:
+    event, env = standing()
+    allowed = authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", SHA, env, ORDER, 3)
+    assert allowed["mode"] == "standing-order" and allowed["engineer"] == "claude"
+
+
+@pytest.mark.parametrize(
+    ("inputs", "order_patch", "runs", "why"),
+    [
+        ({"engineer": "owner"}, {}, 0, "not named"),
+        ({"model": "claude-opus-5-5"}, {}, 0, "outside standing order"),
+        ({"provider": "openai", "model": "gpt-5-mini"}, {}, 0, "outside standing order"),
+        ({"max_tokens": "100"}, {"max_output_tokens": 64}, 0, "exceeds"),
+        ({}, {}, 20, "budget"),
+        ({}, {}, None, "fail closed"),
+        ({}, {"status": "revoked"}, 0, "not active"),
+        ({"authorization_ref": "standing-order:SO-0002"}, {}, 0, "not found"),
+        ({}, {"__missing__": True}, 0, "not found"),
+    ],
+)
+def test_standing_order_refusals(
+    inputs: dict[str, Any], order_patch: dict[str, Any], runs: int | None, why: str
+) -> None:
+    event, env = standing(**inputs)
+    order = None if order_patch.get("__missing__") else {**ORDER, **order_patch}
+    with pytest.raises(ValueError, match=why):
+        authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", SHA, env, order, runs)
+
+
+def test_standing_order_still_requires_main_exact_sha_and_confirmation() -> None:
+    event, env = standing()
+    with pytest.raises(ValueError):
+        authorize_dispatch(event, "workflow_dispatch", "refs/heads/feature", SHA, env, ORDER, 0)
+    with pytest.raises(ValueError):
+        authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", "b" * 40, env, ORDER, 0)
+    event["inputs"]["confirm_live_inference"] = "false"
+    with pytest.raises(ValueError):
+        authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", SHA, env, ORDER, 0)
+
+
+def test_standing_order_rejects_deadlocking_environment() -> None:
+    event, _ = standing()
+    env = {
+        "name": "live-inference",
+        "protection_rules": [
+            {
+                "type": "required_reviewers",
+                "prevent_self_review": True,
+                "reviewers": [{"type": "User", "reviewer": {"id": 1}}],
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="deadlock"):
+        authorize_dispatch(event, "workflow_dispatch", "refs/heads/main", SHA, env, ORDER, 0)
+
+
+def test_repository_standing_order_is_well_formed() -> None:
+    import json
+
+    order = json.loads((Path(__file__).resolve().parents[1] / "governance" / "live_standing_order.json").read_text())
+    assert order["order_id"] == "SO-0001" and order["status"] in {"active", "revoked"}
+    assert set(order["engineers"]) <= {"claude", "sage"} and order["max_output_tokens"] <= 128
+    assert set(order["scope"]) <= {"ollama", "anthropic", "openai", "gemini"}

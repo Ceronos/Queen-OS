@@ -1,0 +1,71 @@
+name: live canary (keyless local model)
+
+# QOS-0004, owner-ordered 2026-11-07. Proves on every change to main that the real
+# provider → capability → receipt → ledger path still works against a real model.
+# Deliberately NOT on pull_request: no untrusted code runs here, no secrets exist here,
+# nothing here is billable. See docs/LIVE_CANARY.md.
+on:
+  push:
+    branches: [main, claude/m1-eggs]   # TEMP: one verification run on the PR branch; removed next commit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-canary
+  cancel-in-progress: false
+
+env:
+  OLLAMA_VERSION: "0.40.15"   # QOS-0005: pinned runtime (tag v0.40.15 → 02480ca2a471)
+  CANARY_MODEL: "qwen2.5:0.5b"
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QUEEN_DISABLE_KEYRING: "1"
+      QUEEN_HOME: ${{ runner.temp }}/queen-canary-home
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install pinned Ollama runtime
+        run: |
+          curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION="$OLLAMA_VERSION" sh
+          ollama --version | tee "$RUNNER_TEMP/ollama-version.txt"
+          grep -q "$OLLAMA_VERSION" "$RUNNER_TEMP/ollama-version.txt" || { echo "runtime is not the pinned version"; exit 1; }
+          if ! curl -sf http://127.0.0.1:11434/api/version; then
+            (ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &)
+            for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && break; sleep 1; done
+          fi
+          for attempt in 1 2 3 4 5; do
+            ollama pull "$CANARY_MODEL" && break
+            [ "$attempt" = 5 ] && exit 1
+            echo "registry pull failed (attempt $attempt); retrying in $((attempt * 15))s"; sleep $((attempt * 15))
+          done
+          ollama show "$CANARY_MODEL" --modelfile | head -3
+      - name: Install Queen-OS
+        run: python -m pip install -e ".[dev]"
+      - name: Witnessed inference in a production hive
+        env:
+          QUEEN_LIVE_TARGETS: ollama=${{ env.CANARY_MODEL }}
+        run: pytest -m live -rs -s tests/live
+      - name: CLI path (capability-minted, receipt-signed)
+        run: |
+          H="$RUNNER_TEMP/canary-hive"
+          queen init "$H" --node-id canary
+          queen host probe --hive "$H"
+          queen infer ollama "$CANARY_MODEL" "Name the insect that builds a comb, in one word." --hive "$H" --max-tokens 16
+          queen ledger verify "$H"
+          queen ledger tail "$H" -n 4
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp -r "$H/comb" "$H/hive.json" "$RUNNER_TEMP/evidence/"   # never vault/ (private key)
+          cp "$RUNNER_TEMP/ollama-version.txt" "$RUNNER_TEMP/evidence/"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: canary-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
