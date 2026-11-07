@@ -1,16 +1,13 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5, now on top of Sage's #6)._
+_Last updated: 2026-11-07 by Claude, after the first stack landed on `main` (#8)._
 
-## The stack (merge in order, retargeting each onto `main` as its base lands)
-| PR | Branch | Author | Content |
-|---|---|---|---|
-| #1 | `claude/m0-substrate` | Claude | M0 substrate, license, build map |
-| #2 | `claude/m1-providers` | Claude | providers, InferenceReceipts, credential custody |
-| #3 | `codex/gate-live-inference-ci` | Sage | offline PR CI; reviewer-gated live-inference workflow |
-| #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
-| #6 | `codex/transaction-lease-recovery` | Sage | transaction cleanup, signed lease lifecycle (renew events), process-exit recovery tests |
-| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs, SO-0001, live canary, workflow fixes (rebased onto #6) |
+## State of the repository
+- `main` @ **90b4035** contains the whole first stack (#1–#6), landed via #8 as one signed squash. Its tree
+  is identical to the reviewed head c802dc1. #1–#6 are closed with links. Their per-PR reviews and CI remain there.
+- On `main`: **CI** (actionlint + Linux x64/ARM64, Windows, macOS × py3.12–3.14) and the **live canary**
+  (keyless real model) are both green. The canary's first `main` run is 42379979225.
+- New work branches from `main`. `main` requires signed commits (QOS-0025).
 
 ## Read first
 `CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`
@@ -45,8 +42,8 @@ CI admission and live-run authorization, recovery/interruption contracts, Thelio
 ## Waiting on the owner
 - Create the GitHub environment **`live-inference`** (Settings → Environments). For SO-0001 runs, add **no**
   required reviewers with self-review prevention. Add the secret `ANTHROPIC_API_KEY` there, not in chat.
-- Review and merge the stack #1 → #2 → #3 → #4 → #6 → #5. The canary and live workflows only become
-  dispatchable once they exist on `main`.
+- Environment `live-inference` was created by the owner. Claude can't read its settings through the session
+  proxy; the gate verifies them at dispatch time. The first SO-0001 dispatch confirms the configuration.
 
 ## Commands
 ```
