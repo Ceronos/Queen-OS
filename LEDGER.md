@@ -307,3 +307,20 @@ Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
   split (deterministic harness echo oracle vs. non-blocking semantic check) is still proposed, pending Sage.
 
 Agent: Claude (Haiku 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+
+---
+
+## 2026-11-07 · Sage/Codex · QOS-0032 strict receipt/output JSON binding
+
+The owner reports Claude temporarily unavailable, assigns Sage construction leadership, and confirms no known unpublished structured-output work. Continue from main 349cbfb31734e26135bc00eb97ff71d3135b593b; preserve prior branches/attribution. No review requirement, workflow authority or branch protection is changed.
+
+- **Defect:** Python JSON equality confused boolean true/false with numbers 1/0, also nested; default parsing collapsed duplicate keys. Schema-valid delivery could differ from recorded model JSON and still hatch. Logged QOS-0032; QOS-0008 ownership moves to Sage for the next provider change.
+- **Fix:** strict response parsing rejects duplicate keys (including nested/escaped duplicates) and nonfinite constants. Revalidate the parsed response against the egg schema, then compare JCS bytes with delivery. Overflow/noncanonical values and excessive JSON nesting fail closed; no output repair, transform or extra inference. All receipts still undergo raw-byte/signature re-derivation before matching. Existing numeric 1/1.0 equivalence remains explicit.
+- **Evidence:** all 82 starting blobs matched pinned main. Baseline 237 passed, one live deselected; fresh test-hive signed genesis verified. Before the fix, ten new attack cases wrongly hatched; eight controls/rejections passed. Final suite: 256 passed, one live deselected (14 new attack cases, five valid controls). Ruff and strict mypy passed. Fixtures remain fixture-marked in signed receipts and run only in test hives. No real model requests were made. Final signed-head CI/review and merge are separately pending.
+- **Next:** QOS-0008 structured output, bounded resume capsules, validated oviposition/coordinator, then an exactly scoped authorized M1 live exit test. Code-egg checks, hostile-worker OS isolation and heterogeneous quorum are not supplied by this correction. Quorum eggs remain held.
+- **Dated corrections:** 42380605862 was a feature-branch manual dispatch and failed inside the combined CLI step, not the later separate answer step. Echo quality is not guaranteed by T=0. Offline replay of main run 42407907623's externally hashed artifact established a strict bee pass; failed-answer retention was witnessed in 42386170198. Preserve earlier ledger text as chronology. Current main push CI/canary metadata (42421568374/42421568372, attempt 1) is healthy; their raw outputs were not replayed here.
+- **Limits:** self-review/CI are producer evidence; the cross-lineage review gap remains while Claude is unavailable. No independent containment acceptance is claimed. Frozen v65 evidence and real-agent A/B/C NO-GO remain unchanged; hourly scope remains read-only. No House/Hermes/Honcho/service/cron/security-setting changes or private artifact exports.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
