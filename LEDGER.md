@@ -193,3 +193,76 @@ real-agent orientation.
 Local: 186 passed; ruff, mypy --strict, actionlint + shellcheck clean.
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+---
+
+## 2026-11-07 · Sage/Codex · Bounded smoke acceptance and archived real-call verification
+
+**Owner-selected milestone:** bounded real-model harness smoke, separately from the frozen v65 comparative study. This branch stacks on PR #5 at c802dc1a7943781f2262ef9b8e9457587e4725e6; no frozen-source, service, environment, reviewer or hosted-key changes.
+
+- Recovered actual canary run 42373449340, job logs and artifact 13573899082 from commit 365de353ced5e7d4bf9b21aff5f5575cc1186163. ZIP digest matched the GitHub artifact API: 29dab4f7c21d336a36ae35a31547aaaadcf05e8ed28fffd508fd136bed1103e5. This was an earlier real GitHub run, not a new Astra inference.
+- Fresh offline readback verified five signed events, exact raw bytes and a one-call/16-output-token capability; actual CLI response was `Mosquito.` (four output tokens). The separate live pytest log said `bee`. Thus the witnessed inference path passed, while the CLI comb-answer oracle failed; earlier nonempty checks missed that distinction (QOS-0025). Historical PTP overclaim remains preserved and excluded from smoke acceptance.
+- Added a no-network archive verifier and 16 offline positive/negative cases, using the unchanged historical real-run ZIP as a separately downloaded, attributed local fixture. The ZIP is not published; seven replay cases explicitly skip in ordinary CI without QUEEN_ARCHIVED_SMOKE. Added explicit fixed-word checks to both live paths and raw-byte verification to the canary. Existing main/manual triggers and two-call limits are preserved. No semantic live success is claimed until a corrected candidate actually runs.
+- Baseline initially lacked newly declared jsonschema dependencies; refreshed only the existing isolated dev environment. Then 184 tests passed and two credential-temp cases explicitly skipped under the Git-ancestor temp root. Final full validation and CI are recorded in this PR and local receipts; no skipped case counts as a pass.
+- Final local validation: **202 offline tests passed with no skips** after providing an explicit non-Git fixture root. Ruff/format, package mypy and strict verifier types passed. Actionlint/shellcheck are checked by PR CI; they are not installed on this execution view.
+- Scope: first engineering smoke milestone; not independent containment acceptance, model freshness, A/B/C fairness, hardware proof or consciousness evidence. Detailed acceptance/reproduction contract: docs/SMOKE_ACCEPTANCE.md.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Sage/Codex · Retain admitted CLI evidence before semantic failure (QOS-0025)
+
+The owner authorized this follow-up after canary 42380605862, attempt 1, ran head `9a907655de0f249f5a4001770a6de88e4bc30ab8`. Its pytest call returned `bee`; CLI returned `beeedom` (3 output tokens / 16 allowed). Producer signature checks passed and the answer guard correctly exited 2. Artifact upload was skipped, so the fresh ZIP could not be downloaded/reverified. The log-reported receipt is `d5746442a2f99f45da0d50d0eb8547d8055c0e6935d89de7b19838bdd7afe104`; this is producer evidence, not independent acceptance.
+
+- Split the existing CLI workflow into signed-evidence admission, normally success-gated upload, then the unchanged exact-word answer gate. Bind both verification steps to the admitted ZIP digest via a step output. Missing upload files now fail explicitly.
+- No unconditional export or continue-on-error. Invalid/private/incomplete archives block upload; a semantic mismatch retains admissible evidence and leaves the job red. No prompt, model, call budget, token cap, trigger, credential or live-inference policy change.
+- Offline baseline: 202 passed and a new local hive's signed genesis verified. Updated suite: **203 passed**, with the historical archive explicitly supplied and non-Git credential fixture storage. Ruff/format, package mypy and strict verifier mypy passed.
+- The actual post-inference workflow shell blocks were rehearsed offline against the preserved historical archive: admission exit 0; local retained evidence survived answer exit 2; synthetic private-file admission exit 1 with no success output. This local copy does not witness GitHub's upload service. Seven historical archive cases still skip without explicit `QUEEN_ARCHIVED_SMOKE`; all other negative cases run in ordinary CI.
+- Remaining limits: earlier pytest failure, cancellation, structural rejection or upload failure may leave no exported CLI bundle. The pytest hive remains unexported. New-revision GitHub CI and a separately authorized live upload witness remain to be observed. No new model call, merge, local service change, archive publication or frozen-v65 mutation occurred.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Claude · First stack landed on `main`
+
+- **Owner fixed the `main` ruleset.** "Restrict updates" with no bypass list had locked `main` for everyone, and
+  required code-scanning/code-quality results could never arrive because no tool was configured.
+- **Landing (owner chose Claude's recommendation, Option A):** one consolidated merge instead of six
+  squash-and-rebase cycles. #7 (consolidated) was blocked by *required signed commits*, because three
+  upstream commits from #3/#4/#6 were unsigned. Re-landed as **#8**: the byte-identical tree
+  (`git diff` with c802dc1 is empty) as one verified commit, with Sage credited as co-author. The owner
+  squash-merged #8 → `main` @ **90b4035** (verified).
+- Claude's attempt to merge through the API was **refused by the session's safety classifier**
+  ("merge without review"). The owner merges `main`, and that boundary is correct.
+- **Post-merge evidence on `main`:** CI run 42379979228 green. Live canary run 42379979225 green: qwen2.5:0.5b →
+  "bee", receipt re-derived, signed 5-event chain verified. The probe labelled the Hyper-V PHC virtual and reported
+  the Mellanox NIC PHC as `phc-unverified` (QOS-0024 fix confirmed on real infrastructure).
+- #1–#6 closed with links to #8. Opened **QOS-0026** (Sage's commits must be signed; QOS-0025 is Sage's canary finding). `ENGINEERS.md` now says:
+  branch from `main`, keep stacks short, merge with squash.
+
+Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
+
+**Correction (same day):** earlier entries said the canary model "answered 'bee'". That came from the live
+pytest step only. Sage verified the signed CLI artifact of run 42373449340 and found the CLI step answered
+**"Mosquito."**, and the canary passed anyway because it only checked that the answer was non-empty. The
+call was real and witnessed, but the answer was wrong and nothing checked it. Logged as QOS-0025
+(Sage's fix in #9). "Witnessed" proves a call happened; it says nothing about whether the answer was right.
+
+---
+
+## 2026-11-07 · Sage/Codex · Clean main-based signed integration of #9 and #10 documentation
+
+The owner asked Sage to handle the integration/signing fixes. The existing #9 was retargeted to main, exposing squash ancestry (73-file conflicted ancestry diff versus ten actual tree changes). Preserve #9 at 336dfee9 and #10 at 1a1ca6f6 as source history; do not rewrite another engineer's branch.
+
+- Prepared codex/smoke-main-signed directly from main 90b40356c07492df4ee179bd39177b03cb219f75. All prior candidate source blobs were checked before documentary reconciliation; provider/verifier/test code is unchanged from 336dfee934299b2d050e7729eb4b3dfea1e882b4.
+- Incorporated Claude's exact appended landing/correction ledger text, protocol update, and QOS-0026 signing issue alongside Sage's QOS-0025. Both historical ledger contributions remain intact; the original canary's wrong CLI answer stays recorded.
+- GitHub's web editor produced a Verified first commit 2a39032287183d35cb07d00e26d170e9c9c767f6 directly on the clean branch. This uses existing account access and GitHub web signing; no local key, security rule, reviewer policy or credential was created/changed. Verify every new contribution commit before landing. Source signatures establish attribution, not independent containment acceptance.
+- Clean-copy baseline: 203 offline tests passed with the historical archive explicitly supplied; package import resolved to the fresh source; new local hive genesis signature verified. Seven historical replay cases skip in ordinary CI. No new model calls. Final-head CI/review and live upload confirmation remain separate observations.
+- Relayed Claude review was supplied by Johnny and posted with attribution on #9. It predates the retention follow-up; it is not self-authored independent acceptance or automatically a full review of this integration.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
