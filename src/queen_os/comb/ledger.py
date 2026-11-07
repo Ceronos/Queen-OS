@@ -302,7 +302,7 @@ class Ledger:
 
     # -- verification ---------------------------------------------------------------
 
-    def _public_keys(self) -> dict[str, str]:
+    def public_keys(self) -> dict[str, str]:
         return dict(self._db.execute("SELECT key_id, public_hex FROM signers"))
 
     def _check_event(self, event: Event, keys: dict[str, str] | None = None) -> None:
@@ -325,7 +325,7 @@ class Ledger:
         if sha256_hex(header) != event.hash:
             raise ChainBroken(f"seq {event.seq}: header hash mismatch")
         if event.signer is not None:
-            keys = keys if keys is not None else self._public_keys()
+            keys = keys if keys is not None else self.public_keys()
             public_hex = keys.get(event.signer)
             if public_hex is None:
                 raise ChainBroken(f"seq {event.seq}: unknown signer {event.signer}")
@@ -337,7 +337,7 @@ class Ledger:
 
     def verify_chain(self, require_signatures: bool = False) -> int:
         """Re-derive the whole chain. Returns the number of events verified."""
-        keys = self._public_keys()
+        keys = self.public_keys()
         prev_hash, prev_stamp, count = GENESIS_ROOT, None, 0
         for event in self.events():
             count += 1

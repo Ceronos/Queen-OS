@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from queen_os.authority import Grant
 from queen_os.hive import Hive
 from queen_os.providers import InferenceRequest, Message, build
 from queen_os.providers.receipt import Inference, verify_receipt
@@ -26,7 +27,9 @@ def test_witnessed_inference_in_a_production_hive(target: tuple[str, str], tmp_p
         temperature=0.0,
     )
     with Hive.init(tmp_path / "hive", "live", mode="production") as hive:
-        witnessed = Inference(hive).run(provider, request, actor=f"live:{provider_name}")
+        grant = Grant(providers=(provider_name,), models=(model,), max_output_tokens=32, max_calls=1)
+        capability = hive.authority().issue(f"live:{provider_name}", "live-test", grant, ttl_ms=300_000)
+        witnessed = Inference(hive).run(provider, request, actor=f"live:{provider_name}", capability=capability)
         receipt = witnessed.receipt.payload
 
         assert witnessed.result.text.strip(), "real model returned no text"
@@ -34,7 +37,7 @@ def test_witnessed_inference_in_a_production_hive(target: tuple[str, str], tmp_p
         assert receipt["http_status"] == 200 and receipt["latency_ms"] > 0
         assert receipt["output_tokens"] is None or receipt["output_tokens"] > 0
         assert verify_receipt(hive, witnessed.receipt).text == witnessed.result.text
-        assert hive.ledger.verify_chain(require_signatures=True) == 2
+        assert hive.ledger.verify_chain(require_signatures=True) == 4
 
         # Nothing persisted by the hive may contain credential material.
         for f in hive.root.rglob("*"):

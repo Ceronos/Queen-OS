@@ -1,39 +1,50 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07, Sage/Codex transaction/lease hardening contribution._
+_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5)._
+
+## The stack (merge in order, retargeting each onto `main` as its base lands)
+| PR | Branch | Author | Content |
+|---|---|---|---|
+| #1 | `claude/m0-substrate` | Claude | M0 substrate, license, build map |
+| #2 | `claude/m1-providers` | Claude | providers, InferenceReceipts, credential custody |
+| #3 | `codex/gate-live-inference-ci` | Sage | offline PR CI; reviewer-gated live-inference workflow |
+| #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
+| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs |
 
 ## Read first
+`CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`
+(what is known to be wrong) → last `LEDGER.md` entries → `docs/BUILD_MAP.md`.
 
-`CLAUDE.md` → latest `LEDGER.md` entry → `docs/BUILD_MAP.md`. Work lands through PRs; this branch is stacked on the existing M1 provider work, not a replacement for it.
+## State of M1
+Done: providers + receipts · credential custody · capability tokens (budget reserved atomically, required by
+`Inference.run`) · TaskEggs (signed 7-tuple, DAG by construction) · idempotent ledger ops.
 
-## Existing PRs and remaining provider work
+Next, in order:
+1. **`queen/valve.py`, Bresslau:** risk G → profile {temperature, schema strictness, quorum size, token budget}.
+2. **`workers/claim.py`, Page-Robinson:** claim = lease(`egg:<id>`) + a **per-worker, per-egg** capability whose
+   expiry is ≤ the lease (QOS-0020). Every write is fenced and carries an `op_id` (QOS-0001 contract).
+   On restart, reconcile from stored evidence before any retry (Sage's `RECOVERY_CONTRACT.md`).
+3. **Structured output** in providers (QOS-0008), needed to satisfy diploid schemas.
+4. **`gate/`:** evidence pack → `jsonschema` validation of the output → `Enclaves.promote` or oophagy (signed tombstone).
+   Fix QOS-0009 (promote TOCTOU) here with a fenced promotion lease.
+5. `comb/projection.py` + `capsule.py`, then `queen/oviposition.py`.
+**M1 exit test:** a real model decomposes a goal, real workers hatch the eggs, the gate promotes or quarantines,
+and `queen ledger verify` is green. Live runs go only through `live-inference.yml` (see `docs/LIVE_INFERENCE.md`).
 
-- Existing PR #1 is M0 → main; PR #2 is M1 providers → M0. Preserve that merge order and retarget dependent PRs after their bases land. The CI safeguard is stacked on the provider branch.
-- The upstream handoff reports the earlier 9-job OS/Python matrix green and an earlier Ollama CI run. Those are upstream reports, not containment acceptance by this contribution.
-- Provider streaming, tool/function calls and structured output remain planned M1.5 work. Credential custody is documented in `docs/SECRETS.md`; the proprietary license and source attribution are preserved.
+## Sage's lane (don't duplicate)
+CI admission and live-run authorization, recovery/interruption contracts, Thelio Astra hardware runs
+(`queen host probe --hive …` is the evidence format, see `docs/ENGINEERS.md`), containment evidence.
 
-## Current scope and evidence
+## Waiting on the owner
+- QOS-0003: `prevent_self_review` with one human owner. Add a second reviewer, or have an engineer dispatch while you approve.
+- QOS-0004: whether to restore a keyless local-model check on `main` pushes.
+- QOS-0013: record the text of the "research / real-agent NO-GO" decision Sage references.
+- Put the Anthropic key in **Settings → Environments → `live-inference` → secrets** as `ANTHROPIC_API_KEY`. Not in chat.
+- Review and merge the stack #1 → #5.
 
-- M0 contains the signed ledger/HLC, fenced leases, blobs, enclave conventions and CLI. M1 provider adapters/receipts and credential handling are present on the provider branch. Worker execution, TaskEgg/capability integration and the full VerificationGate remain separate M1 work.
-- Existing code baseline: 89 offline tests passed locally. This CI-gate contribution: 110 offline tests passed on Linux / Python 3.12.3; lint/format and package/script type checks passed. The safeguard subsequently passed all nine OS/Python CI jobs (run 42370239866). The next contribution adds five recovery cases: 115 offline tests, lint/format and package types passed locally; its nine CI jobs passed in run 42370518063. The hardening extension now has 140 offline tests, lint/format and package types passing locally; check its own matrix before claiming cross-platform results.
-- Ordinary push/PR CI is offline. A distinct manually dispatched workflow is the only CI inference entry. Read `docs/LIVE_INFERENCE.md` before proposing any live run.
-- Live workflow preflight requires an exact approved main commit, provider/model/token scope and an already configured `live-inference` environment with required reviewers and self-review prevention. No environment, reviewer, key or live-run authorization was created by this change. No live run was dispatched.
-- The review URL/checker does not establish independent containment acceptance or a monetary grant. Actual prerequisites remain the reviewer's responsibility. Existing research NO-GO decisions remain in force.
-
-## Next engineering work
-
-1. Review/land PR #3 (CI safeguard), PR #4 (offline recovery tests), then the transaction/lease hardening PR stacked on #4. Preserve the existing #1 → #2 dependency order and retarget as bases land.
-2. Recovery contracts are now in `tests/test_recovery_contracts.py` and `docs/RECOVERY_CONTRACT.md`. The later hardening extension adds controlled abrupt writer exits plus transaction and lease fixes; read `docs/TRANSACTION_LEASE_RECOVERY.md`. Renewals now add signed events, all lease operations verify event readback, and invalid duration types are rejected. Read stored evidence before retrying an uncertain append/lease operation; no idempotency guarantee or runner has been implemented. Do not substitute a parallel store or label fixtures as live inference.
-3. Continue M1: TaskEgg and actual capability checks, worker claims, evidence gate, projections/recovery, and then an explicitly scoped integrated run after prerequisites. The build map defines ownership and milestone boundaries.
-4. Keep source-signing, producer tests, independent review and deployed containment as separate evidence classes. Directory permissions are not an OS sandbox.
-
-## Preserved open work
-
-- Operational process containment, aggregate budgets and real cancellation/cessation need separate implementation and evidence.
-- Reviewer/environment setup and model budget decisions are not supplied by this branch.
-- Ollama runtime/installer pinning remains unresolved for future authorized live CI.
-- Fixtures are tagged inside signed inference records and refused in production hives. No automatic model fallback, hidden live test, credentials in Git or service/schedule changes.
-
-## Source reading still pending
-
-The upstream handoff records V4 Treatise, V4 Phase 6, Execution Stacks, Deployment, Robotics, Unison-Bio, Master Compilation, Pillar 1 Report, Pillar 4, AF-IMMUNE-V1, AF-SWARM-V1, AF-BREED-V1 and WK1–WK7 as unread by its author. Read only the sources relevant to the next milestone; this contribution does not claim that corpus review.
+## Commands
+```
+pip install -e ".[dev]"; pytest --ignore=tests/live          # 147 offline tests
+queen init ./h --node-id dev && queen host probe --hive ./h && queen ledger verify ./h
+env -u GH_TOKEN gh api repos/Ceronos/Queen-OS/...            # REST only from Claude sessions
+```

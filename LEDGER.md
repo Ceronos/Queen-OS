@@ -128,3 +128,39 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Claude · Issues ledger, two-engineer protocol, QOS-0001, host probe, eggs + capabilities
+
+**Owner direction:** keep a separate known-issues ledger. Sage works in tandem and runs live tests on the
+Thelio Astra. Keep building operations. The owner offered an Anthropic key for Claude's tests (see decisions).
+
+**Stacked on Sage's PR #4** (`codex/offline-recovery-contracts`), not beside it, so there's one linear stack: #1 → #2 → #3 → #4 → #5.
+
+### Decisions
+- `docs/ISSUES.md`: separate known-issues ledger, `QOS-####`, append-only, claim-before-fix. Seeded with 17 issues,
+  then 5 more this session (QOS-0018–0022).
+- `docs/ENGINEERS.md`: lanes (Claude: substrate/cognition, Sage: admission/recovery/hardware), stacking,
+  cross-lineage review, shared-file rules, Thelio Astra evidence format.
+- **Accepted Sage's PR #3 direction:** inference leaves PR CI and goes behind the authorized dispatch workflow.
+  The cost of that change (no continuous real-inference signal) is logged as QOS-0004, and the single-owner
+  self-review deadlock as QOS-0003. Both need owner decisions.
+- **Anthropic key:** not pasted into chat. A chat transcript isn't a secret store. The key belongs in the
+  `live-inference` environment secrets (Sage's workflow). Claude then exercises it only through that
+  workflow, and never sees the value.
+
+### Built (PR #5)
+| Change | Proof |
+|---|---|
+| QOS-0001 idempotent `append(op_id=…)` (Sage's finding) | lost-ack retry returns the original; 3 conflict arms; replay after fence expiry vs new op fenced; op_id bound into the chain (tamper → ChainBroken); legacy migration |
+| QOS-0002 credential tests vs git-ancestor temp dirs (Sage's finding) | `cred_home` fixture; reproduced by running with `--basetemp` inside a git repo → 7 passed |
+| QOS-0011 ARM64 Linux in the CI matrix | `ubuntu-24.04-arm` × 3 Pythons |
+| QOS-0012 `host/probe.py` + `queen host probe` | stdlib-only (runs with `python -I -S`). Empty sysfs → nothing reads OK. Synthetic TPM → raw-PCR digest changes when one PCR changes. Signed `host.probe` event. |
+| Capability tokens (`authority/`) | 10 tests: scope arms (subject/provider/model/size), exact tool names, expiry, revocation, widened token, foreign issuer, unissued re-signed token, prompt-claimed authority, **8 processes vs a 3-call budget → exactly 3 succeed** |
+| `Inference.run` requires a capability. Receipts bind token + spend (QOS-0014). | receipt tests updated. The CLI mints a one-call operator token per `queen infer`. |
+| TaskEgg 7-tuple (`queen/egg.py`) | DAG by construction, 8 malformed-egg arms, 4 tamper arms, foreign-issuer arm, idempotent re-lay |
+
+Local: **147 passed** (Linux/py3.13), ruff + mypy --strict clean. CI: see PR #5.
+
+Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A

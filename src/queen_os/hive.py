@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from queen_os import __version__
+from queen_os.authority.tokens import Authority
 from queen_os.comb.blobs import BlobStore
 from queen_os.comb.enclaves import Enclaves
 from queen_os.comb.hlc import HybridLogicalClock, validate_node_id
@@ -79,6 +80,12 @@ class Hive:
         ledger = Ledger(root / "comb" / "ledger.sqlite3", HybridLogicalClock(node_id), signer)
         blobs = BlobStore(root / "comb" / "blobs")
         return cls(root, node_id, manifest["mode"], enclaves, ledger, blobs, Leases(ledger))
+
+    def authority(self) -> Authority:
+        """The hive's capability issuer and checker, keyed by the host identity."""
+        if self.ledger.signer is None:
+            raise PermissionError("hive opened without a host signer")
+        return Authority(self.ledger, self.ledger.signer)
 
     def close(self) -> None:
         self.ledger.close()

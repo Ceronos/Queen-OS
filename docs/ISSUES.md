@@ -28,10 +28,15 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0011 | S3 | open | — | C | The ARM64 Linux target (Thelio Astra / Ampere Altra) had no CI coverage. |
 | QOS-0012 | S3 | **fixed** (this PR) | Claude | C | Absent hardware (TPM/PTP/NUMA) had no honest probe. Pillar 1's own probe reports a missing PTP device as a pass. |
 | QOS-0013 | S4 | owner-decision | — | S | Sage's notes cite an existing "research NO-GO / real-agent NO-GO" decision that is not recorded in this repo. Its text and scope need to be recorded here. |
-| QOS-0014 | S3 | open | — | C | `verify_receipt` re-derives fields from raw bytes, but nothing ties the stored request bytes to the egg/capability that authorized the call (that comes with capability tokens). |
+| QOS-0014 | S3 | **fixed** (this PR) | Claude | C | `verify_receipt` re-derived fields from raw bytes, but nothing tied the call to the capability that authorized it. Receipts now carry `token_id` + `spend_seq`, which are verified against a prior `capability.spent` for the same provider/model. |
 | QOS-0015 | S2 | open | — | C | Model lineage is inferred from a name-prefix table. A renamed or fine-tuned model could be misattributed, which would weaken quorum decorrelation. It needs explicit per-provider lineage declarations plus an `unknown` refusal in quorum. |
 | QOS-0016 | S3 | open | — | C | `LEDGER.md`/`HANDOFF.md` are edited by both engineers on stacked branches, which guarantees merge conflicts. Process fix in `docs/ENGINEERS.md`. |
 | QOS-0017 | S4 | open | — | C | LICENSE is engineer-drafted, not counsel-reviewed. |
+| QOS-0018 | S4 | wontfix (design) | — | C | A capability spend is consumed even if the provider call then fails. This is deliberate: a non-refundable budget fails closed, and a call whose outcome is uncertain may have billed. |
+| QOS-0019 | S2 | open | — | C | Token validity windows use the checking host's wall clock. With multi-node skew (QOS-0010), a token can appear valid early or late on another node. |
+| QOS-0020 | S3 | open | — | C | Capability subjects allow globs (`worker:*`). Claims should mint per-worker, per-egg tokens so a stolen token's blast radius is one egg. To be enforced in `workers/claim.py`. |
+| QOS-0021 | S3 | open | — | C | The egg input bound is bytes/4 ≈ tokens, not a real tokenizer. It is uniform across models but approximate; CJK/code can exceed 2k real tokens. |
+| QOS-0022 | S3 | open | — | C | `capability.spent` counting uses `json_extract` over all events (O(N) per check). It needs a generated, indexed `token_id` column before high-throughput hives. |
 
 ## Details
 

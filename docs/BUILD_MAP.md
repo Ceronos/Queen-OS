@@ -78,7 +78,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Concept | Tier | V5 realization | Module | Milestone |
 |---|---|---|---|---|
 | Oviposition Engine: goal → Task DAG (Thesis §5.1) | T1 | A strategic model decomposes the goal into a DAG, which is validated, signed and written to the ledger | `queen/oviposition.py` | M1 |
-| TaskEgg 7-tuple ⟨ID, Ploidy, Input, Schema, Tools, Stimulus, Signature⟩ (Thesis §5.1) | T1 | Frozen dataclass, JCS-canonical, Ed25519-signed. Input bound is enforced by tokenizer estimate. | `queen/egg.py` | M1 |
+| TaskEgg 7-tuple ⟨ID, Ploidy, Input, Schema, Tools, Stimulus, Signature⟩ (Thesis §5.1) | T1 | Frozen dataclass, JCS-canonical, Ed25519-signed. `goal_id`/`parents` make a DAG that is acyclic by construction. Input ≤ 8,000 canonical bytes (≈2k tokens). JSON Schema 2020-12, strict object schema for diploid. | `queen/egg.py` | **M1 ✅** |
 | Bresslau's Valve: risk G → diploid (T≤0.2, strict schema) / haploid (T≥0.9) (Thesis §5.3) | T1 | Risk scorer (rules first, model optional) → execution profile | `queen/valve.py` | M1 |
 | Dual-brain: fast subconscious + strategic model (Thesis §6.1) | T1 | **Routing** between a fast/local model and a strategic model. The specific nets (Mamba `nox_soul.pt`, Gemma 4 MoE) are config, not code. | `queen/brains.py` | M2 |
 | Spermathecal Vault: SLERP/TIES LoRA merging on demand (Thesis §5.2) | T3 | Model *registry* is T1. Weight-space merging is an offline tool via a mergekit adapter, run as an experiment. Merged weights only become usable after the eval gate passes. | `vault/registry.py`, `experiments/merge/` | M4 |
@@ -115,11 +115,11 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Sage System-2 dispositions ACT / PROPOSE / HOLD (P2 §2) | T1 | Deterministic policy engine (authority lineage, resource footprint, dependency risk), with optional model-based consequence review. Every disposition is a sealed ledger event. | `sage/` | M2 |
 | Smallest Justified Action rule | T1 | Policy constraint: proposals carry a blast-radius estimate, and the smallest one is preferred | `sage/policy.py` | M2 |
 | `BEGIN_MGC_PAYLOAD` sealed canonical envelopes | T1 | Envelope codec over JCS bytes | `serial/envelope.py` | M1 |
-| Tripartite Authority, capability-token TaskContracts (REMEDY §1.5) | T1 | Ed25519-signed capability tokens. Tool dispatch checks the grant. Model text is never consulted. | `authority/` | M1 |
+| Tripartite Authority, capability-token TaskContracts (REMEDY §1.5) | T1 | Ed25519-signed capability tokens (subject/scope/providers/models/tools/output cap/call budget/expiry). Issued, revoked and spent on the ledger. The budget is reserved atomically **before** the call (8-process overspend test). `Inference.run` requires one. Receipts bind `token_id` + `spend_seq`. | `authority/` | **M1 ✅** (tool *registry* dispatch: next) |
 | Credential custody (Resource Custody branch, REMEDY §1.5) | T1 | env → OS keyring → owner-only `secrets.env` (refused inside a git worktree). Fingerprints only. Redaction, plus a repo credential scan in CI. | `secrets.py` | **M1.3 ✅** |
 | Dufour Ed25519 origin signatures (Thesis §5) | T1 | Host and queen keys, event signing | `crypto/keys.py` | **M0 ✅** (keys, sign/verify) |
 | AF-CHARTER 2-of-2 multisig with YubiKey (Thesis §1) | T2 | The multisig *protocol* is T1 (two Ed25519 keys). FIDO2/YubiKey key storage is a T2 key provider. | `authority/multisig.py`, `host/fido2.py` | M3 |
-| TPM 2.0 PCR 0–14 attestation (Thesis §3.1) | T2 | Linux `tpm2_pcrread`, Windows `Get-PcrValue`/TBS. macOS has no TPM (Secure Enclave only) and reports `UNAVAILABLE`. | `host/tpm.py` | M3 |
+| TPM 2.0 PCR 0–14 attestation (Thesis §3.1) | T2 | Linux: raw PCR 0–14 from `/sys/class/tpm/tpm0/pcr-sha256` (no tool-stdout hashing). Windows/macOS report `UNAVAILABLE` (M3). | `host/probe.py` | **probe ✅**; sealing M3 |
 | NUMA caste zones A–D, core pinning (Thesis §3.2) | T2 | `os.sched_setaffinity` (Linux), `SetProcessAffinityMask` (Windows). macOS has no affinity API, so it is a no-op that reports `UNAVAILABLE`. | `host/affinity.py` | M3 |
 | BMC out-of-band audit, PTP ±10 ns | T2 / infra | Out of scope for the harness binary. Documented as deployment prerequisites for the Enclave profile. | docs | — |
 

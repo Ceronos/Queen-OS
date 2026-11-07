@@ -88,8 +88,13 @@ def cmd_infer(args: argparse.Namespace) -> int:
     request = InferenceRequest(
         args.model, (Message("user", args.prompt),), args.system, args.max_tokens, args.temperature
     )
+    from queen_os.authority import Grant
+
     with Hive.open(Path(args.hive)) as hive:
-        witnessed = Inference(hive).run(provider, request, actor="cli")
+        # The operator at the CLI is the authority. It mints a one-call token scoped to exactly this request.
+        grant = Grant(providers=(args.provider,), models=(args.model,), max_output_tokens=args.max_tokens, max_calls=1)
+        cap = hive.authority().issue("operator:cli", "cli:infer", grant, ttl_ms=10 * 60_000)
+        witnessed = Inference(hive).run(provider, request, actor="operator:cli", capability=cap)
     print(witnessed.result.text)
     r = witnessed.receipt
     print(

@@ -22,6 +22,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from queen_os.authority.tokens import ISSUED, SPENT, Capability
 from queen_os.comb.ledger import Event
 from queen_os.hive import Hive
 from queen_os.providers.base import InferenceRequest, InferenceResult, Provider
@@ -51,11 +52,20 @@ class Inference:
         self.hive = hive
         self.client = client or httpx.Client(follow_redirects=False)
 
-    def run(self, provider: Provider, request: InferenceRequest, actor: str) -> Witnessed:
+    def run(self, provider: Provider, request: InferenceRequest, actor: str, capability: Capability) -> Witnessed:
+        """One witnessed call. ``capability`` must grant this actor/provider/model/size.
+
+        Order: refuse fixtures in production, then authorize and reserve budget (ledger),
+        then call, then persist and sign. A call that fails after authorization still consumes
+        its budget, which errs on the side of fail-closed.
+        """
         if provider.kind == "fixture" and self.hive.mode != "test":
             raise NonSimulationViolation(
                 f"fixture provider {provider.name!r} refused: hive {self.hive.node_id} is a production hive"
             )
+        spend_seq = self.hive.authority().authorize_inference(
+            capability, actor, provider.name, request.model, request.max_tokens
+        )
         exchange = provider.send(request, self.client)
         if provider.credential is not None:
             key = provider.credential.reveal().encode()
@@ -83,6 +93,8 @@ class Inference:
             "output_tokens": result.output_tokens,
             "finish_reason": result.finish_reason,
             "credential_fp": provider.credential.fingerprint if provider.credential else None,
+            "token_id": capability.token_id,
+            "spend_seq": spend_seq,
             "host": {"os": sys.platform, "machine": platform.machine(), "python": platform.python_version()},
         }
         event = self.hive.ledger.append(RECEIPT_KIND, actor, payload)
@@ -101,6 +113,13 @@ def verify_receipt(hive: Hive, event: Event) -> InferenceResult:
         hive.blobs.get(p["request_sha"])
     except (OSError, DigestDivergence) as exc:
         raise NonSimulationViolation(f"seq {event.seq}: raw bytes missing ({exc})") from None
+    spend = hive.ledger.get(p["spend_seq"])
+    if spend is None or spend.kind != SPENT or spend.payload["token_id"] != p["token_id"] or spend.seq >= event.seq:
+        raise NonSimulationViolation(f"seq {event.seq}: no prior capability spend authorizes this call")
+    if hive.ledger.find_op(f"{ISSUED}:{p['token_id']}") is None:
+        raise NonSimulationViolation(f"seq {event.seq}: authorizing token was never issued by this hive")
+    if spend.payload["action"] != {"type": "inference", "provider": p["provider"], "model": p["model_requested"]}:
+        raise NonSimulationViolation(f"seq {event.seq}: spend authorized a different provider/model")
     result = decoder_for(p["codec"])(raw)
     checks = {
         "completion_sha": sha256_hex(result.text.encode("utf-8")),
