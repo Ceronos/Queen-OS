@@ -1,0 +1,12 @@
+{
+  "fixture_kind": "archived_actual_live_run_not_new_execution",
+  "source_run": "https://github.com/Ceronos/Queen-OS/actions/runs/42373449340",
+  "artifact_id": 13573899082,
+  "producer_commit": "365de353ced5e7d4bf9b21aff5f5575cc1186163",
+  "archive_sha256": "29dab4f7c21d336a36ae35a31547aaaadcf05e8ed28fffd508fd136bed1103e5",
+  "scope": "Exported CLI hive only, one capability/spend/receipt and five signed events. The workflow also performed a separate live pytest call; its hive is not in this fixture.",
+  "known_answer": "Mosquito.",
+  "known_semantic_failure": "The archived comb-building answer is incorrect; the historical canary checked nonempty text only. Preserve original bytes/signatures.",
+  "hardware_exclusion": "Historical host.probe reports PTP from unverified hardware presence; QOS-0024 later corrects it. Not a smoke acceptance criterion.",
+  "credentials": "No vault or private keys are present."
+}

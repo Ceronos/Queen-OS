@@ -21,8 +21,8 @@ def test_witnessed_inference_in_a_production_hive(target: tuple[str, str], tmp_p
         pytest.skip(f"{provider_name}: no credential available ({exc.__class__.__name__})")
     request = InferenceRequest(
         model,
-        (Message("user", "Reply with one word: the insect that builds a comb."),),
-        system="You answer in one lowercase word.",
+        (Message("user", "Reply with exactly one lowercase word: bee."),),
+        system="Return only the requested word.",
         max_tokens=32,
         temperature=0.0,
     )
@@ -33,6 +33,7 @@ def test_witnessed_inference_in_a_production_hive(target: tuple[str, str], tmp_p
         receipt = witnessed.receipt.payload
 
         assert witnessed.result.text.strip(), "real model returned no text"
+        assert witnessed.result.text.strip().casefold().rstrip(".!?") == "bee", "real model missed the smoke oracle"
         assert receipt["provider_kind"] in ("api", "local")
         assert receipt["http_status"] == 200 and receipt["latency_ms"] > 0
         assert receipt["output_tokens"] is None or receipt["output_tokens"] > 0

@@ -1,56 +1,28 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Claude, newest PR in the stack (#5, now on top of Sage's #6)._
+_Last updated: November 7, 2026 by Sage/Codex; clean signed main-based integration._
 
-## The stack (merge in order, retargeting each onto `main` as its base lands)
-| PR | Branch | Author | Content |
-|---|---|---|---|
-| #1 | `claude/m0-substrate` | Claude | M0 substrate, license, build map |
-| #2 | `claude/m1-providers` | Claude | providers, InferenceReceipts, credential custody |
-| #3 | `codex/gate-live-inference-ci` | Sage | offline PR CI; reviewer-gated live-inference workflow |
-| #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
-| #6 | `codex/transaction-lease-recovery` | Sage | transaction cleanup, signed lease lifecycle (renew events), process-exit recovery tests |
-| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs, SO-0001, live canary, workflow fixes (rebased onto #6) |
+## Current contribution
 
-## Read first
-`CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`
-(what is known to be wrong) → last `LEDGER.md` entries → `docs/BUILD_MAP.md`.
+`codex/smoke-main-signed` starts directly at main `90b40356c07492df4ee179bd39177b03cb219f75`. It combines the exact provider/verifier/test changes from #9 head `336dfee934299b2d050e7729eb4b3dfea1e882b4` with the overlapping documentation from #10 head `1a1ca6f66868916cb4cbb4465d33906ebdbb8a56`. Historical branches/PRs are preserved. This fixes the squash ancestry conflict without forcing either engineer's branch. New contribution commits use GitHub's signed web-editor path; verify their final signatures and CI before landing.
 
-## State of M1
-Done: providers + receipts · credential custody · capability tokens (budget reserved atomically, required by
-`Inference.run`) · TaskEggs (signed 7-tuple, DAG by construction) · idempotent ledger ops.
+- QOS-0025 remains the canary answer/evidence issue. QOS-0026 is the separate signing issue. Local CLI signing is still unconfigured; no new key or security-policy change was made.
+- Claude's original landing entry and correction, and Sage's smoke/retention entries, are retained in LEDGER.md. New work branches from main; short explicit dependencies are allowed by docs/ENGINEERS.md.
+- Original #9 had 13 green checks against its former landing-branch base. Those are historical results, not a new main-based integration pass. Final-head CI must be bound to its actual tested commit and base/head.
 
-Next, in order:
-1. **`queen/valve.py`, Bresslau:** risk G → profile {temperature, schema strictness, quorum size, token budget}.
-2. **`workers/claim.py`, Page-Robinson:** claim = lease(`egg:<id>`) + a **per-worker, per-egg** capability whose
-   expiry is ≤ the lease (QOS-0020). Every write is fenced and carries an `op_id` (QOS-0001 contract).
-   On restart, reconcile from stored evidence before any retry (Sage's `RECOVERY_CONTRACT.md`).
-3. **Structured output** in providers (QOS-0008), needed to satisfy diploid schemas.
-4. **`gate/`:** evidence pack → `jsonschema` validation of the output → `Enclaves.promote` or oophagy (signed tombstone).
-   Fix QOS-0009 (promote TOCTOU) here with a fenced promotion lease.
-5. `comb/projection.py` + `capsule.py`, then `queen/oviposition.py`.
-**M1 exit test:** a real model decomposes a goal, real workers hatch the eggs, the gate promotes or quarantines,
-and `queen ledger verify` is green. Live runs go only through `live-inference.yml` (see `docs/LIVE_INFERENCE.md`).
+## Smoke evidence and limits
 
-## Sage's lane (don't duplicate)
-CI admission and live-run authorization, recovery/interruption contracts, Thelio Astra hardware runs
-(`queen host probe --hive …` is the evidence format, see `docs/ENGINEERS.md`), containment evidence.
+Read docs/SMOKE_ACCEPTANCE.md. Historical run 42373449340 exported the wrong CLI answer `Mosquito.` despite a green job. Corrected run 42380605862 at `9a907655de0f249f5a4001770a6de88e4bc30ab8` returned `bee` in pytest but `beeedom` in the CLI. Producer signatures passed; the strict word gate exited 2. Artifact upload was then skipped. Do not claim a strict semantic smoke pass.
 
-## Live inference (owner order SO-0001)
-- **Keyless canary** (`live-canary.yml`) runs on every push to `main`. If it goes red, the real provider path is broken.
-- **Engineer-dispatched runs:** `live-inference.yml` with `authorization_ref=standing-order:SO-0001`,
-  `engineer=claude|sage`, within `governance/live_standing_order.json` scope (≤128 tokens, ≤20/day).
-  The gate reads the order at the approved main SHA. The workflow is valid now (QOS-0023 fixed).
+The retention fix admits the signed public CLI bundle, uploads it, then checks the unchanged `bee` oracle against the pinned ZIP digest. Invalid/private/incomplete bundles block upload; a wrong answer keeps the job red. No prompt, model, two-call count, 32/16 output-token caps, inference retry, live trigger, hosted-key policy or environment setting is changed here. Earlier pytest failure/cancellation/structural rejection/upload failure can still leave no CLI artifact; pytest's separate hive remains unexported.
 
-## Waiting on the owner
-- Create the GitHub environment **`live-inference`** (Settings → Environments). For SO-0001 runs, add **no**
-  required reviewers with self-review prevention. Add the secret `ANTHROPIC_API_KEY` there, not in chat.
-- Review and merge the stack #1 → #2 → #3 → #4 → #6 → #5. The canary and live workflows only become
-  dispatchable once they exist on `main`.
+Clean-copy baseline: 203 offline tests with the preserved historical archive, correct fresh-source import, and a verified new local hive genesis. Ordinary CI explicitly skips seven archive replay cases. No new model call was made for this integration. GitHub upload behavior at the final source still needs a live witness. Source signing and producer CI are not independent containment acceptance.
 
-## Commands
-```
-pip install -e ".[dev]"; pytest --ignore=tests/live          # 186 offline tests
-queen init ./h --node-id dev && queen host probe --hive ./h && queen ledger verify ./h
-env -u GH_TOKEN gh api repos/Ceronos/Queen-OS/...            # REST only from Claude sessions
-```
+## Next work
+
+1. Check final signatures, CI, exact diff and cross-engineer review before owner landing; originals remain as review history until superseded deliberately.
+2. Record any later bounded canary result separately; never turn the preserved wrong answer into a pass or retry until lucky.
+3. Continue M1 implementation: valve, worker claim with per-worker/per-egg capabilities and fenced writes, structured output, verification gate, projections/capsules and oviposition. See docs/BUILD_MAP.md and docs/ISSUES.md; no worker/model runtime is implemented by this handoff.
+4. Frozen Astra v65 stays separate and unchanged. Its independent containment/fresh-session prerequisites still govern its A/B/C comparison; they do not prohibit ordinary repository engineering.
+
+Read CLAUDE.md, docs/ENGINEERS.md, docs/ISSUES.md, the latest LEDGER.md entry and docs/BUILD_MAP.md. Existing live-inference documentation governs other run paths; documentary labels and historical owner statements do not expand the hourly cadence's read-only scope.

@@ -172,6 +172,8 @@ CI admission for this provider work is separated into offline push/PR checks and
 Offline interruption/reopen regression contracts now cover the existing ledger and leases; see `RECOVERY_CONTRACT.md`. The subsequent transaction/lease hardening extension adds failed-commit cleanup and controlled abrupt-writer-exit tests; see `TRANSACTION_LEASE_RECOVERY.md`. These changes do not implement M1 projection/capsule recovery or establish process containment.
 
 
+The bounded live-smoke acceptance contribution adds an offline signed-artifact verifier and explicit fixed-word oracle (QOS-0025); see `SMOKE_ACCEPTANCE.md`. Its follow-up admits and retains structurally valid CLI evidence before the separate semantic gate; wrong answers still fail. It distinguishes witnessed transport from answer correctness and leaves containment/fresh-session research acceptance separate.
+
 ## Milestones (top-down from the software core)
 
 - **M0 — Substrate primitives (this session):** JCS/AF-SER-V1, hash-chained ledger with HLC, leases
