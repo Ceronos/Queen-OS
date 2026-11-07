@@ -7,6 +7,7 @@ import io
 import json
 import os
 import runpy
+import shutil
 import sqlite3
 import stat
 import subprocess
@@ -69,17 +70,17 @@ def test_nonempty_wrong_answer_does_not_pass_an_explicit_oracle(recorded_archive
     assert observed["status"] == "ARCHIVED_SMOKE_PASS"
 
 
-def test_answer_mismatch_is_also_a_nonzero_cli_result(recorded_archive: Path) -> None:
+def test_retained_admissible_evidence_does_not_make_a_wrong_answer_pass(recorded_archive: Path, tmp_path: Path) -> None:
+    # Offline rehearsal of admission -> retention -> answer gate. This local copy
+    # does not claim that GitHub's artifact service was exercised.
+    command = [sys.executable, str(SCRIPT), str(recorded_archive), "--expected-sha256", META["archive_sha256"]]
+    admitted = subprocess.run(command, capture_output=True, text=True, check=False, timeout=20)
+    assert admitted.returncode == 0
+    assert json.loads(admitted.stdout)["status"] == "ARCHIVED_INFERENCE_PATH_VERIFIED"
+    retained = tmp_path / "retained-evidence.zip"
+    shutil.copyfile(recorded_archive, retained)
     result = subprocess.run(
-        [
-            sys.executable,
-            str(SCRIPT),
-            str(recorded_archive),
-            "--expected-sha256",
-            META["archive_sha256"],
-            "--expect-word",
-            "bee",
-        ],
+        [*command, "--expect-word", "bee"],
         capture_output=True,
         text=True,
         check=False,
@@ -87,6 +88,7 @@ def test_answer_mismatch_is_also_a_nonzero_cli_result(recorded_archive: Path) ->
     )
     assert result.returncode == 2
     assert json.loads(result.stdout)["reply"] == "Mosquito."
+    assert hashlib.sha256(retained.read_bytes()).hexdigest() == META["archive_sha256"]
 
 
 def test_wrong_external_digest_is_rejected(tmp_path: Path) -> None:
@@ -102,6 +104,21 @@ def test_unsafe_or_private_members_are_rejected(tmp_path: Path, entry: str) -> N
     with pytest.raises(ValueError):
         verify_archive(archive, sha)
     assert not (tmp_path / "escape").exists()
+
+
+def test_private_bundle_is_also_a_nonzero_cli_result(tmp_path: Path) -> None:
+    archive, sha = changed_archive(tmp_path, {"vault/keys/host.pem": b"synthetic private-file sentinel"})
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), str(archive), "--expected-sha256", sha],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=20,
+    )
+    assert result.returncode != 0
+    assert "unexpected evidence member" in result.stderr
+    assert "ARCHIVED_INFERENCE_PATH_VERIFIED" not in result.stdout
+    assert "synthetic private-file sentinel" not in result.stdout + result.stderr
 
 
 @pytest.mark.parametrize("variant", ["symlink", "duplicate", "oversize"])

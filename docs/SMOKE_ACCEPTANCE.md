@@ -46,6 +46,37 @@ No hosted key, repository environment, reviewer rule or standing-order scope is
 modified by this change. The installer-script pinning remainder in QOS-0005 stays
 open. There is no automatic model-call retry in the answer checker.
 
+## Preserve valid evidence when the CLI answer is wrong
+
+[Run 42380605862, attempt 1](https://github.com/Ceronos/Queen-OS/actions/runs/42380605862)
+executed commit `9a907655de0f249f5a4001770a6de88e4bc30ab8`. Live pytest returned
+`bee`, but the CLI returned `beeedom` (3 output tokens / 16 allowed). The five-event
+signature check passed; the word checker exited 2. The job correctly failed, but
+its later artifact upload was skipped, leaving only producer logs for readback.
+
+The workflow now orders its CLI phases as:
+
+1. Verify the candidate ZIP's bounded public layout, signatures, raw bytes and
+   one-call scope **without** an answer oracle. Invalid/private/incomplete bundles
+   fail here and cannot reach the normally success-gated upload. Pin the verified
+   ZIP digest in a step output only after admission succeeds.
+2. Upload the admitted evidence directory. Missing files fail the upload.
+3. Check the same ZIP against the pinned digest and the unchanged `bee` oracle.
+   A mismatch still exits 2 and fails the job; it cannot erase the earlier artifact.
+
+There is no `continue-on-error`, unconditional upload, added inference, changed
+prompt or retry. A canceled run, earlier live-pytest failure, structural rejection
+or failed artifact upload may still leave no exported CLI evidence. Only the CLI
+hive is exported; pytest's separate hive is not. These are explicit limits of this
+fix, not evidence that an unavailable bundle passed.
+
+Offline tests exercise the actual verifier CLI with the retained historical
+wrong-answer archive: admission succeeds, a local retained copy survives, and the
+answer gate still exits 2. A synthetic private-file bundle fails CLI admission.
+The local copy is a retention rehearsal, not a GitHub artifact-service test.
+The new workflow revision still needs an authorized live run to witness upload
+ordering in GitHub. No new model call is required by these offline tests.
+
 ## Offline artifact verification
 
 Use a digest from a separately obtained receipt (such as the GitHub artifact API),

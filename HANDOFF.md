@@ -1,20 +1,16 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07 by Sage/Codex, bounded-smoke acceptance contribution on top of #5._
+_Last updated: 2026-11-07 by Sage/Codex, failed-smoke evidence retention follow-up in PR #9._
 
-## The stack (merge in order, retargeting each onto `main` as its base lands)
-| PR | Branch | Author | Content |
-|---|---|---|---|
-| #1 | `claude/m0-substrate` | Claude | M0 substrate, license, build map |
-| #2 | `claude/m1-providers` | Claude | providers, InferenceReceipts, credential custody |
-| #3 | `codex/gate-live-inference-ci` | Sage | offline PR CI; reviewer-gated live-inference workflow |
-| #4 | `codex/offline-recovery-contracts` | Sage | ledger/lease interruption + reopen contracts |
-| #6 | `codex/transaction-lease-recovery` | Sage | transaction cleanup, signed lease lifecycle (renew events), process-exit recovery tests |
-| #5 | `claude/m1-eggs` | Claude | issues ledger, engineer protocol, idempotent appends, host probe, ARM64 CI, capabilities, TaskEggs, SO-0001, live canary, workflow fixes (rebased onto #6) |
+## Observed repository state
+
+The original stack has landed separately on main (observed `90b40356c07492df4ee179bd39177b03cb219f75`). PR #9 remains on `codex/bounded-astra-smoke`, based on `claude/v5-landing` at `2f0d338b997f63c1c9336548616e199dc664bee5`. PR #10 is a separate Claude documentation/protocol contribution; do not overwrite it or describe this follow-up as merged. Recheck remote heads and review before any integration.
 
 ## Bounded smoke milestone — latest contribution
 
-The owner selected a bounded live harness smoke before the A/B/C study. Read `docs/SMOKE_ACCEPTANCE.md`. An actual earlier run proves a signed real-call path, but its exported CLI reply was `Mosquito.` to the comb question. QOS-0025 adds a fixed-word oracle and offline verification of the signed raw response; a corrected candidate needs its own live pass. The archived real-run fixture is retained locally and not published; replay tests require QUEEN_ARCHIVED_SMOKE and otherwise explicitly skip. It contains no vault/private key and is never presented as a new call. Local validation is 202 offline tests with no skips, clean lint/format and types; this PR needs its own CI and corrected live run. Frozen v65 remains separate; its research gates do not bar model-free repository work.
+The owner selected a bounded live harness smoke before the A/B/C study. Read `docs/SMOKE_ACCEPTANCE.md`. Historical CLI output was `Mosquito.` despite a green job. The explicit oracle at `9a907655de0f249f5a4001770a6de88e4bc30ab8` then ran in canary **42380605862, attempt 1**: pytest returned `bee`; CLI returned `beeedom`. Producer signatures passed; the word gate correctly exited 2. Upload was skipped, so fresh archive readback was unavailable. Do not claim a strict smoke pass.
+
+This follow-up moves CLI evidence admission before upload and the answer gate after upload, binding both checks to one digest. Invalid/private/incomplete bundles still block export. Wrong answers retain admitted evidence and keep the job failed. No prompt, model-call count, token limit, live trigger, credential policy or oracle is changed. Offline validation: **203 tests passed**, plus Ruff/format and package/verifier mypy. Actual post-inference shell commands also passed an offline wrong-answer/private-file rehearsal with local retention. Replay uses the historical archive explicitly; seven archive-dependent cases skip when it is unavailable. It is not published or relabeled as new inference. GitHub upload behavior remains to be witnessed at the new revision. Frozen v65 stays untouched and requires its separate independent containment/fresh-session acceptance.
 
 ## Read first
 `CLAUDE.md` (laws) → `docs/ENGINEERS.md` (how two engineers share this repo) → `docs/ISSUES.md`
@@ -41,16 +37,15 @@ CI admission and live-run authorization, recovery/interruption contracts, Thelio
 (`queen host probe --hive …` is the evidence format, see `docs/ENGINEERS.md`), containment evidence.
 
 ## Live inference (owner order SO-0001)
-- **Keyless canary** (`live-canary.yml`) runs on every push to `main`. If it goes red, the real provider path is broken.
+- **Keyless canary** (`live-canary.yml`) runs on every push to `main`. Inspect the failing step: provider/receipt failure, semantic mismatch and artifact upload failure are distinct outcomes.
 - **Engineer-dispatched runs:** `live-inference.yml` with `authorization_ref=standing-order:SO-0001`,
   `engineer=claude|sage`, within `governance/live_standing_order.json` scope (≤128 tokens, ≤20/day).
   The gate reads the order at the approved main SHA. The workflow is valid now (QOS-0023 fixed).
 
-## Waiting on the owner
-- Create the GitHub environment **`live-inference`** (Settings → Environments). For SO-0001 runs, add **no**
-  required reviewers with self-review prevention. Add the secret `ANTHROPIC_API_KEY` there, not in chat.
-- Review and merge the stack #1 → #2 → #3 → #4 → #6 → #5. The canary and live workflows only become
-  dispatchable once they exist on `main`.
+## Remaining acceptance work
+- Review PR #9 against its current head/base and this revision's CI. Merging remains separate.
+- After offline checks pass, a separately authorized run at the new exact head can witness evidence upload and the subsequent strict answer result. No model retry is part of this follow-up.
+- No hosted key, environment or reviewer setup is needed for this keyless retention fix. Existing live-inference documentation governs other paths; this change does not edit those settings.
 
 ## Commands
 ```

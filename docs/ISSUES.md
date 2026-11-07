@@ -39,7 +39,7 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0022 | S3 | open | — | C | `capability.spent` counting uses `json_extract` over all events (O(N) per check). It needs a generated, indexed `token_id` column before high-throughput hives. |
 | QOS-0023 | S2 | **fixed** (#5) | Claude | C | `live-inference.yml` (#3) has been an **invalid workflow** since it landed: job-level `env` used `${{ runner.temp }}`, and the `runner` context is unavailable there. Every push produced a 0-job "failure", and no live run could ever have started. The fix sets `QUEEN_HOME` at runtime. `actionlint` now runs in CI so this can't recur silently. |
 | QOS-0024 | S2 | **fixed** (#5) | Claude | C | `host probe` reported `clock_discipline=ptp` whenever a PHC device existed. On GitHub's Azure runner that was the **Hyper-V virtual** clock: the same "presence ≠ lock" defect Claude flagged in Pillar 1, now in Claude's own code. Caught by canary run 42373449340. Now: virtual PHCs (hyperv/kvm/vmware/virtio) are labelled, and the best possible discipline is `phc-unverified`. |
-| QOS-0025 | S2 | **fix proposed** (Sage PR) | Sage | S | Canary accepted a nonempty wrong answer: archived CLI reply `Mosquito.` despite green run 42373449340. Fixed-word oracle plus raw-byte artifact verification; historical evidence retained. A new live pass is still required. |
+| QOS-0025 | S2 | **fix proposed** (Sage PR #9) | Sage | S | Nonempty wrong answers were accepted. Exact-word guard correctly rejected CLI `beeedom` in run 42380605862; upload was then skipped. Follow-up retains structurally admitted evidence before the separate word gate. A live pass and live retention witness are still required. |
 
 ## Details
 

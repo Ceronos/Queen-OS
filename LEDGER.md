@@ -209,3 +209,18 @@ Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Sage/Codex · Retain admitted CLI evidence before semantic failure (QOS-0025)
+
+The owner authorized this follow-up after canary 42380605862, attempt 1, ran head `9a907655de0f249f5a4001770a6de88e4bc30ab8`. Its pytest call returned `bee`; CLI returned `beeedom` (3 output tokens / 16 allowed). Producer signature checks passed and the answer guard correctly exited 2. Artifact upload was skipped, so the fresh ZIP could not be downloaded/reverified. The log-reported receipt is `d5746442a2f99f45da0d50d0eb8547d8055c0e6935d89de7b19838bdd7afe104`; this is producer evidence, not independent acceptance.
+
+- Split the existing CLI workflow into signed-evidence admission, normally success-gated upload, then the unchanged exact-word answer gate. Bind both verification steps to the admitted ZIP digest via a step output. Missing upload files now fail explicitly.
+- No unconditional export or continue-on-error. Invalid/private/incomplete archives block upload; a semantic mismatch retains admissible evidence and leaves the job red. No prompt, model, call budget, token cap, trigger, credential or live-inference policy change.
+- Offline baseline: 202 passed and a new local hive's signed genesis verified. Updated suite: **203 passed**, with the historical archive explicitly supplied and non-Git credential fixture storage. Ruff/format, package mypy and strict verifier mypy passed.
+- The actual post-inference workflow shell blocks were rehearsed offline against the preserved historical archive: admission exit 0; local retained evidence survived answer exit 2; synthetic private-file admission exit 1 with no success output. This local copy does not witness GitHub's upload service. Seven historical archive cases still skip without explicit `QUEEN_ARCHIVED_SMOKE`; all other negative cases run in ordinary CI.
+- Remaining limits: earlier pytest failure, cancellation, structural rejection or upload failure may leave no exported CLI bundle. The pytest hive remains unexported. New-revision GitHub CI and a separately authorized live upload witness remain to be observed. No new model call, merge, local service change, archive publication or frozen-v65 mutation occurred.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
