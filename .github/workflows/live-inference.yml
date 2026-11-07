@@ -1,0 +1,117 @@
+name: authorized live inference
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_live_inference:
+        description: Explicitly request one live, billable where applicable inference
+        type: boolean
+        required: true
+        default: false
+      approved_commit_sha:
+        description: Exact 40-character main commit covered by the authorization
+        type: string
+        required: true
+      authorization_ref:
+        description: "HTTPS record reviewed by an environment approver, or standing-order:SO-0001 (governance/)"
+        type: string
+        required: true
+      engineer:
+        description: Who is dispatching (recorded; must be named in a standing order to use one)
+        type: choice
+        options: [owner, claude, sage]
+        required: true
+        default: owner
+      provider:
+        description: One provider to exercise
+        type: choice
+        options: [ollama, anthropic, openai, gemini]
+        required: true
+      model:
+        description: Explicit model identifier covered by the authorization
+        type: string
+        required: true
+      max_tokens:
+        description: Output token limit, from 1 through 128
+        type: string
+        required: true
+        default: "24"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: authorized-live-inference
+  cancel-in-progress: false
+
+jobs:
+  authorize:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify existing environment and dispatch scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/live-environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/live-inference.yml/runs?created=>=$(date -u +%F)&per_page=100" \
+            > "$RUNNER_TEMP/live-runs.json"
+          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json" --runs-file "$RUNNER_TEMP/live-runs.json"
+
+  live:
+    needs: authorize
+    environment: live-inference
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QUEEN_PROVIDER: ${{ inputs.provider }}
+      QUEEN_MODEL: ${{ inputs.model }}
+      QUEEN_MAX_TOKENS: ${{ inputs.max_tokens }}
+      QUEEN_DISABLE_KEYRING: "1"
+    steps:
+      # QOS-0023: `runner` is not available in job-level env; that made this workflow invalid since #3.
+      - name: Isolated Queen home
+        run: echo "QUEEN_HOME=$RUNNER_TEMP/queen-live-home" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - name: Recheck environment after required approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/live-environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/live-inference.yml/runs?created=>=$(date -u +%F)&per_page=100" \
+            > "$RUNNER_TEMP/live-runs.json"
+          python3 scripts/live_ci_gate.py "$RUNNER_TEMP/live-environment.json" --runs-file "$RUNNER_TEMP/live-runs.json"
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install Queen-OS
+        run: python -m pip install -e ".[dev]"
+      - name: Install local inference runtime only when explicitly selected
+        if: inputs.provider == 'ollama'
+        run: |
+          curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION="0.40.15" sh   # QOS-0005 pin
+          ollama --version
+          if ! curl -sf http://127.0.0.1:11434/api/version; then
+            ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+            for _ in $(seq 1 30); do
+              if curl -sf http://127.0.0.1:11434/api/version; then break; fi
+              sleep 1
+            done
+          fi
+          ollama pull "$QUEEN_MODEL"
+      - name: One authorized witnessed inference
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          queen init "$RUNNER_TEMP/hive" --node-id authorized_live
+          queen infer "$QUEEN_PROVIDER" "$QUEEN_MODEL" "Say hello in three words." --hive "$RUNNER_TEMP/hive" --max-tokens "$QUEEN_MAX_TOKENS"
+          queen ledger verify "$RUNNER_TEMP/hive"

@@ -14,3 +14,9 @@ build/
 *.sqlite3-wal
 *.sqlite3-shm
 *.ed25519.pem
+
+# credentials never enter the repo
+.env
+.env.*
+secrets.env
+*.key

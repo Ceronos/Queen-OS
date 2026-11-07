@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "queen-os"
+dynamic = ["version"]
+description = "Queen-OS: a stigmergic, verification-gated multi-agent harness for any model"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+authors = [{ name = "Ceronos Aethrion" }]
+dependencies = [
+  "cryptography>=43,<47",
+  "httpx>=0.27,<1",
+  "jsonschema>=4.23,<5",
+]
+classifiers = [
+  "License :: Other/Proprietary License",
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+]
+
+[project.optional-dependencies]
+keyring = ["keyring>=25,<27"]
+dev = [
+  "pytest>=8,<10",
+  "hypothesis>=6.100,<7",
+  "ruff>=0.6,<1",
+  "mypy>=1.11,<2",
+  "types-jsonschema>=4.23,<5",
+]
+
+[project.scripts]
+queen = "queen_os.cli:main"
+
+[tool.hatch.version]
+path = "src/queen_os/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/queen_os"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m 'not live'"
+markers = ["live: real network inference; run with -m live (needs a local runtime or a key from the OS keyring / CI secret)"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["queen_os"]
+mypy_path = "src"
