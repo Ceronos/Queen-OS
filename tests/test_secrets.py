@@ -28,8 +28,8 @@ def test_redact_scrubs_known_shapes_and_explicit_secrets() -> None:
     assert len(find_secrets(text)) == 2
 
 
-def test_resolution_order_env_then_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    store = SecretStore(tmp_path / "home")
+def test_resolution_order_env_then_file(cred_home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    store = SecretStore(cred_home / "home")
     assert store.get("ANTHROPIC_API_KEY") is None
     store.set("ANTHROPIC_API_KEY", "from-file")
     got = store.get("ANTHROPIC_API_KEY")
@@ -44,8 +44,8 @@ def test_resolution_order_env_then_file(tmp_path: Path, monkeypatch: pytest.Monk
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
-def test_group_readable_secrets_file_fails_closed(tmp_path: Path) -> None:
-    store = SecretStore(tmp_path)
+def test_group_readable_secrets_file_fails_closed(cred_home: Path) -> None:
+    store = SecretStore(cred_home)
     store.set("OPENAI_API_KEY", "v")
     os.chmod(store.file, 0o644)
     with pytest.raises(SecretError):

@@ -21,7 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # ubuntu-24.04-arm covers the ARM64 Linux target (Thelio Astra / Ampere Altra), QOS-0011.
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-latest]
         python: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,3 +46,5 @@ jobs:
           queen init "$RUNNER_TEMP/hive" --node-id ci_${{ matrix.python }}
           queen ledger verify "$RUNNER_TEMP/hive"
           queen ledger tail "$RUNNER_TEMP/hive" -n 1
+          queen host probe --hive "$RUNNER_TEMP/hive"
+          queen ledger verify "$RUNNER_TEMP/hive"

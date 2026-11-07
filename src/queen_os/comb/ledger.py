@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS events (
     prev_hash   TEXT NOT NULL,
     hash        TEXT NOT NULL UNIQUE,
     signer      TEXT,
-    signature   TEXT
+    signature   TEXT,
+    op_id       TEXT UNIQUE
 );
 CREATE INDEX IF NOT EXISTS events_kind ON events(kind);
 CREATE TABLE IF NOT EXISTS signers (key_id TEXT PRIMARY KEY, name TEXT NOT NULL, public_hex TEXT NOT NULL);
@@ -77,6 +78,10 @@ class ChainBroken(LedgerError):
     pass
 
 
+class IdempotencyConflict(LedgerError):
+    """An ``op_id`` was replayed with different content. Two different effects claim one operation."""
+
+
 @dataclass(frozen=True)
 class Event:
     seq: int
@@ -90,21 +95,25 @@ class Event:
     hash: str
     signer: str | None
     signature: str | None
+    op_id: str | None = None
 
 
-def _header(seq: int, event_id: str, hlc: str, kind: str, actor: str, payload_sha: str, prev: str) -> bytes:
-    return canonicalize(
-        {
-            "actor": actor,
-            "event_id": event_id,
-            "hlc": hlc,
-            "kind": kind,
-            "payload_sha": payload_sha,
-            "prev_hash": prev,
-            "seq": seq,
-            "v": SCHEMA_VERSION,
-        }
-    )
+def _header(
+    seq: int, event_id: str, hlc: str, kind: str, actor: str, payload_sha: str, prev: str, op_id: str | None = None
+) -> bytes:
+    header: dict[str, Any] = {
+        "actor": actor,
+        "event_id": event_id,
+        "hlc": hlc,
+        "kind": kind,
+        "payload_sha": payload_sha,
+        "prev_hash": prev,
+        "seq": seq,
+        "v": SCHEMA_VERSION,
+    }
+    if op_id is not None:  # bound into the chain, so an op_id cannot be reassigned after the fact
+        header["op_id"] = op_id
+    return canonicalize(header)
 
 
 def now_ms() -> int:
@@ -129,6 +138,7 @@ class Ledger:
         self._db.execute("PRAGMA synchronous=FULL")
         self._db.execute("PRAGMA foreign_keys=ON")
         self._db.executescript(_SCHEMA)
+        self._migrate()
         if signer is not None:
             self._register_signer(signer)
 
@@ -167,6 +177,13 @@ class Ledger:
                     primary.add_note("Closing the failed connection also failed; do not reuse it.")
             raise
 
+    def _migrate(self) -> None:
+        cols = {row[1] for row in self._db.execute("PRAGMA table_info(events)")}
+        if "op_id" not in cols:  # ledgers created before QOS-0001
+            with self.transaction() as db:
+                db.execute("ALTER TABLE events ADD COLUMN op_id TEXT")
+                db.execute("CREATE UNIQUE INDEX IF NOT EXISTS events_op_id ON events(op_id)")
+
     def _register_signer(self, signer: Signer) -> None:
         with self.transaction() as db:
             db.execute(
@@ -183,19 +200,54 @@ class Ledger:
         payload: dict[str, Any],
         *,
         fence: tuple[str, int] | None = None,
+        op_id: str | None = None,
     ) -> Event:
+        """Append one event.
+
+        With ``op_id``, the append is idempotent (QOS-0001): if the operation already committed,
+        possibly in an attempt whose caller saw an exception, the original event is returned
+        and nothing new is written. A replay with different kind/actor/payload raises
+        :class:`IdempotencyConflict`. A replay is a read of an effect that already
+        committed, so it is answered even if the fence has since expired.
+        """
         with self.transaction() as db:
+            if op_id is not None:
+                prior = self._prior_op(db, op_id, kind, actor, payload)
+                if prior is not None:
+                    return self._post_write_fetch_after(db, prior)
             if fence is not None:
                 self.check_fence(db, *fence)
-            seq = self.append_locked(db, kind, actor, payload)
+            seq = self.append_locked(db, kind, actor, payload, op_id=op_id)
         return self._post_write_fetch(seq)
+
+    def _post_write_fetch_after(self, db: sqlite3.Connection, seq: int) -> Event:
+        row = db.execute("SELECT * FROM events WHERE seq=?", (seq,)).fetchone()
+        event = self._row(row)
+        self._check_event(event)
+        return event
+
+    def _prior_op(
+        self, db: sqlite3.Connection, op_id: str, kind: str, actor: str, payload: dict[str, Any]
+    ) -> int | None:
+        row = db.execute("SELECT seq, kind, actor, payload_sha FROM events WHERE op_id=?", (op_id,)).fetchone()
+        if row is None:
+            return None
+        if (row[1], row[2], row[3]) != (kind, actor, sha256_hex(canonicalize(payload))):
+            raise IdempotencyConflict(f"op_id {op_id!r} already committed as seq {row[0]} with different content")
+        return int(row[0])
+
+    def find_op(self, op_id: str) -> Event | None:
+        row = self._db.execute("SELECT * FROM events WHERE op_id=?", (op_id,)).fetchone()
+        return None if row is None else self._row(row)
 
     def check_fence(self, db: sqlite3.Connection, resource: str, token: int) -> None:
         row = db.execute("SELECT token, expires_ms FROM leases WHERE resource=?", (resource,)).fetchone()
         if row is None or row[0] != token or row[1] <= self.now():
             raise StaleFence(f"fence {resource}#{token} is not the live lease")
 
-    def append_locked(self, db: sqlite3.Connection, kind: str, actor: str, payload: dict[str, Any]) -> int:
+    def append_locked(
+        self, db: sqlite3.Connection, kind: str, actor: str, payload: dict[str, Any], op_id: str | None = None
+    ) -> int:
         """Append inside an open :meth:`transaction`. Returns the new seq."""
         body = canonicalize(payload)
         payload_sha = sha256_hex(body)
@@ -205,14 +257,14 @@ class Ledger:
         last_stamp = None if head is None else HLCStamp.decode(head[2])
         hlc = self.clock.tick(last_stamp).encode()
         event_id = uuid.uuid4().hex
-        digest = sha256_hex(_header(seq, event_id, hlc, kind, actor, payload_sha, prev))
+        digest = sha256_hex(_header(seq, event_id, hlc, kind, actor, payload_sha, prev, op_id))
         signer_id = signature = None
         if self.signer is not None:
             signer_id, signature = self.signer.key_id, self.signer.sign(bytes.fromhex(digest))
         db.execute(
-            "INSERT INTO events(seq,event_id,hlc,kind,actor,payload,payload_sha,prev_hash,hash,signer,signature)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-            (seq, event_id, hlc, kind, actor, body, payload_sha, prev, digest, signer_id, signature),
+            "INSERT INTO events(seq,event_id,hlc,kind,actor,payload,payload_sha,prev_hash,hash,signer,signature,op_id)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (seq, event_id, hlc, kind, actor, body, payload_sha, prev, digest, signer_id, signature, op_id),
         )
         return int(seq)
 
@@ -243,8 +295,10 @@ class Ledger:
 
     @staticmethod
     def _row(row: tuple[Any, ...]) -> Event:
-        seq, event_id, hlc, kind, actor, body, payload_sha, prev, digest, signer, signature = row
-        return Event(seq, event_id, hlc, kind, actor, json.loads(body), payload_sha, prev, digest, signer, signature)
+        seq, event_id, hlc, kind, actor, body, payload_sha, prev, digest, signer, signature, op_id = row
+        return Event(
+            seq, event_id, hlc, kind, actor, json.loads(body), payload_sha, prev, digest, signer, signature, op_id
+        )
 
     # -- verification ---------------------------------------------------------------
 
@@ -259,7 +313,14 @@ class Ledger:
         if sha256_hex(bytes(stored)) != event.payload_sha:
             raise ChainBroken(f"seq {event.seq}: stored payload bytes do not match digest")
         header = _header(
-            event.seq, event.event_id, event.hlc, event.kind, event.actor, event.payload_sha, event.prev_hash
+            event.seq,
+            event.event_id,
+            event.hlc,
+            event.kind,
+            event.actor,
+            event.payload_sha,
+            event.prev_hash,
+            event.op_id,
         )
         if sha256_hex(header) != event.hash:
             raise ChainBroken(f"seq {event.seq}: header hash mismatch")

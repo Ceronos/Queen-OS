@@ -122,6 +122,21 @@ def cmd_secrets(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_host_probe(args: argparse.Namespace) -> int:
+    from queen_os.host.probe import probe
+
+    report = probe()
+    if args.hive:
+        with Hive.open(Path(args.hive)) as hive:
+            ev = hive.ledger.append("host.probe", f"host:{hive.node_id}", report)
+        print(f"host.probe recorded: seq={ev.seq} hash={ev.hash[:16]} signer={ev.signer}", file=sys.stderr)
+    for name, sensor in report["sensors"].items():
+        detail = sensor.get("value") if sensor["status"] == "OK" else sensor.get("reason")
+        print(f"{name:<10} {sensor['status']:<12} {json.dumps(detail, sort_keys=True)}")
+    print(f"clock_discipline={report['clock_discipline']}")
+    return 0
+
+
 def cmd_info(_: argparse.Namespace) -> int:
     print(
         json.dumps(
@@ -160,6 +175,12 @@ def build_parser() -> argparse.ArgumentParser:
     t.set_defaults(func=cmd_tail)
 
     sub.add_parser("info", help="environment report").set_defaults(func=cmd_info)
+    host = sub.add_parser("host", help="host hardware providers")
+    hsub = host.add_subparsers(dest="host_cmd", required=True)
+    hp = hsub.add_parser("probe", help="honest hardware probe; with --hive, records a signed host.probe event")
+    hp.add_argument("--hive")
+    hp.set_defaults(func=cmd_host_probe)
+
     sub.add_parser("providers", help="list model providers and credential status").set_defaults(func=cmd_providers)
 
     inf = sub.add_parser("infer", help="run one witnessed inference (receipt goes to the ledger)")

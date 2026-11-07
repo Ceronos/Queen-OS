@@ -26,3 +26,31 @@ def _isolate_credentials(monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pyte
     for var in list(os.environ):
         if var.endswith("_API_KEY") and not os.environ.get("QUEEN_LIVE"):
             monkeypatch.delenv(var)
+
+
+def _has_git_ancestor(path: Path) -> bool:
+    return any((p / ".git").exists() for p in [path, *path.parents])
+
+
+@pytest.fixture
+def cred_home(tmp_path: Path):
+    """A writable directory with no git ancestor (QOS-0002).
+
+    The credential store correctly refuses to write secrets inside a git working tree. On hosts
+    whose temp dir sits in a repo, fall back to $QUEEN_TEST_TMP, then the system temp root.
+    """
+    import shutil
+    import tempfile
+
+    if not _has_git_ancestor(tmp_path):
+        yield tmp_path
+        return
+    for base in (os.environ.get("QUEEN_TEST_TMP"), tempfile.gettempdir(), str(Path.home())):
+        if base and Path(base).is_dir() and not _has_git_ancestor(Path(base).resolve()):
+            d = Path(tempfile.mkdtemp(prefix="qos-cred-", dir=base))
+            try:
+                yield d
+            finally:
+                shutil.rmtree(d, ignore_errors=True)
+            return
+    pytest.skip("no writable temp directory outside a git worktree; set QUEEN_TEST_TMP")
