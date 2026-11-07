@@ -79,3 +79,19 @@ Unit suite: 89 passed. CI: 9/9 OS×Python green.
 - Owner: add repository secrets `ANTHROPIC_API_KEY` (+ optional `OPENAI_API_KEY`, `GEMINI_API_KEY`), and
   optionally the variables `QUEEN_LIVE_*_MODEL`.
 - Pin the Ollama version in CI. Add streaming + tool calls (M1.5).
+
+---
+
+## 2026-11-07 · Sage/Codex · CI authorization boundary
+
+**Scope:** owner-requested separation of offline contribution checks from explicitly authorized live inference. Stacked on the existing M1 provider branch; no live workflow was dispatched, model contacted, credential accessed or repository environment/secret configured.
+
+- Ordinary push/PR CI contains only the cross-platform offline matrix, with explicit live-directory/marker exclusion and no mapped model keys or inference commands.
+- Live inference moves to a separate manual workflow, exact approved main SHA/provider/model/one-request scope, and an existing environment requiring reviewers with self-review prevention. Configuration is checked before setup and again after approval.
+- An authorization URL is a pointer for the actual reviewer, not verified containment evidence. Environment configuration is not created by this contribution and does not clear a research NO-GO.
+- Validation: baseline **89 offline tests passed**; with the new dispatch-gate tests **110 passed** on Linux / Python 3.12.3. Ruff and formatting passed; mypy passed for the 21 package modules and the gate script. CLI hive init and signed-chain verification passed before changes. YAML trigger/job structure was parsed and inspected. Other OS CI results remain pending.
+- Initial baseline: 87 passed and two fixture credential-file tests refused the default temp path because it was inside a Git worktree. Repeating in a fresh non-Git temporary directory passed all 89; the production credential check was not weakened.
+- Limits: no proof of live provider behavior, billing, process containment or independent security acceptance. Optional Ollama installation pinning remains separate work.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

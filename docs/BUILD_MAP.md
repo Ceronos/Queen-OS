@@ -166,6 +166,10 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python â‰
 
 ---
 
+
+CI admission for this provider work is separated into offline push/PR checks and a manually authorized live workflow; see `LIVE_INFERENCE.md`. The gate script has synthetic-metadata tests only and is not independent containment acceptance.
+
+
 ## Milestones (top-down from the software core)
 
 - **M0 â€” Substrate primitives (this session):** JCS/AF-SER-V1, hash-chained ledger with HLC, leases

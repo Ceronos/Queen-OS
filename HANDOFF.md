@@ -1,44 +1,39 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Last updated: 2026-11-07, Session 001 end._
+_Last updated: 2026-11-07, Sage/Codex CI-authorization contribution._
 
-## Where things stand
-- **PR #1** (`claude/m0-substrate` → `main`): M0 substrate, proprietary LICENSE, build map v0.2. CI green on 3 OS × 3 Pythons.
-- **PR #2** (`claude/m1-providers` → `claude/m0-substrate`): providers, InferenceReceipts, credential custody, live CI.
-  Merge #1 first, then retarget #2 to `main`.
-- `docs/BUILD_MAP.md` v0.2 is the plan (rows marked ✅ are built). `docs/SECRETS.md` covers key handling.
+## Read first
 
-## Non-negotiables you inherit
-Read `CLAUDE.md`. In short: witnessed not declared · the ledger is the only channel · authority comes only
-from signed tokens · decorrelated verifiers · fail closed · cross-platform · tier honesty.
-Plus: **no credential ever enters the repo.** Keys live in env / OS keyring / owner-only `secrets.env` / GitHub encrypted secrets.
+`CLAUDE.md` → latest `LEDGER.md` entry → `docs/BUILD_MAP.md`. Work lands through PRs; this branch is stacked on the existing M1 provider work, not a replacement for it.
 
-## M1 remaining, in this order
-1. `queen/egg.py`: TaskEgg 7-tuple, JCS-canonical, host-signed. Ledger kind `egg.laid`.
-2. `authority/`: Ed25519 capability tokens (egg-scoped tools + expiry). Tool dispatch checks them.
-3. ~~providers + receipts~~ ✅ (M1.3). Still to add: streaming, tool/function calls, and structured output
-   (JSON-schema mode per vendor). These are needed for diploid strict-schema eggs.
-4. `queen/valve.py`: Bresslau risk G → execution profile (temperature, schema strictness, quorum size).
-5. `workers/claim.py`: Page-Robinson claim via `Leases`. Every write is fenced. Workers call `Inference.run`.
-6. `gate/`: evidence packs, VerificationGate (`Enclaves.promote`), oophagy with a signed tombstone.
-7. `comb/projection.py` + `comb/capsule.py`.
-8. `queen/oviposition.py`: goal → DAG of eggs via a strategic model.
-**M1 exit test:** real model end-to-end in a production hive, with `queen ledger verify` green.
-In CI, Ollama is the always-on real model. Hosted APIs run when secrets exist.
+## Existing PRs and remaining provider work
 
-## Useful commands
-```
-pip install -e ".[dev]"; pytest                      # unit (live excluded)
-QUEEN_LIVE_TARGETS="ollama=qwen2.5:0.5b" pytest -m live -rs
-queen init ./h --node-id dev && queen providers && queen infer ollama qwen2.5:0.5b "hi" --hive ./h
-env -u GH_TOKEN gh api repos/Ceronos/Queen-OS/...   # GraphQL is blocked in Claude sessions; use REST
-```
+- Existing PR #1 is M0 → main; PR #2 is M1 providers → M0. Preserve that merge order and retarget dependent PRs after their bases land. The CI safeguard is stacked on the provider branch.
+- The upstream handoff reports the earlier 9-job OS/Python matrix green and an earlier Ollama CI run. Those are upstream reports, not containment acceptance by this contribution.
+- Provider streaming, tool/function calls and structured output remain planned M1.5 work. Credential custody is documented in `docs/SECRETS.md`; the proprietary license and source attribution are preserved.
 
-## Corpus not yet read
-V4 Treatise, V4 Phase 6, Execution Stacks, Deployment docs, Robotics, Unison-Bio, the 6.5 MB Master
-Compilation, Pillar 1 Report (`1ge6wMjn…`), Pillar 4 (`1NtEtxPo…`), AF-IMMUNE-V1, AF-SWARM-V1, AF-BREED-V1,
-Sovereign Waking Protocol WK1–WK7. Read the ones relevant to each milestone before building it.
+## Current scope and evidence
 
-## Waiting on the owner
-- GitHub repository secrets: `ANTHROPIC_API_KEY` (and optionally `OPENAI_API_KEY`, `GEMINI_API_KEY`).
-- Review and merge PR #1, then PR #2.
+- M0 contains the signed ledger/HLC, fenced leases, blobs, enclave conventions and CLI. M1 provider adapters/receipts and credential handling are present on the provider branch. Worker execution, TaskEgg/capability integration and the full VerificationGate remain separate M1 work.
+- Existing code baseline: 89 offline tests passed locally. This CI-gate contribution: 110 offline tests passed on Linux / Python 3.12.3; lint/format and package/script type checks passed. Cross-platform results are left to the PR CI matrix and must be checked before claiming them.
+- Ordinary push/PR CI is offline. A distinct manually dispatched workflow is the only CI inference entry. Read `docs/LIVE_INFERENCE.md` before proposing any live run.
+- Live workflow preflight requires an exact approved main commit, provider/model/token scope and an already configured `live-inference` environment with required reviewers and self-review prevention. No environment, reviewer, key or live-run authorization was created by this change. No live run was dispatched.
+- The review URL/checker does not establish independent containment acceptance or a monetary grant. Actual prerequisites remain the reviewer's responsibility. Existing research NO-GO decisions remain in force.
+
+## Next engineering work
+
+1. Review/land the CI safeguard before the next contribution.
+2. Add offline ledger/lease interruption and post-commit-readback recovery contracts against the existing primitives. Do not substitute a parallel store or label fixtures as live inference.
+3. Continue M1: TaskEgg and actual capability checks, worker claims, evidence gate, projections/recovery, and then an explicitly scoped integrated run after prerequisites. The build map defines ownership and milestone boundaries.
+4. Keep source-signing, producer tests, independent review and deployed containment as separate evidence classes. Directory permissions are not an OS sandbox.
+
+## Preserved open work
+
+- Operational process containment, aggregate budgets and real cancellation/cessation need separate implementation and evidence.
+- Reviewer/environment setup and model budget decisions are not supplied by this branch.
+- Ollama runtime/installer pinning remains unresolved for future authorized live CI.
+- Fixtures are tagged inside signed inference records and refused in production hives. No automatic model fallback, hidden live test, credentials in Git or service/schedule changes.
+
+## Source reading still pending
+
+The upstream handoff records V4 Treatise, V4 Phase 6, Execution Stacks, Deployment, Robotics, Unison-Bio, Master Compilation, Pillar 1 Report, Pillar 4, AF-IMMUNE-V1, AF-SWARM-V1, AF-BREED-V1 and WK1–WK7 as unread by its author. Read only the sources relevant to the next milestone; this contribution does not claim that corpus review.
