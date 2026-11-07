@@ -26,8 +26,10 @@ jobs:
     timeout-minutes: 20
     env:
       QUEEN_DISABLE_KEYRING: "1"
-      QUEEN_HOME: ${{ runner.temp }}/queen-canary-home
     steps:
+      # QOS-0023: the `runner` context is unavailable in job-level env, so set the path at runtime.
+      - name: Isolated Queen home
+        run: echo "QUEEN_HOME=$RUNNER_TEMP/queen-canary-home" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:

@@ -73,8 +73,10 @@ jobs:
       QUEEN_MODEL: ${{ inputs.model }}
       QUEEN_MAX_TOKENS: ${{ inputs.max_tokens }}
       QUEEN_DISABLE_KEYRING: "1"
-      QUEEN_HOME: ${{ runner.temp }}/queen-live-home
     steps:
+      # QOS-0023: `runner` is not available in job-level env; that made this workflow invalid since #3.
+      - name: Isolated Queen home
+        run: echo "QUEEN_HOME=$RUNNER_TEMP/queen-live-home" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
