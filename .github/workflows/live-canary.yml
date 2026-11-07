@@ -6,7 +6,7 @@ name: live canary (keyless local model)
 # nothing here is billable. See docs/LIVE_CANARY.md.
 on:
   push:
-    branches: [main, claude/canary-system-prompt]   # TEMP: one verification run; removed before review
+    branches: [main]
   workflow_dispatch:
 
 permissions:
