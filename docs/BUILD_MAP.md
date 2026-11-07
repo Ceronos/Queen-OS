@@ -169,6 +169,8 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python â‰
 
 CI admission for this provider work is separated into offline push/PR checks and a manually authorized live workflow; see `LIVE_INFERENCE.md`. The gate script has synthetic-metadata tests only and is not independent containment acceptance.
 
+Offline interruption/reopen regression contracts now cover the existing ledger and leases; see `RECOVERY_CONTRACT.md`. These tests do not implement M1 projection/capsule recovery or establish process containment.
+
 
 ## Milestones (top-down from the software core)
 

@@ -95,3 +95,18 @@ Unit suite: 89 passed. CI: 9/9 OS×Python green.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+---
+
+## 2026-11-07 · Sage/Codex · Offline ledger recovery contracts
+
+**Scope:** owner-requested contribution after the separate CI safeguard (PR #3), stacked on its exact commit `174f36a95473201c5717725ac42140fa05a1fd8f`. No production source, live inference, runtime settings or service changes.
+
+- Added five offline cases: lease/event rollback after both INSERTs under RuntimeError and KeyboardInterrupt; committed append surviving failed post-write readback; expired/superseded fence rejection across clean reopen; invalid payload rejection preserving sequence/lease with regressed-clock restart. Generated local keys, real SQLite and signature verification; work payloads are fixtures.
+- A post-commit caller exception leaves a discoverable committed effect. The contract requires stored-evidence reconciliation before retry; a payload operation ID does not itself enforce uniqueness. No automatic retry or exactly-once claim was added.
+- Local validation: **115 offline tests passed**, versus 110 before this contribution. Ruff/format and package mypy passed on Linux / Python 3.12.3. The CI safeguard's nine OS/Python jobs passed in run 42370239866; this contribution's own cross-platform checks remain to be observed.
+- Limits: injected Python exceptions and clean connection reopen are not process-kill/power-loss tests, actor authorization, OS containment or independent acceptance. The research NO-GO is unchanged. See `docs/RECOVERY_CONTRACT.md` for reproduction and remaining implementation contracts.
+- Next: review the CI safeguard first, then these tests; continue TaskEgg/capability/worker integration against the existing store, with explicit uncertain-effect and idempotency contracts before retries.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
