@@ -60,6 +60,68 @@ def cmd_tail(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_providers(_: argparse.Namespace) -> int:
+    from queen_os.providers.registry import PRESETS, base_url_for, resolve_credential
+    from queen_os.secrets import SecretStore
+
+    store = SecretStore(default_home())
+    for name, preset in sorted(PRESETS.items()):
+        try:
+            cred = resolve_credential(preset, store)
+        except PermissionError as exc:
+            status = f"ERROR {exc}"
+        else:
+            if cred is not None:
+                status = f"key {cred.fingerprint} ({cred.source})"
+            else:
+                status = f"no key ({preset.key_env[0]})" if preset.key_required else "no key needed"
+        print(f"{name:<11} {preset.kind:<6} {base_url_for(preset):<48} {status}")
+    return 0
+
+
+def cmd_infer(args: argparse.Namespace) -> int:
+    from queen_os.providers import InferenceRequest, Message, build
+    from queen_os.providers.receipt import Inference
+    from queen_os.secrets import SecretStore
+
+    provider = build(args.provider, SecretStore(default_home()), args.base_url)
+    request = InferenceRequest(
+        args.model, (Message("user", args.prompt),), args.system, args.max_tokens, args.temperature
+    )
+    with Hive.open(Path(args.hive)) as hive:
+        witnessed = Inference(hive).run(provider, request, actor="cli")
+    print(witnessed.result.text)
+    r = witnessed.receipt
+    print(
+        f"\n[receipt seq={r.seq} hash={r.hash[:16]} lineage={r.payload['lineage']} "
+        f"latency={r.payload['latency_ms']}ms tokens={r.payload['input_tokens']}/{r.payload['output_tokens']}]",
+        file=sys.stderr,
+    )
+    return 0
+
+
+def cmd_secrets(args: argparse.Namespace) -> int:
+    import getpass
+
+    from queen_os.secrets import SecretStore
+
+    store = SecretStore(default_home())
+    if args.action == "set":
+        value = getpass.getpass(f"{args.name} (input hidden): ").strip()
+        if not value:
+            print("empty value; nothing stored", file=sys.stderr)
+            return 1
+        print(f"stored {args.name} in {store.set(args.name, value)}")
+    elif args.action == "delete":
+        store.delete(args.name)
+        print(f"deleted {args.name}")
+    else:
+        for name in store.names():
+            secret = store.get(name)
+            print(f"{name} {secret.fingerprint if secret else '-'}")
+    return 0
+
+
 def cmd_info(_: argparse.Namespace) -> int:
     print(
         json.dumps(
@@ -98,6 +160,23 @@ def build_parser() -> argparse.ArgumentParser:
     t.set_defaults(func=cmd_tail)
 
     sub.add_parser("info", help="environment report").set_defaults(func=cmd_info)
+    sub.add_parser("providers", help="list model providers and credential status").set_defaults(func=cmd_providers)
+
+    inf = sub.add_parser("infer", help="run one witnessed inference (receipt goes to the ledger)")
+    inf.add_argument("provider")
+    inf.add_argument("model")
+    inf.add_argument("prompt")
+    inf.add_argument("--hive", default=str(default_home()))
+    inf.add_argument("--system")
+    inf.add_argument("--max-tokens", type=int, default=512)
+    inf.add_argument("--temperature", type=float)
+    inf.add_argument("--base-url")
+    inf.set_defaults(func=cmd_infer)
+
+    sec = sub.add_parser("secrets", help="manage API keys (OS keyring or owner-only file; never argv)")
+    sec.add_argument("action", choices=["set", "delete", "list"])
+    sec.add_argument("name", nargs="?")
+    sec.set_defaults(func=cmd_secrets)
     return p
 
 
