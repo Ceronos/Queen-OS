@@ -56,18 +56,41 @@ jobs:
           QUEEN_LIVE_TARGETS: ollama=${{ env.CANARY_MODEL }}
         run: pytest -m live -rs -s tests/live
       - name: CLI path (capability-minted, receipt-signed)
+        id: cli_evidence
         run: |
           H="$RUNNER_TEMP/canary-hive"
           queen init "$H" --node-id canary
           queen host probe --hive "$H"
-          queen infer ollama "$CANARY_MODEL" "Name the insect that builds a comb, in one word." --hive "$H" --max-tokens 16
+          queen infer ollama "$CANARY_MODEL" "Reply with exactly one lowercase word: bee." --hive "$H" --max-tokens 16 --temperature 0.0
           queen ledger verify "$H"
           queen ledger tail "$H" -n 4
           mkdir -p "$RUNNER_TEMP/evidence"
           cp -r "$H/comb" "$H/hive.json" "$RUNNER_TEMP/evidence/"   # never vault/ (private key)
           cp "$RUNNER_TEMP/ollama-version.txt" "$RUNNER_TEMP/evidence/"
+          # Admission to export checks structure/signatures/scope, independent of the answer.
+          python - "$RUNNER_TEMP/evidence" "$RUNNER_TEMP/canary-review.zip" <<'PY'
+          import pathlib
+          import sys
+          import zipfile
+          root = pathlib.Path(sys.argv[1])
+          with zipfile.ZipFile(sys.argv[2], "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+              for item in sorted(root.rglob("*")):
+                  if item.is_file():
+                      bundle.write(item, item.relative_to(root))
+          PY
+          ARCHIVE_SHA=$(sha256sum "$RUNNER_TEMP/canary-review.zip" | cut -d ' ' -f 1)
+          python scripts/verify_smoke_artifact.py "$RUNNER_TEMP/canary-review.zip" --expected-sha256 "$ARCHIVE_SHA"
+          echo "archive_sha256=$ARCHIVE_SHA" >> "$GITHUB_OUTPUT"
+      # Default success gating is intentional: invalid/private bundles never reach upload.
+      # Retain admissible evidence BEFORE the separate answer check can fail the job.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: canary-evidence-${{ github.sha }}
           path: ${{ runner.temp }}/evidence
+          if-no-files-found: error
           retention-days: 30
+      - name: Require expected CLI answer
+        env:
+          EXPECTED_ARCHIVE_SHA: ${{ steps.cli_evidence.outputs.archive_sha256 }}
+        run: |
+          python scripts/verify_smoke_artifact.py "$RUNNER_TEMP/canary-review.zip" --expected-sha256 "$EXPECTED_ARCHIVE_SHA" --expect-word bee
