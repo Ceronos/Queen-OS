@@ -104,6 +104,84 @@ def test_invented_output_with_real_receipt_is_purged(hive: Hive) -> None:
     _assert_purged(hive, egg.egg_id, claim, "output_matches_receipt")
 
 
+@pytest.mark.parametrize(
+    ("model_text", "delivered", "answer_schema"),
+    [
+        ('{"answer":true}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":false}', {"answer": 0}, {"type": "integer"}),
+        ('{"answer":[true]}', {"answer": [1]}, {"type": "array", "items": {"type": "integer"}}),
+        ('{"answer":{"x":true}}', {"answer": {"x": 1}}, {"type": "object"}),
+        ('{"answer":0,"answer":1}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":{"x":0,"x":1}}', {"answer": {"x": 1}}, {"type": "object"}),
+        ('{"answer":0,"\\u0061nswer":1}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":NaN,"answer":1}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":Infinity,"answer":1}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":-Infinity,"answer":1}', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":1e400}', {"answer": 0}, {"type": "integer"}),
+        ('{"answer":1', {"answer": 1}, {"type": "integer"}),
+        ('```json\n{"answer":1}\n```', {"answer": 1}, {"type": "integer"}),
+        ('{"answer":' + "[" * 1200 + "0" + "]" * 1200 + "}", {"answer": []}, {"type": "array"}),
+    ],
+    ids=[
+        "true-to-one",
+        "false-to-zero",
+        "nested-array-type",
+        "nested-object-type",
+        "duplicate-key",
+        "nested-duplicate",
+        "escaped-duplicate",
+        "shadowed-nan",
+        "shadowed-infinity",
+        "shadowed-negative-infinity",
+        "overflow",
+        "truncated",
+        "fenced-json",
+        "too-deep",
+    ],
+)
+def test_qos_0032_ambiguous_or_changed_json_is_purged(
+    hive: Hive, model_text: str, delivered: dict[str, Any], answer_schema: dict[str, Any]
+) -> None:
+    schema = {
+        "type": "object",
+        "properties": {"answer": answer_schema},
+        "required": ["answer"],
+        "additionalProperties": False,
+    }
+    egg = lay(hive, "g", "diploid", {"q": "signed fixture only"}, schema, stimulus=0.9)
+    claim = run_worker(hive, model_text, deliver=delivered)
+    _assert_purged(hive, egg.egg_id, claim, "output_matches_receipt")
+    assert (hive.root / "quarantine" / f"{egg.egg_id}.json.quarantine").exists()
+    assert hive.ledger.verify_chain(require_signatures=True) > 0
+
+
+@pytest.mark.parametrize(
+    ("model_text", "delivered"),
+    [
+        (' { "answer" : 1.0 } ', {"answer": 1}),
+        ('{"answer":true}', {"answer": True}),
+        ('{"answer":false}', {"answer": False}),
+        ('{"answer":null}', {"answer": None}),
+        ('{"answer":{"z":2,"a":1}}', {"answer": {"a": 1, "z": 2}}),
+    ],
+    ids=["numeric-equivalence", "true", "false", "null", "key-order"],
+)
+def test_qos_0032_unambiguous_canonical_equivalents_hatch(
+    hive: Hive, model_text: str, delivered: dict[str, Any]
+) -> None:
+    schema = {
+        "type": "object",
+        "properties": {"answer": {}},
+        "required": ["answer"],
+        "additionalProperties": False,
+    }
+    egg = lay(hive, "g", "diploid", {"q": "signed fixture only"}, schema, stimulus=0.9)
+    run_worker(hive, model_text, deliver=delivered)
+    decision = Gate(hive).review(egg.egg_id)
+    assert decision.verdict == "hatched" and decision.failed == ()
+    assert hive.ledger.verify_chain(require_signatures=True) > 0
+
+
 def test_unwitnessed_output_is_purged(hive: Hive) -> None:
     egg = lay_strict(hive)
     claim = run_worker(hive, "", deliver={"answer": "bee"}, infer=False)
