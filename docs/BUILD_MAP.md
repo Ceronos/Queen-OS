@@ -1,6 +1,6 @@
 # Queen-OS V5 Build Map
 
-**Status:** v0.1, 2026-11-07. Written at the start of the V5 build.
+**Status:** v0.2, 2026-11-07. v0.1 at the start of the V5 build; v0.2 adds the Pillar 1 spec review.
 **Purpose:** list every concept in the Queen-OS V1–V4 blueprint corpus, sort each one by what a
 software harness can actually run, and map it to a V5 module. V5 is the unified,
 non-simulated harness. Anything in Tier 1 that is not built is a gap. Anything in Tier 3 or
@@ -14,7 +14,7 @@ Tier 4 that is ever presented as working is a Non-Simulation Contract violation.
 | Pillar 2 Deep-Dive (AF-SPEC-2026-QOS-P2) | `1jg_ppQX…` | full |
 | V1 Spec + V2 Production Blueprint (PDF) | `1bB16guQ…` | five-plane topology + V1→V2 remedy table |
 | AF-REMEDY-V1 (PDF) | `1NN-y4Ht…` | Ch.1 in full, §3.4 |
-| Pillar 1 (Section 1 & Pillar 1) | `1XGDDEnN…` | **empty doc (1 KB) — flag to owner** |
+| Pillar 1 Technical Specification (2026-11-07) | `1cw1oEw6…` | full (supersedes the empty `1XGDDEnN…`) |
 | V4 Treatise, V4 Phase 6, Execution Stacks, Deployment docs, Robotics, Unison-Bio, 6.5 MB Master Compilation | — | **not yet read**. Planned for v0.2. |
 
 Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python ≥3.11, ~10.9k `.py` files).
@@ -122,6 +122,18 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | NUMA caste zones A–D, core pinning (Thesis §3.2) | T2 | `os.sched_setaffinity` (Linux), `SetProcessAffinityMask` (Windows). macOS has no affinity API, so it is a no-op that reports `UNAVAILABLE`. | `host/affinity.py` | M3 |
 | BMC out-of-band audit, PTP ±10 ns | T2 / infra | Out of scope for the harness binary. Documented as deployment prerequisites for the Enclave profile. | docs | — |
 
+#### Pillar 1 spec review (v0.2): corrections V5 adopts
+
+| Pillar 1 claim | Defect | V5 rule |
+|---|---|---|
+| `verify_ptp_clock_drift()` returns `True` with *"Nominal clock lock assumed in test environment"* when `/sys/class/ptp/ptp0` is missing | **Breaks the spec's own Non-Simulation Contract**: an absent sensor is reported as a pass. | A missing PTP device reports `UNAVAILABLE`. The hive records clock discipline as `system` vs `ptp` in genesis. Nothing assumes a lock. |
+| PCR digest = SHA-256 of `tpm2_pcrread` **stdout text** | The digest depends on the tool's output format, which differs between tpm2-tools versions and locales. A tools upgrade looks like a firmware attack. | Hash the raw PCR values (bank, index, bytes) in canonical JCS. |
+| Ed25519 host key "derived inside the TPM" | Most deployed TPM 2.0 parts implement NIST P-256 (and RSA), not Ed25519. | Either a TPM-resident P-256 attestation key, or an Ed25519 key **sealed** to a PCR policy and unsealed only on matching PCRs. Both are T2 providers. |
+| `seed_capsule.py` uses stdlib only | Sound. Keep it. | `host/probe.py` imports stdlib only, so it can run before dependencies are installed. |
+| "Direct bare-metal Ring-0 execution" | A Python userspace harness never runs in Ring 0. | The harness runs in userspace. Kernel/firmware hardening is a deployment-profile document, not harness code. |
+| BMC "subverted into sovereign system controllers" | Firmware ownership is outside a harness. | Read-only BMC/IPMI health probe (T2) at most. |
+| cgroups v2 slices per caste, `CPUSchedulingPolicy=rr` | Real, but Linux + systemd only. | `deploy/systemd/` unit templates for the Enclave profile (T2). Workers report their zone. |
+
 ### Plane 6 — Model & Tool Edge (from Hermes)
 
 | Concept | Tier | V5 realization | Source in Hermes | Milestone |
@@ -172,8 +184,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 ## Open questions for the owner
 
-1. The Pillar 1 doc (`1XGDDEnN…`) is empty. Is there another copy?
-2. A license is needed before the repo takes outside contributions (no license = all rights reserved).
-   Hermes is MIT, so any code we port carries its notice in `NOTICE`.
-3. Which provider keys exist for the M1 exit test and the 2-of-3 quorum (needs ≥3 distinct lineages,
-   e.g. OpenAI, Google, Anthropic, or one local model)?
+1. ~~Pillar 1 doc empty~~. Resolved: `1cw1oEw6…` (2026-11-07).
+2. ~~License~~. Resolved: proprietary, source-visible (`LICENSE`).
+3. ~~Provider keys~~. Resolved: keys stay out of the repo. Live tests read them from GitHub Actions
+   encrypted secrets or the user's OS keyring. See `docs/SECRETS.md`.
