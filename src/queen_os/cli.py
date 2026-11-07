@@ -142,6 +142,33 @@ def cmd_host_probe(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eggs(args: argparse.Namespace) -> int:
+    from queen_os.comb.projection import fold_eggs, ready
+
+    with Hive.open(Path(args.hive)) as hive:
+        eggs = fold_eggs(hive.ledger)
+        ready_ids = {e.egg_id for e in ready(eggs)}
+        for e in sorted(eggs.values(), key=lambda v: v.laid_seq):
+            flag = "ready" if e.egg_id in ready_ids else ""
+            detail = f"stimulus={e.stimulus:.2f} goal={e.goal_id} parents={len(e.parents)}"
+            print(f"{e.egg_id}  {e.state:<9} {flag:<5} {detail}")
+    return 0
+
+
+def cmd_gate_review(args: argparse.Namespace) -> int:
+    from queen_os.gate.gate import Gate
+
+    with Hive.open(Path(args.hive)) as hive:
+        d = Gate(hive).review(args.egg_id)
+    print(
+        json.dumps(
+            {"egg_id": d.egg_id, "evidence_sha": d.evidence_sha, "failed": list(d.failed), "verdict": d.verdict},
+            indent=2,
+        )
+    )
+    return 0 if d.verdict == "hatched" else 3
+
+
 def cmd_info(_: argparse.Namespace) -> int:
     print(
         json.dumps(
@@ -180,6 +207,17 @@ def build_parser() -> argparse.ArgumentParser:
     t.set_defaults(func=cmd_tail)
 
     sub.add_parser("info", help="environment report").set_defaults(func=cmd_info)
+    eg = sub.add_parser("eggs", help="list task eggs and their lifecycle state (ledger fold)")
+    eg.add_argument("--hive", default=str(default_home()))
+    eg.set_defaults(func=cmd_eggs)
+
+    gate = sub.add_parser("gate", help="verification gate")
+    gsub = gate.add_subparsers(dest="gate_cmd", required=True)
+    gr = gsub.add_parser("review", help="verify a delivered egg: hatch, purge (oophagy) or hold")
+    gr.add_argument("egg_id")
+    gr.add_argument("--hive", default=str(default_home()))
+    gr.set_defaults(func=cmd_gate_review)
+
     host = sub.add_parser("host", help="host hardware providers")
     hsub = host.add_subparsers(dest="host_cmd", required=True)
     hp = hsub.add_parser("probe", help="honest hardware probe; with --hive, records a signed host.probe event")

@@ -56,19 +56,33 @@ class Enclaves:
         return write_verified(self.root / "staging" / safe_name(name), data)
 
     def promote(self, name: str, expected_sha: str) -> Path:
-        """staging → committed, only if the bytes still match the digest the gate approved."""
+        """staging → committed, only with the exact bytes the gate approved (QOS-0009).
+
+        1. Read staging once and hash it, so the approved digest refers to *these* bytes.
+        2. Write those bytes (not the file, which could still change) to a temp file in committed/.
+        3. Publish with ``os.link``: atomic and **no-replace** on POSIX and NTFS. If two promoters race,
+           exactly one wins, and an existing committed artifact can never be overwritten.
+        4. Re-read and verify, mark read-only, then remove the staging copy.
+        """
         src = self.root / "staging" / safe_name(name)
         dst = self.root / "committed" / name
-        if dst.exists():
-            raise EnclaveViolation(f"committed/{name} already exists; committed state is immutable")
-        actual = sha256_hex(src.read_bytes())
+        data = src.read_bytes()
+        actual = sha256_hex(data)
         if actual != expected_sha:
             raise DigestDivergence(f"staging/{name} changed after approval: {actual} != {expected_sha}")
-        os.replace(src, dst)
+        tmp = self.root / "committed" / f".promote-{os.getpid()}-{os.urandom(6).hex()}.tmp"
+        write_verified(tmp, data, expected_sha=expected_sha)
+        try:
+            os.link(tmp, dst)
+        except FileExistsError:
+            raise EnclaveViolation(f"committed/{name} already exists; committed state is immutable") from None
+        finally:
+            tmp.unlink(missing_ok=True)
         fsync_dir(dst.parent)
         if sha256_hex(dst.read_bytes()) != expected_sha:
             raise DigestDivergence(f"committed/{name} diverged after promotion")
         os.chmod(dst, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
+        src.unlink(missing_ok=True)
         return dst
 
     def quarantine(self, name: str, enclave: str = "staging") -> Path:

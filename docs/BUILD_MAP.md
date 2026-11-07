@@ -63,7 +63,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 |---|---|---|---|---|
 | QueenStore append-only hash-chained ledger from `GENESIS_ROOT_0000000000000000` (Thesis §4.3) | T1 | SQLite WAL, `BEGIN IMMEDIATE` serialized appends, SHA-256 chain, full-chain verifier; failed-COMMIT/automatic-rollback cleanup with primary-error preservation | `comb/ledger.py` | **M0 ✅** |
 | HLC `(L, C, node_id)` causal ordering (Thesis §4.3) | T1 | HLC persisted in the ledger so it stays monotonic across restarts. L is the system clock; PTP is optional host infra (T2). | `comb/hlc.py` | **M0 ✅** |
-| State = deterministic fold of the event ledger (Thesis §4.3) | T1 | Pure projection functions over events. Rebuildable at any time. | `comb/projection.py` | M1 |
+| State = deterministic fold of the event ledger (Thesis §4.3) | T1 | Pure projection functions over events. Rebuildable at any time. | `comb/projection.py` | **M1 ✅** (#11, eggs) |
 | Content-addressed blob store (REMEDY §1.2) | T1 | `blobs/ab/<sha256>` with tmp + fsync + atomic replace + read-back verify | `comb/blobs.py` | **M0 ✅** |
 | Atomic leases + monotonic fencing tokens (V2 remedy table) | T1 | Lease table plus signed grant/renew/release events with post-commit event readback. Positive integer durations; fenced appends reject stale holders. | `comb/leases.py` | **M0 ✅** |
 | 5-tier spatial enclaves `/workspace /staging /committed /quarantine /vault` (Thesis §4.2) | T1 | Per-hive directory tree with in-process policy. Committed files are made read-only, quarantine is a no-exec convention, and vault holds keys. | `comb/enclaves.py` | **M0 ✅** (paths + promote/quarantine) |
@@ -79,7 +79,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 |---|---|---|---|---|
 | Oviposition Engine: goal → Task DAG (Thesis §5.1) | T1 | A strategic model decomposes the goal into a DAG, which is validated, signed and written to the ledger | `queen/oviposition.py` | M1 |
 | TaskEgg 7-tuple ⟨ID, Ploidy, Input, Schema, Tools, Stimulus, Signature⟩ (Thesis §5.1) | T1 | Frozen dataclass, JCS-canonical, Ed25519-signed. `goal_id`/`parents` make a DAG that is acyclic by construction. Input ≤ 8,000 canonical bytes (≈2k tokens). JSON Schema 2020-12, strict object schema for diploid. | `queen/egg.py` | **M1 ✅** |
-| Bresslau's Valve: risk G → diploid (T≤0.2, strict schema) / haploid (T≥0.9) (Thesis §5.3) | T1 | Risk scorer (rules first, model optional) → execution profile | `queen/valve.py` | M1 |
+| Bresslau's Valve: risk G → diploid (T≤0.2, strict schema) / haploid (T≥0.9) (Thesis §5.3) | T1 | Risk scorer (rules first, model optional) → execution profile | `queen/valve.py` | **M1 ✅** (#11) |
 | Dual-brain: fast subconscious + strategic model (Thesis §6.1) | T1 | **Routing** between a fast/local model and a strategic model. The specific nets (Mamba `nox_soul.pt`, Gemma 4 MoE) are config, not code. | `queen/brains.py` | M2 |
 | Spermathecal Vault: SLERP/TIES LoRA merging on demand (Thesis §5.2) | T3 | Model *registry* is T1. Weight-space merging is an offline tool via a mergekit adapter, run as an experiment. Merged weights only become usable after the eval gate passes. | `vault/registry.py`, `experiments/merge/` | M4 |
 | Supersedure / emergency requeening, sub-500 ms failover (V1 plane 5) | T1 | Queen is a lease holder. A standby takes over on lease expiry, and the fencing token prevents split-brain. Real failover latency is measured, not claimed. | `queen/succession.py` | M3 |
@@ -89,7 +89,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 | Concept | Tier | V5 realization | Module | Milestone |
 |---|---|---|---|---|
-| Page-Robinson stimulus-response claim + work stealing (Thesis §5.3) | T1 | Workers poll stimulus scores and claim through a fenced lease. Idle workers steal from neighbouring cells. | `workers/claim.py` | M1 |
+| Page-Robinson stimulus-response claim + work stealing (Thesis §5.3) | T1 | Workers poll stimulus scores and claim through a fenced lease. Idle workers steal from neighbouring cells. | `workers/claim.py` | **M1 ✅** (#11; work-stealing by lease contention) |
 | Age-Polyethic State Machine driven by context use τ (Thesis §5.3) | T1 | Role state machine (Nurse→Maintenance→Forager→Vigil) driven by measured context utilization. Triggers compaction. | `workers/apsm.py` | M2 |
 | H2O KV compaction / RadixAttention pruning | T3 | Server-side inference internals. The harness-side analogue is context compaction plus prefix-cache-preserving prompt layout (copied from Hermes's "prompt cache is sacred" invariant). | `workers/context.py` | M2 |
 | Process isolation of workers | T1 / T2 | Subprocess workers on every OS. Landlock/seccomp (Linux), Job Objects (Windows) and sandbox-exec (macOS) are T2 providers. | `host/sandbox_*.py` | M3 |
@@ -100,11 +100,11 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Concept | Tier | V5 realization | Module | Milestone |
 |---|---|---|---|---|
 | AF-SER-V1 canonicalization + 6-step post-write fetch (P2 §4) | T1 | Real RFC 8785 JCS (UTF-16 key order, ES6 number format). Non-NFC strings are **rejected** rather than silently normalized, so data is never mutated. Post-write fetch is applied to blobs, enclave promotion and ledger rows. | `serial/jcs.py`, `serial/afser.py` | **M0 ✅** |
-| VerificationGate staging→committed (P2 §3) | T1 | Append-only gate state machine. Promotion only with a passing evidence pack. | `gate/gate.py` | M1 |
-| ADR-143 Evidence Packs (P2 §3.2) | T1 | Schema + collectors (exit code, runtime, digests, pytest, ruff, radon CC, mutmut). **Thresholds are per-profile config.** The 98.4% mutation / CC≤5 values ship as the `sovereign` profile, not the default, because a universal CC≤5 rule would reject most real code. | `gate/evidence.py` | M1 |
+| VerificationGate staging→committed (P2 §3) | T1 | Append-only gate state machine. Promotion only with a passing evidence pack. | `gate/gate.py` | **M1 ✅** (#12: deterministic checks, receipt binding, fenced hatch/purge/hold) |
+| ADR-143 Evidence Packs (P2 §3.2) | T1 | Schema + collectors (exit code, runtime, digests, pytest, ruff, radon CC, mutmut). **Thresholds are per-profile config.** The 98.4% mutation / CC≤5 values ship as the `sovereign` profile, not the default, because a universal CC≤5 rule would reject most real code. | `gate/evidence.py` | **partial** (#12: JSON-output checks; code checks QOS-0029) |
 | InferenceReceipts (REMEDY §1.1) | T1 | Emitted by every provider adapter and host-signed. Raw bytes are stored, every claim is re-derivable, and fixtures are refused in production. | `providers/receipt.py` | **M1.3 ✅** |
 | Tri-Sovereign heterogeneous 2-of-3 quorum (REMEDY §1.4) | T1 | Quorum across *distinct* provider lineages, enforced by lineage id. Invoked by Bresslau risk so cost scales with G. | `gate/quorum.py` | M2 |
-| Atomic Oophagy → /quarantine + signed receipt (Thesis §7.3) | T1 | `os.replace` into quarantine, signed tombstone event, worker termination | `gate/oophagy.py` | M1 |
+| Atomic Oophagy → /quarantine + signed receipt (Thesis §7.3) | T1 | `os.replace` into quarantine, signed tombstone event, worker termination | `gate/oophagy.py` | **M1 ✅** (#12: quarantine + capability revocation + signed `egg.purged`) |
 | Multi-channel alerts + disk DLQ (P2 §5.2) | T1 | Async dispatcher (webhook/Slack/Discord/PagerDuty/SMTP), JSONL DLQ, exponential backoff | `alerts/` | M3 |
 | Two-Arm control tests (P2 §6) | T1 | Every security boundary gets a negative-control test that must fail closed | `tests/two_arm/` | ongoing |
 
