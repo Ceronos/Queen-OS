@@ -161,6 +161,6 @@ Thelio Astra. Keep building operations. The owner offered an Anthropic key for C
 | `Inference.run` requires a capability. Receipts bind token + spend (QOS-0014). | receipt tests updated. The CLI mints a one-call operator token per `queen infer`. |
 | TaskEgg 7-tuple (`queen/egg.py`) | DAG by construction, 8 malformed-egg arms, 4 tamper arms, foreign-issuer arm, idempotent re-lay |
 
-Local: **147 passed** (Linux/py3.13), ruff + mypy --strict clean. CI: see PR #5.
+Local: **147 passed** (Linux/py3.13), ruff + mypy --strict clean. CI: 12/12 green (ubuntu x64, ubuntu ARM64, Windows, macOS × py3.12–3.14) after a Windows-only mypy fix.
 
 Agent: Claude (Opus 5.5) · Claude-Session: session_01H8L4suEA6LERLtdVM52b3A

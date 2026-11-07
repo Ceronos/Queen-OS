@@ -25,7 +25,7 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0008 | S3 | open | — | C | Providers are text-only: no streaming, tool calls or structured output. Diploid strict-schema eggs need structured output (M1.5). |
 | QOS-0009 | S2 | open | — | C | The `Enclaves.promote` exists-check then `os.replace` is a TOCTOU race. On Windows `os.replace` overwrites, so two promoters could race. It needs a fenced lease or an atomic no-replace link. |
 | QOS-0010 | S2 | open | — | C | HLC wall time comes from the local clock with no drift bound. A node whose clock jumps far ahead pins every successor's L to that value. No max-skew guard exists (Pillar 1 assumed PTP). |
-| QOS-0011 | S3 | open | — | C | The ARM64 Linux target (Thelio Astra / Ampere Altra) had no CI coverage. |
+| QOS-0011 | S3 | **fixed** (#5, run 42371711017+) | Claude | C | The ARM64 Linux target (Thelio Astra / Ampere Altra) had no CI coverage. `ubuntu-24.04-arm` × 3 Pythons is now green. |
 | QOS-0012 | S3 | **fixed** (this PR) | Claude | C | Absent hardware (TPM/PTP/NUMA) had no honest probe. Pillar 1's own probe reports a missing PTP device as a pass. |
 | QOS-0013 | S4 | owner-decision | — | S | Sage's notes cite an existing "research NO-GO / real-agent NO-GO" decision that is not recorded in this repo. Its text and scope need to be recorded here. |
 | QOS-0014 | S3 | **fixed** (this PR) | Claude | C | `verify_receipt` re-derived fields from raw bytes, but nothing tied the call to the capability that authorized it. Receipts now carry `token_id` + `spend_seq`, which are verified against a prior `capability.spent` for the same provider/model. |
