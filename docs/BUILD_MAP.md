@@ -102,7 +102,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | AF-SER-V1 canonicalization + 6-step post-write fetch (P2 §4) | T1 | Real RFC 8785 JCS (UTF-16 key order, ES6 number format). Non-NFC strings are **rejected** rather than silently normalized, so data is never mutated. Post-write fetch is applied to blobs, enclave promotion and ledger rows. | `serial/jcs.py`, `serial/afser.py` | **M0 ✅** |
 | VerificationGate staging→committed (P2 §3) | T1 | Append-only gate state machine. Promotion only with a passing evidence pack. | `gate/gate.py` | M1 |
 | ADR-143 Evidence Packs (P2 §3.2) | T1 | Schema + collectors (exit code, runtime, digests, pytest, ruff, radon CC, mutmut). **Thresholds are per-profile config.** The 98.4% mutation / CC≤5 values ship as the `sovereign` profile, not the default, because a universal CC≤5 rule would reject most real code. | `gate/evidence.py` | M1 |
-| InferenceReceipts (REMEDY §1.1) | T1 | Emitted by every provider adapter and host-signed | `providers/receipt.py` | M1 |
+| InferenceReceipts (REMEDY §1.1) | T1 | Emitted by every provider adapter and host-signed. Raw bytes are stored, every claim is re-derivable, and fixtures are refused in production. | `providers/receipt.py` | **M1.3 ✅** |
 | Tri-Sovereign heterogeneous 2-of-3 quorum (REMEDY §1.4) | T1 | Quorum across *distinct* provider lineages, enforced by lineage id. Invoked by Bresslau risk so cost scales with G. | `gate/quorum.py` | M2 |
 | Atomic Oophagy → /quarantine + signed receipt (Thesis §7.3) | T1 | `os.replace` into quarantine, signed tombstone event, worker termination | `gate/oophagy.py` | M1 |
 | Multi-channel alerts + disk DLQ (P2 §5.2) | T1 | Async dispatcher (webhook/Slack/Discord/PagerDuty/SMTP), JSONL DLQ, exponential backoff | `alerts/` | M3 |
@@ -116,6 +116,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Smallest Justified Action rule | T1 | Policy constraint: proposals carry a blast-radius estimate, and the smallest one is preferred | `sage/policy.py` | M2 |
 | `BEGIN_MGC_PAYLOAD` sealed canonical envelopes | T1 | Envelope codec over JCS bytes | `serial/envelope.py` | M1 |
 | Tripartite Authority, capability-token TaskContracts (REMEDY §1.5) | T1 | Ed25519-signed capability tokens. Tool dispatch checks the grant. Model text is never consulted. | `authority/` | M1 |
+| Credential custody (Resource Custody branch, REMEDY §1.5) | T1 | env → OS keyring → owner-only `secrets.env` (refused inside a git worktree). Fingerprints only. Redaction, plus a repo credential scan in CI. | `secrets.py` | **M1.3 ✅** |
 | Dufour Ed25519 origin signatures (Thesis §5) | T1 | Host and queen keys, event signing | `crypto/keys.py` | **M0 ✅** (keys, sign/verify) |
 | AF-CHARTER 2-of-2 multisig with YubiKey (Thesis §1) | T2 | The multisig *protocol* is T1 (two Ed25519 keys). FIDO2/YubiKey key storage is a T2 key provider. | `authority/multisig.py`, `host/fido2.py` | M3 |
 | TPM 2.0 PCR 0–14 attestation (Thesis §3.1) | T2 | Linux `tpm2_pcrread`, Windows `Get-PcrValue`/TBS. macOS has no TPM (Secure Enclave only) and reports `UNAVAILABLE`. | `host/tpm.py` | M3 |
@@ -138,7 +139,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 | Concept | Tier | V5 realization | Source in Hermes | Milestone |
 |---|---|---|---|---|
-| Any-model provider adapters | T1 | OpenAI-compatible (covers OpenRouter/vLLM/Ollama/llama.cpp), Anthropic, Gemini, behind one adapter ABC | `agent/*_adapter.py`, `providers/` | M1 |
+| Any-model provider adapters | T1 | Raw-HTTP codecs: Anthropic, OpenAI, Gemini, Ollama, and OpenAI-compatible (LM Studio, vLLM, llama.cpp, OpenRouter, Groq, DeepSeek, xAI, Mistral, Together, Fireworks, Cerebras, Nous). Lineage is keyed by model family. Streaming and tool calls come in M1.5. | `agent/*_adapter.py`, `providers/` | **M1.3 ✅** (text) |
 | Tool registry + toolsets | T1 | Tools bound to capability tokens | `model_tools.py`, `toolsets.py` | M1 |
 | MCP client (Adaptive Interface Discovery) | T1 | MCP tools with AST/schema drift checks (`verify_schema_drift`) | `tools/mcp_tool.py` | M2 |
 | Skills (procedural memory) | T1 | Skills are ledger-tracked artifacts. A skill only becomes `committed` after passing the gate. | `skills/` | M2 |

@@ -43,3 +43,39 @@ Append-only. One entry per working session. Newest at the bottom.
 1. Pillar 1 Google Doc is empty (1 KB).
 2. License choice.
 3. Provider keys available for M1 (needs ≥ 3 lineages for the 2-of-3 quorum).
+
+---
+
+## 2026-11-07 · Session 001 (cont.) · License, Pillar 1, M1.3 providers
+
+**Owner answers:** Pillar 1 has a new doc (`1cw1oEw6…`, read in full). License is proprietary, like
+mainstream harnesses. Integrations should cover all major APIs plus Ollama/LM Studio. Private keys must never touch the public repo.
+
+### Decisions
+- `LICENSE`: proprietary, source-visible, all rights reserved. Hermes MIT text is kept in `NOTICE` for future ports.
+  Not legal advice. The owner should have counsel review it before commercial distribution.
+- Build map v0.2: Pillar 1 review table. The spec's PTP probe returns `True` when no PTP device is present,
+  which breaks its own Non-Simulation Contract. Its PCR digest hashes tool stdout. Its TPM Ed25519 claim does
+  not hold for most TPMs. V5 corrections are recorded there.
+- Providers speak raw HTTP (no SDKs) so receipts can hash the exact wire bytes.
+- Quorum lineage is keyed by **model family**, not host.
+- Vendor `*_BASE_URL` variables are deliberately ignored. `QUEEN_<P>_BASE_URL` is the override.
+- **"Use your API" for tests:** this Claude session has no Anthropic API key it can give to the repo,
+  and must not have one. Session credentials are not transferable and would breach the no-private-keys rule.
+  Live hosted-API tests read `ANTHROPIC_API_KEY` etc. from **GitHub encrypted secrets** that the owner adds.
+  Until then they are reported SKIPPED. Real inference is proven today through Ollama in CI.
+
+### Built (PR #2, stacked on #1)
+| Module | Proof |
+|---|---|
+| `providers/` codecs ×4 + 12 OpenAI-compatible presets | codec tests against documented shapes. Every preset builds. Lineage table (13 cases). |
+| `providers/receipt.py` | signed receipt, re-derivation, 5 two-arm failures (fixture in prod, forged hash, corrupted bytes, mode flip, echoed key) |
+| `secrets.py` + `queen secrets` | resolution order, 0600, refusal inside a git worktree, no-print, redaction, repo-wide credential scan |
+| live CI | `live / ollama`: real qwen2.5:0.5b in a production hive → answered "bee", receipt re-derived, chain verified (first run hit an Ollama registry 503; retry added, run 42369221244 green) · `live / hosted APIs`: 3 SKIPPED (no secrets yet) |
+
+Unit suite: 89 passed. CI: 9/9 OS×Python green.
+
+### Open
+- Owner: add repository secrets `ANTHROPIC_API_KEY` (+ optional `OPENAI_API_KEY`, `GEMINI_API_KEY`), and
+  optionally the variables `QUEEN_LIVE_*_MODEL`.
+- Pin the Ollama version in CI. Add streaming + tool calls (M1.5).
