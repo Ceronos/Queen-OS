@@ -9,6 +9,7 @@ from queen_os.providers.base import (
     lineage_of,
 )
 from queen_os.providers.registry import PRESETS, FixtureProvider, build
+from queen_os.providers.structured import JsonSchemaOutput, StructuredOutputError
 
 __all__ = [
     "PRESETS",
@@ -16,9 +17,11 @@ __all__ = [
     "FixtureProvider",
     "InferenceRequest",
     "InferenceResult",
+    "JsonSchemaOutput",
     "Message",
     "Provider",
     "ProviderError",
+    "StructuredOutputError",
     "WireCall",
     "build",
     "lineage_of",

@@ -37,6 +37,7 @@ class Preset:
     key_required: bool = True
     max_tokens_field: str = "max_tokens"
     extra_base_env: str | None = None
+    json_schema_output: bool = False
 
 
 PRESETS: dict[str, Preset] = {
@@ -49,6 +50,7 @@ PRESETS: dict[str, Preset] = {
             "https://api.openai.com/v1",
             ("OPENAI_API_KEY",),
             max_tokens_field="max_completion_tokens",
+            json_schema_output=True,
         ),
         Preset("gemini", "gemini", "https://generativelanguage.googleapis.com", ("GEMINI_API_KEY", "GOOGLE_API_KEY")),
         Preset("openrouter", "openai", "https://openrouter.ai/api/v1", ("OPENROUTER_API_KEY",)),
@@ -112,7 +114,14 @@ def build(name: str, store: SecretStore, base_url: str | None = None) -> Provide
         return GeminiProvider(credential, url, name)
     if preset.codec == "ollama":
         return OllamaProvider(url, credential, name)
-    return OpenAICompatibleProvider(name, url, credential, preset.kind, preset.max_tokens_field)
+    return OpenAICompatibleProvider(
+        name,
+        url,
+        credential,
+        preset.kind,
+        preset.max_tokens_field,
+        supports_structured_output=preset.json_schema_output,
+    )
 
 
 # Decoders by codec name, so a stored receipt can be re-derived from its raw bytes.
@@ -156,12 +165,18 @@ class FixtureProvider(Provider):
     *inside* every signed receipt. Production hives refuse to run it.
     """
 
+    supports_structured_output = True
+
     def __init__(self, name: str, replies: list[str]) -> None:
         super().__init__(name, "fixture", "fixture://local", None)
         self._replies = list(replies)
 
     def encode(self, request: InferenceRequest) -> WireCall:
-        body = self.json_body({"model": request.model, "messages": [m.content for m in request.messages]})
+        self.validate_request(request)
+        payload: dict[str, object] = {"model": request.model, "messages": [m.content for m in request.messages]}
+        if request.output is not None:
+            payload["output_schema"] = request.output.schema
+        body = self.json_body(payload)
         return WireCall("POST", f"{self.base_url}/{self.name}", {}, body)
 
     def decode(self, raw: bytes) -> InferenceResult:
@@ -173,4 +188,4 @@ class FixtureProvider(Provider):
             raise RuntimeError("fixture provider has no scripted replies left")
         raw = self.json_body({"text": self._replies.pop(0), "model": request.model})
         call = self.encode(request)
-        return Exchange(call, 200, raw, 0.0, self.decode(raw))
+        return Exchange(call, 200, raw, 0.0, None if request.output is not None else self.decode(raw))
