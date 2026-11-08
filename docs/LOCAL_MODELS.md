@@ -109,3 +109,19 @@ first live witness uses one synthetic request, at most 512 output tokens and no 
 It needs a reachable existing server, exact model/instance/configuration, private producer
 receipts and offline replay; success does not establish planning quality, M1 exit or independent
 containment acceptance. Sol is deferred, with no key, call or allowance change.
+
+
+### Dated candidate qualification — November 8, 2026
+At source fbcd10003bf3c6d0af733ebd98961b1dff237674, PR CI 42501507581 attempt1
+passed all13 jobs, testing merge 5cb3a73a783c3efbc94851f1304478571eba60e7 of main fe95a0f
+and that head. Linux ARM64/macOS sample logs report 520 passed/7 historical-archive skips;
+Windows 3.14 reports 519/8 (the existing POSIX-permission-only case also skips).
+
+The owner's manual local grant was used for a real native unload/load at 2048 context and
+exactly one synthetic structured request bounded to 512 output tokens with no tools/retries.
+Producer state, signed response admission, the fixed-word semantic check and offline receipt
+replay after hive reopen passed. Raw local inventory/runtime evidence remains private and
+is not uploaded to this public repository. The selected model remains loaded at the short
+context. This is one model/server witness, not broad compatibility, planning competence,
+M1 exit or independent acceptance. No additional call is needed to qualify this docs update.
+The final docs-only revision must still have its own CI and unchanged-code coverage checked.

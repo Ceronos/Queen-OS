@@ -42,13 +42,18 @@ contract; Hermes is architectural reference, not an implementation imported here
 
 46 new offline cases; full local **518 passed / 9 skipped** (7 absent historical archives,
 2 local credential-home restrictions). Ruff/format and strict mypy38 pass. Fresh signed hive
-and baseline 472/9 verified before edits. CI and actual local witness results must bind the
-exact PR revision; neither is substituted by this preparation note. See LOCAL_MODELS.md.
+and baseline 472/9 verified before edits. At source commit fbcd10003bf3c6d0af733ebd98961b1dff237674, PR CI 42501507581 attempt1
+passed all13 jobs (tested merge 5cb3a73a783c3efbc94851f1304478571eba60e7). The manually
+authorized real local unload/load and one bounded structured request passed; signed raw-byte
+receipt verification and offline replay after hive reopen passed. Evidence remains private,
+not independently accepted. This final handoff amendment changes docs only; recheck final-head
+CI and code-blob equality before carrying forward the source-revision witness. See LOCAL_MODELS.md.
 
 ## Next actions and standing limits
 
-1. Qualify this candidate's offline matrix at exact head/base; keep private runtime receipts
-   separate and report actual local witness success, failure or UNKNOWN without retry.
+1. Verify final-head CI after the docs-only qualification update and confirm the source/test
+   blobs equal the witnessed fbcd100 revision. The one-request local witness is completed;
+   do not repeat it. Keep private receipts separate from public source.
 2. Obtain a new PR-specific owner merge decision while Claude is unavailable. #21 approval
    does not cover this candidate. Preserve protected signed squash and verify the signature.
 3. Wire a strategic proposal producer through witnessed providers, then prepare the real M1

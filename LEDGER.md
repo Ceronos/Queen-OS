@@ -490,3 +490,28 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-08 · QOS-0040 producer qualification and continuity
+At candidate fbcd10003bf3c6d0af733ebd98961b1dff237674, tree1289a3c9f393ca192b536fd152b823372527a118,
+PR CI 42501507581 attempt1 passed all13 jobs, testing synthetic merge
+5cb3a73a783c3efbc94851f1304478571eba60e7 with parents fe95a0f + fbcd100.
+Sample Linux ARM64/macOS: 520 passed/7 absent historical-archive skips; Windows3.14:519/8,
+including the existing POSIX-permission-only skip. No live PR workflow was triggered.
+
+The owner-authorized manual LM Studio witness executed a real native unload and load at
+2048 context, then exactly one synthetic JSON-schema request bounded to512 output tokens
+with no tools/retries. Signed intent/response/state records, real local v2 inference receipt,
+strict output/word checks and offline replay after hive reopen passed. The production hive
+contains one capability spend and one inference receipt. Private runtime inventory and
+receipts stay outside GitHub; no model identity, raw receipt or local filesystem inventory
+is exported here. The selected model is left ready at the short context. Sol remains deferred.
+
+This establishes the observed producer scope for that source revision, not broad semantic
+ability, M1 exit, independence or containment acceptance. The final qualification handoff
+amendment changes docs only; its own CI and exact code/test blob equality must be checked.
+Do not repeat the completed local request for the docs update. Next: final-head CI/readback,
+new PR-specific owner review/merge decision, then the next bounded planning/worker experiment.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
