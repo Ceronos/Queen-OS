@@ -1,0 +1,79 @@
+name: one-use bounded Sol smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      approved_commit_sha:
+        description: Exact main SHA approved for this one-use test
+        type: string
+        required: true
+      confirm_billable_sol:
+        description: Authorize ONE gpt-6.1-sol request, 1024 total completion tokens, no retries
+        type: boolean
+        required: true
+        default: false
+      confirm_usd_005:
+        description: Authorize at most USD 0.05; fixed synthetic input only
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: bounded-sol-smoke-v1
+  cancel-in-progress: false
+
+jobs:
+  authorize:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - name: Check existing environment and complete lifetime run history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/bounded-sol-smoke.yml/runs?per_page=100" > "$RUNNER_TEMP/runs.json"
+          python scripts/bounded_sol_gate.py "$RUNNER_TEMP/environment.json" "$RUNNER_TEMP/runs.json"
+
+  witness:
+    needs: authorize
+    environment: live-inference
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.13"
+      - run: python -m pip install -e .
+      - name: Recheck admission metadata after any environment approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/environments/live-inference" > "$RUNNER_TEMP/environment.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/bounded-sol-smoke.yml/runs?per_page=100" > "$RUNNER_TEMP/runs.json"
+      - name: One fixed witnessed request
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/bounded_sol_smoke.py live "$RUNNER_TEMP/sol-evidence" --hive "$RUNNER_TEMP/sol-hive" --environment-file "$RUNNER_TEMP/environment.json" --runs-file "$RUNNER_TEMP/runs.json"
+      - name: Offline replay without an inference credential
+        run: python scripts/bounded_sol_smoke.py replay "$RUNNER_TEMP/sol-evidence"
+      - name: Retain public evidence, including received rejection
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bounded-sol-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/sol-evidence
+          retention-days: 14
+          if-no-files-found: warn

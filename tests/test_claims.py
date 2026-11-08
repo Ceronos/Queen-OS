@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 
 import pytest
@@ -92,12 +91,16 @@ def test_invalid_output_is_rejected_before_anything_is_staged(hive: Hive) -> Non
     assert fold_eggs(hive.ledger)[claim.egg.egg_id].state == "delivered"
 
 
-def test_lapsed_worker_cannot_deliver_and_successor_takes_over(hive: Hive) -> None:
+def test_lapsed_worker_cannot_deliver_and_successor_takes_over(hive: Hive, monkeypatch: pytest.MonkeyPatch) -> None:
+    # A 50 ms wall-clock lease can expire during signing/SQLite on a busy runner.
+    # Control only the lease/capability clock; advance it explicitly after a valid claim.
+    now = [hive.ledger.now()]
+    monkeypatch.setattr(hive.ledger, "now", lambda: now[0])
     lay(hive, "g", "diploid", {"q": "x"}, STRICT, stimulus=0.9)
     slow, fast = Worker(hive, "slow"), Worker(hive, "fast")
     stale = slow.claim(ttl_ms=50)
     assert stale is not None
-    time.sleep(0.2)
+    now[0] = stale.lease.expires_ms + 1
     fresh = fast.claim(ttl_ms=5_000)
     assert fresh is not None and fresh.lease.token == stale.lease.token + 1
     with pytest.raises(StaleFence):  # Two-arm: the zombie must not stage or deliver

@@ -343,3 +343,15 @@ Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Publication observation, same session: the browser interface reports unavailable; documented reacquisition failed. Connected Contents API created commit 2d908fb85fe89a2fb0350ef53714a11b0fb7f0cb, verified=false/unsigned. Preserve this observation and prepare the full candidate as a draft for CI/review; do not claim signed publication or weaken main protections. Asked the owner to restore the existing browser tab; no credentials or signing configuration requested.
+
+
+## 2026-11-07 — Sage: bounded Sol witness candidate (QOS-0033)
+
+Owner requested the next bounded test after #16 landed. Prepared a separate one-use main-only workflow with exact revision/owner/consent checks, lifetime first-run and no-rerun admission, expiry, one fixed synthetic structured request to gpt-6.1-sol (1024 completion tokens, no tools/retries), signed receipt custody, no-key export and offline replay. SO-0001 and the generic live workflow are unchanged. USD 0.05 is proposed for explicit owner approval, not a provider billing guarantee. Existing environment protections are preserved; unavailable metadata fails closed. No model or live credential accessed during preparation. All new inference tests are fixture-marked inside signed test-hive receipts. An initial timeout-export missing-directory failure was found and fixed; retain the negative case. Current local baseline: 297 passed, 9 explicit skips (7 private archive cases and 2 credential-home environment limitations); fresh signed test-hive genesis verified. Final candidate evidence is recorded separately after checks. Merge/dispatch, account/secret access and live compatibility remain pending; no independent review or frozen-v65 acceptance is claimed.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+Candidate readback: 26 new offline admission/evidence tests pass; full local suite 323 passed, 9 explicit skips. Ruff check/format and strict mypy pass (34 package files and both new scripts). No live call or dispatch. Cross-platform CI and owner merge/run decision still pending.
+
+CI qualification finding (run 42432759896, Windows/Python 3.13 job 128585040430): existing test_claims lease test expired its 50 ms wall-clock lease during claim binding. All new Sol tests passed. Replaced that test's sleep with a controlled per-ledger lease/capability clock and explicit advance beyond expiry; production code/fencing is unchanged. The nine claim tests pass locally. This preserves the failed run and requires fresh candidate CI, rather than rerunning for a lucky pass.

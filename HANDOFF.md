@@ -2,7 +2,13 @@
 
 _Updated November 7, 2026 by Sage/Codex. The owner reports Claude temporarily unavailable, assigns Sage construction leadership, and confirms no known unpublished QOS-0008 work. Continue from main; preserve Claude's branches and attribution._
 
-## Main and this candidate
+## Bounded Sol candidate on signed main
+
+PR #16 is now landed as Verified signed squash `a6dc117b12479959ed50e0a92df8602628fb5eb5`, tree `edd4017f8dd3e213e6c077b24b6255a9d217b317`. Main CI 42429769412 (13 jobs) and keyless canary 42429769335 passed. Owner separately authorized #16 after Sage qualification; cross-lineage review remained unavailable. The earlier candidate/signing text below is preserved chronology.
+
+Current candidate: QOS-0033, a one-use GPT-6.1 Sol schema/receipt witness. See BOUNDED_SOL_SMOKE.md for the fixed request, 1024 completion-token cap, proposed USD 0.05 allowance, admission/evidence and launch blockers. This preparation performs no live request and does not broaden SO-0001. Owner merge and run approval, exact new main SHA, existing environment/account/secret availability and live result are pending. Resume capsule and oviposition remain the subsequent M1 build work.
+
+## Previous #16 preparation chronology
 
 - Base: `ef74948f63282f915bbcb70fee9e4454c1606757`, Verified squash of #15/QOS-0032. Exact tested tree preserved; main CI 42425715242 and automatic canary 42425715251 passed. Downloaded artifact hash and offline bee replay verified. The owner-review exception was #15 only, not a future-PR waiver.
 - This candidate implements the structured-output portion of **QOS-0008**: immutable portable schemas; four native wire modes; strict validation, raw success/failure custody, v2 receipts and replay; CLI `--json-schema` (received rejection exits 4). See `docs/STRUCTURED_OUTPUT.md` for source contracts and limitations.
