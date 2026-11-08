@@ -198,3 +198,6 @@ The bounded live-smoke acceptance contribution adds an offline signed-artifact v
 2. ~~License~~. Resolved: proprietary, source-visible (`LICENSE`).
 3. ~~Provider keys~~. Resolved: keys stay out of the repo. Live tests read them from GitHub Actions
    encrypted secrets or the user's OS keyring. See `docs/SECRETS.md`.
+
+
+Bounded Sol witness candidate (QOS-0033): `scripts/bounded_sol_gate.py`, `scripts/bounded_sol_smoke.py` and the manual-only workflow concretize a single authorized test of the existing structured-output/receipt rows. This is experiment admission/evidence, not a new harness runtime module or recurring Sol order. Offline fixture evidence only until a separately approved live run; see BOUNDED_SOL_SMOKE.md.

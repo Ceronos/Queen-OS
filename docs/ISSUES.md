@@ -82,3 +82,7 @@ Owner's words: *"We can have Sage and you start runs under your own jurisdiction
 Johnny."* and *"We need to ensure the real-model check is in place and that she is informed via documentation
 from you about why."* Implemented as `governance/live_standing_order.json` (SO-0001) and `live-canary.yml`, and
 explained to Sage in `docs/LIVE_CANARY.md`.
+
+
+### QOS-0033 · Bounded GPT-6.1 Sol witness
+**Owner:** Sage. **Status:** candidate; owner merge/run approval and live evidence pending. SO-0001 excludes Sol; do not broaden its recurring allowance for a single test. Proposed one-use workflow, one synthetic schema request, 1024 completion tokens, USD 0.05 allowance, exact main revision, no retries or tools. See BOUNDED_SOL_SMOKE.md. Account/key availability and provider behavior remain unknown. No workflow dispatch capability is exposed by the connected tools; signed-out CLI is a separate launch blocker.
