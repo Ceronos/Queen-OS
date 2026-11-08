@@ -80,21 +80,34 @@ def cmd_providers(_: argparse.Namespace) -> int:
 
 
 def cmd_infer(args: argparse.Namespace) -> int:
-    from queen_os.providers import InferenceRequest, Message, build
-    from queen_os.providers.receipt import Inference
+    from queen_os.providers import InferenceRequest, JsonSchemaOutput, Message, build
+    from queen_os.providers.receipt import Inference, StructuredOutputRejected
+    from queen_os.providers.structured import SCHEMA_LIMIT, strict_json
     from queen_os.secrets import SecretStore
 
+    output = None
+    if args.json_schema:
+        with Path(args.json_schema).open("rb") as stream:
+            raw_schema = stream.read(SCHEMA_LIMIT + 1)
+        if len(raw_schema) > SCHEMA_LIMIT:
+            raise ValueError("JSON schema exceeds the 16 KiB input limit")
+        output = JsonSchemaOutput(strict_json(raw_schema))
     provider = build(args.provider, SecretStore(default_home()), args.base_url)
     request = InferenceRequest(
-        args.model, (Message("user", args.prompt),), args.system, args.max_tokens, args.temperature
+        args.model, (Message("user", args.prompt),), args.system, args.max_tokens, args.temperature, output
     )
+    provider.validate_request(request)
     from queen_os.authority import Grant
 
     with Hive.open(Path(args.hive)) as hive:
         # The operator at the CLI is the authority. It mints a one-call token scoped to exactly this request.
         grant = Grant(providers=(args.provider,), models=(args.model,), max_output_tokens=args.max_tokens, max_calls=1)
         cap = hive.authority().issue("operator:cli", "cli:infer", grant, ttl_ms=10 * 60_000)
-        witnessed = Inference(hive).run(provider, request, actor="operator:cli", capability=cap)
+        try:
+            witnessed = Inference(hive).run(provider, request, actor="operator:cli", capability=cap)
+        except StructuredOutputRejected as exc:
+            print(str(exc), file=sys.stderr)
+            return 4
     print(witnessed.result.text)
     r = witnessed.receipt
     print(
@@ -232,6 +245,7 @@ def build_parser() -> argparse.ArgumentParser:
     inf.add_argument("prompt")
     inf.add_argument("--hive", default=str(default_home()))
     inf.add_argument("--system")
+    inf.add_argument("--json-schema", help="strict portable JSON schema file (16 KiB max); no repair/retry")
     inf.add_argument("--max-tokens", type=int, default=512)
     inf.add_argument("--temperature", type=float)
     inf.add_argument("--base-url")

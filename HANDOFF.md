@@ -4,15 +4,16 @@ _Updated November 7, 2026 by Sage/Codex. The owner reports Claude temporarily un
 
 ## Main and this candidate
 
-- Base: `349cbfb31734e26135bc00eb97ff71d3135b593b`, merged #14 documentation. #12 gate and #13 system-prompt correction are on main. No other PR was open at preparation.
-- GitHub reports current-main CI 42421568374 and canary 42421568372 successful (push, attempt 1, exact base). Job/step summaries were inspected; these new raw artifacts were not replayed.
-- This branch proposes **QOS-0032**: strict JSON receipt/output binding. Python equality let recorded `true` become delivered `1`, including nested values, and JSON decoding collapsed duplicate keys. The gate now rejects ambiguous/nonfinite JSON, validates the recorded response against the egg schema and compares canonical bytes. Numeric 1/1.0 equivalence and key-order/whitespace differences remain valid.
-- Candidate until reviewed/merged. Producer evidence: baseline 237 passed; ten new attack cases failed before the fix; final 256 passed, one live deselected. Ruff and strict mypy passed. Final signed-head CI must be observed separately.
+- Base: `ef74948f63282f915bbcb70fee9e4454c1606757`, Verified squash of #15/QOS-0032. Exact tested tree preserved; main CI 42425715242 and automatic canary 42425715251 passed. Downloaded artifact hash and offline bee replay verified. The owner-review exception was #15 only, not a future-PR waiver.
+- This candidate implements the structured-output portion of **QOS-0008**: immutable portable schemas; four native wire modes; strict validation, raw success/failure custody, v2 receipts and replay; CLI `--json-schema` (received rejection exits 4). See `docs/STRUCTURED_OUTPUT.md` for source contracts and limitations.
+- Baseline 256 passed; candidate **306 passed**, one live deselected; 50 new tests. Ruff and strict mypy pass. All new inference/HTTP tests are signed fixture-marked and test-only. No live schema request or live credential was used.
+- Receipt v1 and existing text decoders remain supported; seven optional historical archive-replay cases passed locally. Unknown compatible presets fail preflight; unsupported schema features fail locally; no fallback, output repair or hidden retry.
+- Candidate until reviewed/merged. Final signed-head CI is separate from local checks. Cross-lineage review is not supplied by the author; the #15 exception does not apply here. The signed web-editor interface is currently unavailable; the connected file API produced unsigned commit 2d908fb8. Draft publication/CI may proceed, but a signed re-land is required before merge; do not weaken protections.
 
 ## Next construction work
 
-1. Review/land QOS-0032 with final-head CI evidence before relying on receipt-bound structured output.
-2. **QOS-0008 structured output**, Sage-led: explicit supported-provider/schema request contract, retained exact bytes and versioned receipt replay. Unsupported/malformed/truncated/refused responses fail visibly. No output repair or hidden model retries. Streaming and general tool execution remain separate.
+1. Review the current QOS-0008 structured-output candidate and observe final-head CI; obtain a correctly scoped review/owner decision before merging. Keep live compatibility as unverified until an authorized bounded witness exists.
+2. Reconcile actual structured-output provider/model support before the M1 live exit plan. Streaming/tool execution remain separate; do not invent tool authority or weaken schema/receipt checks.
 3. **Resume capsule**: bounded representation bound to verified ledger head, egg and parent digests, with stale/missing/tampered/reopen tests. Bound dependency expansion and bytes explicitly.
 4. **Oviposition/coordinator**: bounded untrusted goal-to-DAG proposals, validated before signed publication. Models cannot mint capabilities. Test graph, budget and interruption failures offline.
 5. **M1 exit test**: concrete authorized workflow/revision/provider/call/token limits, then decomposition → workers → gate promotion/purge → verified ledger and replayable evidence. This handoff is not a dispatch grant.

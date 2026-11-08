@@ -324,3 +324,22 @@ The owner reports Claude temporarily unavailable, assigns Sage construction lead
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+---
+
+## 2026-11-07 · Sage/Codex · QOS-0008 structured JSON output candidate
+
+Continue from Verified main ef74948f63282f915bbcb70fee9e4454c1606757 after #15's explicitly owner-excepted squash. #15-only exception and its missing cross-lineage review do not transfer to this candidate. Main CI 42425715242 and canary 42425715251 passed; downloaded artifact 13594894666 matched its external API digest and replayed offline as ARCHIVED_SMOKE_PASS. QOS-0032 status is reconciled to landed; earlier pending text remains chronology.
+
+- **Contract:** immutable canonical JsonSchemaOutput, conservative closed/required object schema profile, bounded schema size/depth/property/enum counts; no references, unsupported keyword stripping, coercion or repair. Native schema settings for Anthropic Messages, OpenAI Chat Completions, Gemini generateContent and Ollama local chat. Other compatible presets default unsupported; known Ollama cloud routes refused. Actual vendor/model acceptance is not claimed.
+- **Receipts:** normal text remains v1 with legacy decoders. Structured v2 binds exact raw request/response and schema blobs with versioned strict admission. HTTP-error, incomplete, refused, malformed and schema-invalid responses retain signed rejected evidence, then raise; no invented completion fields, retry or budget refund. Known credential echoes still prevent persistence. Transport failure without a response remains spent/error, not a fabricated receipt.
+- **Replay and gate:** derive mode/schema from stored request bytes, schema/decoder version and response again, reject forged admission/schema/downgrade, and keep strict egg schema + canonical receipt/output binding. JSON format does not authorize tools. CLI adds --json-schema; successful admission exits 0, received rejection exits 4 with receipt reference.
+- **Evidence:** copied source matched all 82 main-tree blobs. Fresh baseline 256 passed and signed test-hive chain verified. Candidate 306 passed, one live deselected; 50 new offline tests, ruff and strict mypy pass. All mocked HTTP/inference receipts are fixture-kind inside signed records and test hives. Tests cover native field literals, malformed/error custody, reopen, no retry/extra spend, production refusal, tampering, gate and CLI. Initial lint findings were corrected; no model request/credential access/live dispatch occurred.
+- **Sources:** current primary Anthropic/OpenAI/Ollama docs and Google's official REST discovery schema; links, read/access limits and wire fields are in STRUCTURED_OUTPUT.md. Google guide/reference redirects were unavailable; discovery field existence is not live execution evidence.
+- **Limits/next:** QOS-0008 stays partial overall: streaming/general tools and real structured compatibility remain unverified. Final signed-head CI/review are pending at preparation. Next is a bounded digest-bound resume capsule, followed by validated oviposition/coordinator and a specifically authorized M1 exit test. No host/process containment, quorum or independent acceptance claim. No frozen-v65, service, policy, cron, other-agent or private-export changes.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+Publication observation, same session: the browser interface reports unavailable; documented reacquisition failed. Connected Contents API created commit 2d908fb85fe89a2fb0350ef53714a11b0fb7f0cb, verified=false/unsigned. Preserve this observation and prepare the full candidate as a draft for CI/review; do not claim signed publication or weaken main protections. Asked the owner to restore the existing browser tab; no credentials or signing configuration requested.

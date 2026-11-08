@@ -16,6 +16,7 @@ from typing import Any, Literal
 
 import httpx
 
+from queen_os.providers.structured import JsonSchemaOutput
 from queen_os.secrets import Secret, redact
 from queen_os.serial.jcs import canonicalize
 
@@ -40,12 +41,15 @@ class InferenceRequest:
     system: str | None = None
     max_tokens: int = 1024
     temperature: float | None = None
+    output: JsonSchemaOutput | None = None
 
     def __post_init__(self) -> None:
         if not self.messages:
             raise ValueError("an inference request needs at least one message")
         if self.max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
+        if self.output is not None and not isinstance(self.output, JsonSchemaOutput):
+            raise ValueError("output must be a JsonSchemaOutput contract")
 
 
 @dataclass(frozen=True)
@@ -73,7 +77,7 @@ class Exchange:
     status: int
     response: bytes
     latency_ms: float
-    result: InferenceResult
+    result: InferenceResult | None
 
 
 # Model-family → training lineage. Quorum decorrelation (REMEDY §1.4) is keyed on the
@@ -112,6 +116,7 @@ class Provider(ABC):
     kind: ProviderKind
     base_url: str
     credential: Secret | None
+    supports_structured_output: bool = False
 
     def __init__(self, name: str, kind: ProviderKind, base_url: str, credential: Secret | None) -> None:
         self.name = name
@@ -128,6 +133,10 @@ class Provider(ABC):
     def lineage(self, model: str) -> str:
         return lineage_of(model)
 
+    def validate_request(self, request: InferenceRequest) -> None:
+        if request.output is not None and not self.supports_structured_output:
+            raise ProviderError(f"{self.name}: JSON-schema output is not explicitly supported")
+
     @staticmethod
     def json_body(payload: dict[str, Any]) -> bytes:
         return canonicalize(payload)
@@ -138,6 +147,7 @@ class Provider(ABC):
         return self.credential.reveal()
 
     def send(self, request: InferenceRequest, client: httpx.Client, timeout_s: float = 120.0) -> Exchange:
+        self.validate_request(request)
         call = self.encode(request)
         start = time.perf_counter()
         try:
@@ -146,8 +156,10 @@ class Provider(ABC):
             raise ProviderError(redact(f"{self.name}: transport error {type(exc).__name__}: {exc}")) from None
         latency = (time.perf_counter() - start) * 1000
         raw = resp.content
-        if resp.status_code >= 400:
+        if resp.status_code >= 400 and request.output is None:
             secrets = [self.credential] if self.credential else []
             snippet = redact(raw[:500].decode("utf-8", "replace"), secrets)
             raise ProviderError(f"{self.name}: HTTP {resp.status_code}: {snippet}")
-        return Exchange(call, resp.status_code, raw, latency, self.decode(raw))
+        # Structured decoding happens after raw-byte custody, even for invalid HTTP-200 output.
+        result = None if request.output is not None else self.decode(raw)
+        return Exchange(call, resp.status_code, raw, latency, result)
