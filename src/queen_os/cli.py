@@ -79,6 +79,49 @@ def cmd_providers(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_plan(args: argparse.Namespace) -> int:
+    from queen_os.queen.oviposition import MAX_PROPOSAL_BYTES, PlanBudget, publish_plan, read_plan, validate_proposal
+    from queen_os.serial.afser import sha256_hex
+
+    if args.plan_cmd != "show":
+        with Path(args.file).open("rb") as stream:
+            raw = stream.read(MAX_PROPOSAL_BYTES + 1)
+        budget = PlanBudget(args.calls, args.completion_tokens, args.max_tasks, tuple(args.allow_tool))
+        validated = validate_proposal(raw, budget)
+        if args.plan_cmd == "validate":
+            print(
+                json.dumps(
+                    {
+                        "status": "valid_proposal",
+                        "proposal_sha256": sha256_hex(validated.raw),
+                        "order": validated.order,
+                        "calls": validated.calls,
+                        "completion_tokens": validated.completion_tokens,
+                        "authority": "none",
+                    }
+                )
+            )
+            return 0
+    with Hive.open(Path(args.hive)) as hive:
+        plan = (
+            read_plan(hive, args.goal_id)
+            if args.plan_cmd == "show"
+            else publish_plan(hive, args.goal_id, raw, budget, objective=args.objective)
+        )
+        print(
+            json.dumps(
+                {
+                    "goal_id": plan.goal_id,
+                    "proposal_sha256": plan.proposal_sha256,
+                    "egg_ids": [egg.egg_id for egg in plan.eggs],
+                    "event_seq": plan.event_seq,
+                    "existing": plan.existing,
+                }
+            )
+        )
+    return 0
+
+
 def cmd_capsule(args: argparse.Namespace) -> int:
     from queen_os.comb.capsule import MAX_CAPSULE_BYTES, build_capsule, verify_capsule
 
@@ -264,6 +307,23 @@ def build_parser() -> argparse.ArgumentParser:
     hp = hsub.add_parser("probe", help="honest hardware probe; with --hive, records a signed host.probe event")
     hp.add_argument("--hive")
     hp.set_defaults(func=cmd_host_probe)
+
+    planning = sub.add_parser("plan", help="validate or explicitly publish a bounded task graph; never infer")
+    psub = planning.add_subparsers(dest="plan_cmd", required=True)
+    for name in ["validate", "publish", "show"]:
+        command = psub.add_parser(name)
+        if name != "validate":
+            command.add_argument("goal_id")
+            command.add_argument("--hive", default=str(default_home()))
+        if name != "show":
+            command.add_argument("file")
+            command.add_argument("--calls", type=int, required=True)
+            command.add_argument("--completion-tokens", type=int, required=True)
+            command.add_argument("--max-tasks", type=int, default=16)
+            command.add_argument("--allow-tool", action="append", default=[])
+        if name == "publish":
+            command.add_argument("--objective", required=True)
+        command.set_defaults(func=cmd_plan)
 
     capsule = sub.add_parser("capsule", help="build or verify bounded task context without executing work")
     csub = capsule.add_subparsers(dest="capsule_cmd", required=True)

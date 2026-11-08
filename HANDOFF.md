@@ -1,40 +1,45 @@
 # HANDOFF → next engineer on Queen-OS
 
-Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude is unavailable. Preserve Claude's work and attribution; owner exceptions are PR-specific.
+Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude is unavailable. Preserve Claude's work and attribution. Owner merge exceptions remain PR-specific.
 
-## Current main and post-merge finding
+## Verified main and retained history
 
-Main is **01e52d4dfb24bb1d2e9381e8849051ce3d4b7ef9**, Verified signed squash of #18, parent bb99eac08caed14e1df6e7a15b3702ed8acc6b6c. Tree a26cc13df291e05054ca73a2962922500319f61d exactly matches the qualified candidate. The owner explicitly authorized #18 only. PR run 42478326333 attempt 1 passed all 13 jobs against synthetic merge d756a6d9 (parents bb99eac + 2b1777f).
+Main is **9a40642eb1b6675936e455ce931a7e3ec325949c**, Verified signed #19 squash, tree 98165a2977a1f6f8bfe495af0e6bd0a9ff3cfbfd. Main CI 42480079372 passed all 13 checks, and automatic keyless canary 42480079373 passed. Read canary job 128729897305: retained-path verification and separate expect-word bee both pass. This is dated producer evidence, not general model competence or independent containment acceptance.
 
-**Main CI 42478678377 failed:** ARM64/Python 3.13 job 128725617876 hit the existing claim binder's relative-TTL clock race. Capability issuance read a later clock than the caller's remaining-lease calculation, so signed capability expiry could exceed lease expiry. The new capsule correctly refused that claim; do not relax its check. The failure is retained, not rerun for a lucky pass. Other 12 jobs passed.
+- #16: QOS-0008 structured JSON slice landed; streaming/general tools and broad live compatibility remain unfinished.
+- #17: one-use Sol witness and QOS-0034 controlled-clock test landed.
+- #18: QOS-0035 source-verified bounded capsule landed under its specific owner exception.
+- #19: QOS-0036 absolute lease deadline correction landed under its separate owner exception. No capsule/fence/expiry check relaxed.
+- Preserve main CI 42478678377 (01e52d4 ARM64 clock drift) and keyless canary 42478678093 (HTTP504 runtime download before inference). Later green does not relabel either failure.
 
-**QOS-0036 follow-up candidate:** Authority.issue accepts an optional host absolute upper deadline, clamps expiry at the issuance clock read, and refuses an elapsed deadline before signing/appending. Worker binding supplies the original lease deadline. No signed wire fields, default issuance behavior, lease lifetime, resume checks or budgets are weakened. A controlled +1 ms-per-read regression fails on main and passes with the fix. Expiry during binding leaves only the already committed lease grant: no claim or capability; retain that partial history, do not imply multi-event atomicity. Legacy overlong capabilities are not repaired or silently resumed.
+## Current candidate: QOS-0037 goal-to-task admission/publication
 
-Candidate local suite: **375 passed, 9 skipped** (7 absent historical archive checks; 2 local credential-home fixture limitations); 9 new deadline cases. Ruff check/format and strict mypy pass. Cross-platform CI and exact revision evidence belong in the follow-up PR. It has no merge authorization yet.
+Johnny asks to validate proposed task graphs and budgets before publication, and explore cheaper model testing while the Sol key is absent.
 
-## Other landed work and live evidence
+queen/oviposition.py validates inert UTF-8 proposals against a separate host objective and PlanBudget, derives existing valve profiles, rejects malformed/cyclic/oversize/external/M2-dependent work and atomically signs/appends every egg plus goal.planned. Stable goal ID gives exact canonical replay or conflict, and read_plan resolves uncertain postcommit returns without repeating writes.
 
-- #15/QOS-0032: strict canonical receipt/output equality and ambiguous/type-substitution refusal.
-- #16: structured JSON slice of QOS-0008. Streaming/general tools remain unfinished; live structured compatibility is unverified.
-- #17/QOS-0033: one-use Sol witness, plus QOS-0034 controlled-clock lease test.
-- #18/QOS-0035: bounded source-verified resume context, same-worker live unspent claim restore, no automatic effects. See docs/RESUME_CAPSULE.md.
-- Main keyless canary **42478678093 failed before inference**: the pinned Ollama runtime download returned HTTP 504 and an incomplete archive. There is no semantic/receipt result for this revision. Do not infer regression or success from unavailable infrastructure. No rerun was dispatched.
+queen/budget.py intersects later spending with admitted task calls/output/tools and goal call/completion-token ceilings in the existing writer transaction. Replaced capabilities cannot reset lifetime task allowance. Unknown effects retain their reservations. These units are requested completion ceilings, not input-token, USD, energy or wall-time accounting. No automatic provider, scheduler or tool dispatcher is introduced.
 
-Owner-approved Sol witness is still **ONE** gpt-6.1-sol request, 1024 completion tokens, USD 0.05, no tools/retries, pinned to bb99eac. The owner reports OPENAI_API_KEY not configured. No Sol run observed. Expiry 2026-11-10 00:00 UTC; failures/cancellations consume the first-run slot. Main has moved: obtain a newly scoped owner revision decision before launch, never transfer that approval silently. Read BOUNDED_SOL_SMOKE.md and exact workflow. SO-0001 is unchanged.
+CLI: plan validate / publish / show. See docs/GOAL_PLANNING.md and examples/goal-plan.json. 57 new offline cases; local full suite **432 passed / 9 skipped** (7 absent historical archive checks; 2 local credential-home fixture restrictions). Ruff/format and strict mypy (37 source files) pass. Platform CI and exact revision evidence belong to this PR. No merge approval or cross-lineage review yet.
 
-## Construction order
+## Model testing: preserve scope and use evidence honestly
 
-1. Qualify QOS-0036, obtain the specific review/owner decision, then use the protected signed merge path. PR #18 approval does not cover this follow-up. Keep both failed main runs as evidence.
-2. With claim binding corrected, proceed to oviposition/coordinator: validate untrusted goal-to-DAG proposals, graph/budget failures and host publication. Model text cannot mint capabilities.
-3. Prepare the M1 exit test after those pieces fit, under a separate exact revision/provider/call/token/cost scope. The one-use Sol witness is not that experiment.
+See docs/MODEL_TESTING.md for current primary-source options: fixture/replay reuse, existing local providers, constrained output, and conditional subscription API credits. Repository presets already include local servers; generic compatible presets do not automatically advertise native structured-output support. QOS-0038 is a qualification follow-up, not a live result or provider change.
 
-Use offline fixtures while live setup waits. Read CLAUDE.md, ENGINEERS.md, the latest LEDGER and BUILD_MAP; run baseline and fresh signed hive verification. Source signatures establish attribution; producer tests establish only their observed scope. Cross-lineage review is absent while Claude is unavailable.
+Sol remains ONE gpt-6.1-sol request / 1024 total completion tokens / USD0.05 / no tools or retries. Key setup is owner-controlled; none was configured or read here and no Sol dispatch occurred. Original approval was pinned to bb99eac. Main moved, so bind a concrete current revision decision before launch; the fixed expiry remains 2026-11-10 00:00 UTC. Do not test key presence by consuming the first-run slot or silently extend expired admission. This does not extend SO-0001.
 
-## Boundaries
+Local model inventory, host availability and account details stay in local work receipts, not public source. No weight download, model load or inference was performed in this contribution. No credential/session-token copying, service/startup changes or paid API request.
 
-Capsule verification is linear within hard limits, not O(1) or a measured token-saving claim. Spent/missing-response attempts require explicit reconciliation; no automatic retry. Oviposition and general reconciliation remain separate. Enclaves are in-process policy, not hostile-process containment (QOS-0006); code-egg checks remain partial (QOS-0029), quorum eggs HELD until M2 (QOS-0028). No generated-code/shell runner or expanded model authority is introduced. The hourly cadence remains read-only and separate from manual construction.
+## Next work
 
-Historical wrong answers and failed runs remain recorded. Keep transport/path integrity, schema validity and semantic correctness distinct. Frozen Astra v65 remains unchanged/NO-GO: independent containment acceptance and a verified fresh-session adapter are absent. Repository models, owner merge decisions and green CI do not change that boundary.
+1. Qualify/review QOS-0037 and obtain its own owner merge decision while Claude is unavailable; prior approvals only covered #15–#19 individually.
+2. Establish the exact existing local model/server/version and a bounded synthetic witness, then retain/replay evidence. Keep local protocol compatibility, schema validity, graph/budget validity and semantic goal quality distinct.
+3. Wire a strategic proposal producer through the existing witnessed-provider path only under a separate concrete call scope. The validator must still refuse bad proposals; model text never mints authority.
+4. Prepare an M1 exit experiment after the pieces fit, with exact candidate/provider/model/calls/tokens/cost/time and independent-review limits. A single canned witness or fixture graph is not the M1 exit.
+
+Read CLAUDE.md, ENGINEERS.md, latest LEDGER and BUILD_MAP before changes; baseline plus fresh signed hive verification. Contributions branch from main and land through protected signed squash merges.
+
+Frozen Astra v65 remains untouched/NO-GO: independent containment acceptance and a verified fresh-session adapter are absent. In-process repository controls, model adapters, CI and owner merge decisions do not replace those gates. The separate hourly stays read-only and documentary; manual construction is a distinct lane.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

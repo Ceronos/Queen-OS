@@ -398,3 +398,22 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+---
+
+## 2026-11-08 · Sage/Codex · QOS-0037 goal-to-task admission/publication candidate
+
+Johnny asks to continue major construction at Sage's discretion: keep the approved bounded Sol witness pending until a key exists, investigate lower-cost/local model tests, and validate proposed task graphs/budgets before publishing them. This does not carry forward earlier PR-specific merge exceptions.
+
+- **Baseline:** current main 9a40642eb1b6675936e455ce931a7e3ec325949c is Verified signed #19 squash; CI 42480079372 all 13 jobs success, keyless canary 42480079373 success. Canary job 128729897305 reports retained path verification, reply bee and separate explicit bee oracle pass. Earlier 01e52d4 clock-drift and runtime-download failures remain preserved. All 94 public source blobs match pinned main; fresh signed test-hive genesis verifies. Local baseline 375 passed / 9 explicit environment/archive skips.
+- **Graph/host boundary:** immutable canonical inert proposal; separate host goal ID/objective and limits; no proposal-granted signatures/capabilities. Portable closed-object task schemas and existing valve profiles. Hard raw/canonical byte, task/edge/parent/depth and objective/input/schema bounds. Refuse cycles, external/missing/duplicate parents, malformed encodings/types, unavailable M2 quorum and profile totals beyond host calls/completion-token budget.
+- **Publication/recovery:** deterministic local-to-egg IDs, one writer transaction for all signed eggs plus signed goal.planned; postcommit event fetch. Exact stable-goal replay returns existing source; changed proposal/objective/budget conflicts. Other readers see no partial graph; failed append/commit rolls back. Uncertain postcommit returns require read_plan / CLI show before selecting a later effect, not assuming no work occurred.
+- **Shared spend boundary:** optional signed plan charges inside existing capability reservation transaction; task lifetime call/output/tool limits intersect goal ceilings. Replacement caps do not reset usage. A broader host capability initially could add a tool outside the admitted task: the new attack test reproduced that gap before correction, and the intersection now refuses it before spend. Unknown/missing-response effects consume reservations; missing/inconsistent prior charges fail closed. Legacy standalone capabilities keep existing behavior.
+- **Units/limits:** completion tokens are requested output ceilings reserved before the attempt, not actual generation/input tokens, USD, power or wall time. This is no financial budget engine, automatic retry/reconciliation broker, strategic generator, model-authorized tool dispatcher or semantic goal acceptance. No O(1) or process-containment claim.
+- **Evidence:** 57 added offline cases; full local suite 432 passed / 9 skips (7 absent retained-archive dependencies; 2 local credential-home fixture limits). Ruff check/format and strict mypy pass (37 source files). Includes atomic failure/recovery, competing capabilities, fixture receipt/Gate/capsule integration, budget attacks and numeric canonical expansion (raw short JSON must not become an over-limit stored/recovery packet). Cross-platform CI and tested revision belong to the PR. Fixtures are fixture-marked inside signed receipts.
+- **Model-testing research:** MODEL_TESTING.md cites current official LM Studio, llama.cpp, vLLM and OpenAI documentation. Offers reuse of retained evidence/negative fixtures, existing local models and conditional Pro/Business API credits. No account eligibility assumed. Local metadata investigation remains in private work receipts; no local model inventory, private sources or credentials are exported. No model load, inference, download or explicit service-start command issued. No Sol dispatch/key read; original exact-SHA/first-run/expiry constraints still apply.
+- **Continuation:** qualify this candidate, obtain its own owner review/merge decision, then establish a concrete local model/version/context witness and strategic producer under a separate bounded call scope. A single canned/fixture witness is not the M1 exit. Frozen Astra v65 remains untouched/NO-GO; no independent containment or fresh-session adapter acceptance.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
