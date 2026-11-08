@@ -19,8 +19,8 @@ Read BOUNDED_SOL_SMOKE.md and the exact workflow before launch. The one-use slot
 
 ## Current construction order
 
-1. Refresh this handoff and BUILD_MAP against the landed state. Historical candidate text remains in the append-only LEDGER, not as current instructions here.
-2. Build the M1 resume capsule: bounded verified task state anchored to a signed ledger head, task/schema/dependency digests and retained effect evidence. Reject stale/missing/tampered data and bound dependency expansion. Reopen/recovery must not repeat an inference or delivered result. This is the next implementation slice, not a claim of an existing module.
+1. The handoff and BUILD_MAP refresh is the first commit of codex/resume-capsule. Historical candidate text remains in the append-only LEDGER, not as current instructions here.
+2. Qualify the M1 resume-capsule candidate (QOS-0035), then obtain review/owner merge decision. See docs/RESUME_CAPSULE.md. It anchors bounded context to a verified signed head, includes dependency/effect references, refuses stale/missing/tampered/oversize sources, and restores only the same worker's existing live unspent claim. No automatic inference/retry, fresh capability or gate acceptance. Local suite: 366 passed, 9 skipped (7 absent historical archive, 2 local credential-home fixtures); ruff/strict mypy passed. Platform CI/revision evidence belongs to the PR; no new merge approval has been given.
 3. Build oviposition/coordinator: validate an untrusted goal-to-DAG proposal before signed publication, including graph and budget failures. Models cannot mint capabilities.
 4. Prepare the M1 exit test only after those pieces fit, with a separate exact revision/provider/call/token/cost scope. The single Sol witness does not authorize that experiment.
 

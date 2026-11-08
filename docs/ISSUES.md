@@ -94,3 +94,8 @@ explained to Sage in `docs/LIVE_CANARY.md`.
 
 ### 2026-11-08 landed-state correction — QOS-0008 / QOS-0033 / QOS-0034
 Sage: structured JSON slice landed in #16; QOS-0008 remains partial for streaming/general tools and live compatibility. QOS-0033 witness code and QOS-0034 test-clock fix landed in #17 with green main CI/canary. The owner approved one Sol request at bb99eac; key setup/live execution remain pending. Earlier candidate text above is preparation history, not current merge status.
+
+
+### QOS-0035 · Bounded verified resume context and existing-claim restore
+**Owner:** Sage. **Status:** candidate, platform CI/review/owner merge decision pending. Added comb/capsule.py, deferred ledger snapshots, Worker.resume and capsule build/verify CLI. Packet context grants no authority; stale heads, altered source, missing evidence, resource overflow and unrecorded artifacts fail closed. Same-worker live unspent claim only; a spend with no receipt is uncertain, not retry permission. Complete bounded ancestor closure; only direct-parent outputs inline. See RESUME_CAPSULE.md. 43 new offline cases; local full suite 366 passed / 9 skipped. No live call or independent acceptance. Larger-ledger checkpoints, reconciliation broker, oviposition, performance/token measurement and M1 exit experiment remain separate.
+

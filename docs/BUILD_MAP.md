@@ -71,7 +71,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Hexagonal axial-coordinate comb grid (V2) | T1 | Cell addressing `(q, r)` as an index over task and domain space, used for locality in work stealing | `comb/hexgrid.py` | M2 |
 | CvRDT LWW cells + vector clocks for WAN (REMEDY §3.4) | T1 | Join-semilattice cell merges. Property tests check commutativity, associativity and idempotence. | `federation/crdt.py` | M5 |
 | Merkle Search Tree state healing (REMEDY §3.4) | T1 | MST over ledger keys, root-digest exchange | `federation/mst.py` | M5 |
-| Bounded resume capsules instead of context stuffing (V2 table) | T1 | Planned service-generated packet anchored to verified state/head and dependency digests. Byte/context size is bounded; creation/verification cost and token savings must be measured, not assumed O(1) or zero-token. | `comb/capsule.py` | **M1 next slice** |
+| Bounded resume capsules instead of context stuffing (V2 table) | T1 | Candidate canonical packet anchored to a verified signed head, bounded ancestor closure/effect refs and source readback. Same-worker live unspent claim restore only; spent/unknown effects block. See RESUME_CAPSULE.md for hard limits, stale-head refusal and omitted transitive outputs. Verification is linear; token savings unmeasured. | `comb/capsule.py`, `Worker.resume`, CLI | **M1 candidate, QOS-0035; 43 offline cases; platform CI/review pending** |
 
 ### Plane 2 — Control Plane (Queen Core)
 

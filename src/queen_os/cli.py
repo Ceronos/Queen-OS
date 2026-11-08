@@ -79,6 +79,34 @@ def cmd_providers(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_capsule(args: argparse.Namespace) -> int:
+    from queen_os.comb.capsule import MAX_CAPSULE_BYTES, build_capsule, verify_capsule
+
+    with Hive.open(Path(args.hive)) as hive:
+        if args.capsule_cmd == "build":
+            capsule = build_capsule(hive, args.egg_id, args.max_bytes)
+            sys.stdout.buffer.write(capsule.raw + b"\n")  # one UTF-8 framing LF on every OS
+        else:
+            with Path(args.file).open("rb") as stream:
+                raw = stream.read(MAX_CAPSULE_BYTES + 2)
+            if raw.endswith(b"\n"):
+                raw = raw[:-1]  # only the CLI's single framing LF; not arbitrary whitespace
+            capsule = verify_capsule(hive, raw, args.max_bytes)
+            p = capsule.payload
+            print(
+                json.dumps(
+                    {
+                        "status": "verified",
+                        "capsule_sha256": capsule.sha256,
+                        "egg_id": p["task"]["egg_id"],
+                        "state": p["task"]["state"],
+                        "head": p["head"],
+                    }
+                )
+            )
+    return 0
+
+
 def cmd_infer(args: argparse.Namespace) -> int:
     from queen_os.providers import InferenceRequest, JsonSchemaOutput, Message, build
     from queen_os.providers.receipt import Inference, StructuredOutputRejected
@@ -236,6 +264,15 @@ def build_parser() -> argparse.ArgumentParser:
     hp = hsub.add_parser("probe", help="honest hardware probe; with --hive, records a signed host.probe event")
     hp.add_argument("--hive")
     hp.set_defaults(func=cmd_host_probe)
+
+    capsule = sub.add_parser("capsule", help="build or verify bounded task context without executing work")
+    csub = capsule.add_subparsers(dest="capsule_cmd", required=True)
+    for name in ["build", "verify"]:
+        command = csub.add_parser(name)
+        command.add_argument("egg_id" if name == "build" else "file")
+        command.add_argument("--hive", default=str(default_home()))
+        command.add_argument("--max-bytes", type=int, default=32768)
+        command.set_defaults(func=cmd_capsule)
 
     sub.add_parser("providers", help="list model providers and credential status").set_defaults(func=cmd_providers)
 
