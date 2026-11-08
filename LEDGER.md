@@ -417,3 +417,39 @@ Johnny asks to continue major construction at Sage's discretion: keep the approv
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+## 2026-11-08 · Sage — canary runtime acquisition hardening (QOS-0039)
+
+- **Base:** Verified signed main 9f294afcd46771772e35f419343161559cf12bfd (#20), tree
+  6f178fe3f78bf99dc21cece1ddde83eef964fc84. Its CI 42484325300 has 13 successful jobs;
+  automatic keyless canary 42484325250 passed. QOS-0037 is landed, not a pending candidate.
+- **Baseline:** 432 passed / 9 skipped and fresh signed-genesis hive verified before edits, in
+  an isolated source copy checked against all 100 main blobs. No existing checkout was overwritten.
+- **Trigger:** owner resumes canary fix. Run 42478678093/job 128725616179 failed HTTP504/truncated
+  runtime installation before inference. Model-registry retries happen later. Prior strict-answer
+  failures are retained separately under QOS-0031; the word oracle must still fail wrong answers.
+- **Change:** committed upstream release URL/size/SHA-256 (dated GitHub asset metadata); stdlib
+  acquisition helper with three bounded transport-only attempts, fresh partial files, mandatory
+  size/digest readback before publication and refusal of permanent/integrity/local I/O failures.
+  Replaces the live streamed installer (QOS-0005 remainder); extracts only in ephemeral runner temp.
+  Client and bounded server-version checks precede model pulls. No sudo/system service installer.
+- **Evidence:** 40 new offline synthetic fault/contract cases; full local **472 passed / 9 skipped**
+  (7 absent historical archive cases, 2 local credential-home fixture restrictions). Ruff/format,
+  strict mypy core37 + helper1 pass. Infrastructure fixtures carry fixture:true and are unsigned
+  diagnostics, never model receipts. Platform/actionlint CI and exact candidate revision remain
+  to be observed on the PR. No claim of new live extraction or runtime success.
+- **Diagnostics:** explicit acquisition/runtime/model/pytest/CLI-integrity/answer phase summary,
+  with an always-run metadata-only artifact allowlist. Raw errors/server response/logs/runtime/
+  weights/private hive files are excluded. Existing model evidence admission still gates export.
+- **Limits:** original two local calls, 16 tokens each, T=0/system prompt and strict bee oracle
+  retained; no trigger/permission/standing-order/notification changes. No local model/runtime
+  download, installation, live call, credential read or workflow dispatch/rerun. Main's next
+  ordinary canary after an independently owner-approved merge must establish actual acquisition/
+  extraction/live results at that exact SHA. Cross-lineage review/PR-specific owner decision pending.
+- **Next:** review the concrete PR and its 13 checks; obtain its own merge decision; inspect the
+  ensuing normal canary without erasing failures. Resume bounded local witness/strategic producer
+  work afterward under separate scope. Frozen lab candidate remains untouched and NO-GO.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

@@ -34,15 +34,45 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-      - name: Install pinned Ollama runtime
+      - name: Acquire checksummed Ollama archive (bounded download retries)
+        id: runtime_archive
         run: |
-          curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION="$OLLAMA_VERSION" sh
+          test "$(uname -m)" = x86_64
+          python scripts/canary_runtime.py acquire \
+            --pin governance/canary_runtime.json --expected-version "$OLLAMA_VERSION" \
+            --archive "$RUNNER_TEMP/canary-runtime/ollama.tar.zst" \
+            --receipt "$RUNNER_TEMP/runtime-acquisition.json"
+      - name: Prepare pinned runtime and verify server readiness
+        id: runtime
+        run: |
+          # The prior step verifies complete bytes before anything is extracted.
+          RUNTIME="$RUNNER_TEMP/canary-runtime/extracted"
+          mkdir -p "$RUNTIME"
+          tar --zstd -xf "$RUNNER_TEMP/canary-runtime/ollama.tar.zst" -C "$RUNTIME"
+          export PATH="$RUNTIME/bin:$PATH"
+          echo "$RUNTIME/bin" >> "$GITHUB_PATH"
           ollama --version | tee "$RUNNER_TEMP/ollama-version.txt"
           grep -q "$OLLAMA_VERSION" "$RUNNER_TEMP/ollama-version.txt" || { echo "runtime is not the pinned version"; exit 1; }
-          if ! curl -sf http://127.0.0.1:11434/api/version; then
+          if ! curl --max-time 2 --max-filesize 8192 -sf http://127.0.0.1:11434/api/version > /dev/null; then
             (ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &)
-            for _ in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && break; sleep 1; done
+            for _ in $(seq 1 30); do curl --max-time 2 --max-filesize 8192 -sf http://127.0.0.1:11434/api/version > /dev/null && break; sleep 1; done
           fi
+          curl --max-time 2 --max-filesize 8192 -fsS http://127.0.0.1:11434/api/version > "$RUNNER_TEMP/ollama-server-version-raw.json"
+          python - "$RUNNER_TEMP/ollama-server-version-raw.json" "$RUNNER_TEMP/ollama-server-version.json" <<'PY'
+          import json
+          import os
+          import pathlib
+          import sys
+          raw = pathlib.Path(sys.argv[1]).read_bytes()
+          assert len(raw) <= 8192, "server-version response exceeds bound"
+          value = json.loads(raw)
+          assert set(value) == {"version"}, "unexpected server-version fields"
+          assert value["version"] == os.environ["OLLAMA_VERSION"], "server version differs from pinned runtime"
+          pathlib.Path(sys.argv[2]).write_text(json.dumps({"version": value["version"]}) + "\n")
+          PY
+      - name: Acquire canary model (registry retries only)
+        id: model
+        run: |
           for attempt in 1 2 3 4 5; do
             ollama pull "$CANARY_MODEL" && break
             [ "$attempt" = 5 ] && exit 1
@@ -52,6 +82,7 @@ jobs:
       - name: Install Queen-OS
         run: python -m pip install -e ".[dev]"
       - name: Witnessed inference in a production hive
+        id: live_pytest
         env:
           QUEEN_LIVE_TARGETS: ollama=${{ env.CANARY_MODEL }}
         run: pytest -m live -rs -s tests/live
@@ -92,7 +123,30 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - name: Require expected CLI answer
+        id: answer
         env:
           EXPECTED_ARCHIVE_SHA: ${{ steps.cli_evidence.outputs.archive_sha256 }}
         run: |
           python scripts/verify_smoke_artifact.py "$RUNNER_TEMP/canary-review.zip" --expected-sha256 "$EXPECTED_ARCHIVE_SHA" --expect-word bee
+      - name: Summarize infrastructure, path and answer outcomes
+        if: always()
+        env:
+          CANARY_PHASE_ACQUISITION: ${{ steps.runtime_archive.outcome }}
+          CANARY_PHASE_RUNTIME: ${{ steps.runtime.outcome }}
+          CANARY_PHASE_MODEL: ${{ steps.model.outcome }}
+          CANARY_PHASE_PYTEST: ${{ steps.live_pytest.outcome }}
+          CANARY_PHASE_CLI: ${{ steps.cli_evidence.outcome }}
+          CANARY_PHASE_ANSWER: ${{ steps.answer.outcome }}
+        run: python scripts/canary_runtime.py summary
+      # Allowlist infrastructure metadata only. Model evidence keeps its original admission gate.
+      - name: Retain runtime acquisition diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: canary-runtime-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/runtime-acquisition.json
+            ${{ runner.temp }}/ollama-version.txt
+            ${{ runner.temp }}/ollama-server-version.json
+          if-no-files-found: warn
+          retention-days: 30

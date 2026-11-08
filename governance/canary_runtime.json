@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "version": "0.40.15",
+  "platform": "linux-amd64",
+  "asset": "ollama-linux-amd64.tar.zst",
+  "url": "https://github.com/ollama/ollama/releases/download/v0.40.15/ollama-linux-amd64.tar.zst",
+  "bytes": 1543547172,
+  "sha256": "628c018404a4206493efd38e46251c154ede5141b8b8dc85c659b3b027c47379"
+}
+
