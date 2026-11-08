@@ -50,6 +50,8 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 
 | QOS-0039 | S3 | claimed (candidate) | Sage | S | Canary runtime HTTP504/truncated download is before model pull retries. Checksummed release acquisition, bounded transport-only retry and separate failure diagnostics proposed; real archive execution remains pending main canary. |
 
+| QOS-0040 | S3 | claimed (candidate) | Sage | S/O | Add explicit bounded LM Studio list/load/unload/status controls, signed intent and uncertainty readback, and native schema wire support. Actual local runtime/model qualification and a Queen-owned engine remain separate. |
+
 ## Details
 
 ### QOS-0001 · Append committed, caller saw an exception
@@ -138,3 +140,20 @@ Goal admission/publication landed in #20 at Verified signed 9f294afcd46771772e35
 under its individual owner exception. Main CI 42484325300 passed all 13 jobs; keyless canary
 42484325250 passed. Earlier candidate text records preparation, not current merge state. This is
 not a strategic producer, general model competence or M1 exit experiment.
+
+
+### 2026-11-08 · QOS-0039 landed, QOS-0040 local model lifecycle
+QOS-0039 landed as Verified signed fe95a0fe8401090d3909026f84739993da65f319 (#21),
+under the owner's #21-only review exception. Main CI 42499921886 passed all 13 jobs and
+canary 42499921790/job 128790235107 passed its first normal run: pinned archive verified
+on attempt 1; extraction/readiness, inference path and strict bee oracle all passed.
+No rerun erased the historical HTTP504 failure.
+
+QOS-0040 owner Sage: claimed candidate. Explicit operator native LM Studio lifecycle, loopback
+transport/resource bounds and signed intent before one POST. Stable IDs never repeat an effect;
+status is GET/readback only and retains uncertainty/causality limits. Fixture transports refuse
+production effects. LM Studio preset enables documented schema wire mode with signed mocked
+custody/replay tests; generic compatible presets remain unqualified. 46 new offline cases;
+local 518 passed / 9 skips. Real local producer evidence and platform CI remain to be recorded
+at the exact candidate. The owner grants manual LM Studio launch/use, not hourly writes or
+a new merge exception. No Queen-owned engine/installer/supervisor is implemented.

@@ -40,3 +40,13 @@ Key setup remains owner-controlled in the live-inference environment. The one-us
 
 A qualifying witness records exact model/quantization/server version, source revision, request cap, run/attempt, raw exchange custody and signed source, response-schema status, task/graph/budget result, semantic oracle result, token/time observations and limitations. Keep received failures. Replay without a credential, and report current availability separately. No model test, model load, download or service startup is executed by this document.
 
+
+
+## 2026-11-08 · LM Studio focus (QOS-0040 candidate)
+The owner prioritizes LM Studio and permits manual launch/use. LOCAL_MODELS.md describes the
+new explicit native lifecycle controls and LM Studio-only schema flag. The earlier paragraph
+about all three compatible presets being unqualified describes the planning PR's base: the
+LM Studio candidate now has offline wire/custody tests; llama.cpp/vLLM remain unqualified.
+Actual installed-version/model compatibility still requires a real witnessed request.
+A Queen-owned local engine is future work; a connected local adapter and a managed runtime
+are separate capabilities. No Hermes runtime or cloud provider is used by this slice.

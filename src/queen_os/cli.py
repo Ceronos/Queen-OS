@@ -8,6 +8,10 @@ import platform
 import socket
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from queen_os.providers.lmstudio import LMStudio
 
 from queen_os import __version__
 from queen_os.comb.ledger import ChainBroken
@@ -76,6 +80,37 @@ def cmd_providers(_: argparse.Namespace) -> int:
             else:
                 status = f"no key ({preset.key_env[0]})" if preset.key_required else "no key needed"
         print(f"{name:<11} {preset.kind:<6} {base_url_for(preset):<48} {status}")
+    return 0
+
+
+def cmd_models(args: argparse.Namespace) -> int:
+    from queen_os.providers.lmstudio import LMStudio, LocalModelError
+
+    try:
+        return _models(args, LMStudio(args.base_url))
+    except LocalModelError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+
+def _models(args: argparse.Namespace, manager: LMStudio) -> int:
+    if args.models_cmd == "list":
+        result: object = manager.models()
+    else:
+        with Hive.open(Path(args.hive)) as hive:
+            result = (
+                manager.status(hive, args.operation_id)
+                if args.models_cmd == "status"
+                else manager.change(
+                    hive,
+                    args.operation_id,
+                    args.models_cmd,
+                    args.target,
+                    context_length=getattr(args, "context_length", 2048),
+                    max_weights_bytes=getattr(args, "max_weights_bytes", 16 * 1024**3),
+                )
+            )
+    print(json.dumps(result, ensure_ascii=False))
     return 0
 
 
@@ -335,6 +370,21 @@ def build_parser() -> argparse.ArgumentParser:
         command.set_defaults(func=cmd_capsule)
 
     sub.add_parser("providers", help="list model providers and credential status").set_defaults(func=cmd_providers)
+
+    models = sub.add_parser("models", help="explicit LM Studio model lifecycle; never generate or download")
+    msub = models.add_subparsers(dest="models_cmd", required=True)
+    for name in ["list", "load", "unload", "status"]:
+        command = msub.add_parser(name)
+        command.add_argument("--base-url", default="http://127.0.0.1:1234")
+        if name != "list":
+            command.add_argument("--hive", default=str(default_home()))
+            command.add_argument("--operation-id", required=True)
+        if name in {"load", "unload"}:
+            command.add_argument("target", help="exact installed model key or loaded instance ID")
+        if name == "load":
+            command.add_argument("--context-length", type=int, default=2048)
+            command.add_argument("--max-weights-bytes", type=int, default=16 * 1024**3)
+        command.set_defaults(func=cmd_models)
 
     inf = sub.add_parser("infer", help="run one witnessed inference (receipt goes to the ledger)")
     inf.add_argument("provider")
