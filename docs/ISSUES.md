@@ -48,6 +48,8 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0031 | S2 | **fixed** (#13) | Claude | C | The live canary's pytest step sent a system prompt ("Return only the requested word.") and the `queen infer` CLI step did not. At temperature 0 the 0.5B model answers "bee" under the system prompt and "beeedom" without it, every time. The canary was red on every `main` push (runs 42380605862, 42386170198, 42386561400, and the #12 merge run 42407888634, all failing at `Require expected CLI answer`). Fix: the CLI call now sends the same system prompt. Evidence: branch run 42390202843 (`ARCHIVED_SMOKE_PASS`, reply "bee"); `main` run 42407907623 on `e59ba67b` (success). The strict word gate is unchanged. |
 | QOS-0032 | S2 | **fixed** (#15) | Sage | S | Strict decoding, recorded-response schema validation and canonical-byte receipt/output binding landed as Verified ef74948. Owner granted review exception for #15 only; main CI 42425715242 and canary 42425715251 passed; downloaded artifact replay passed. |
 
+| QOS-0039 | S3 | claimed (candidate) | Sage | S | Canary runtime HTTP504/truncated download is before model pull retries. Checksummed release acquisition, bounded transport-only retry and separate failure diagnostics proposed; real archive execution remains pending main canary. |
+
 ## Details
 
 ### QOS-0001 · Append committed, caller saw an exception
@@ -118,3 +120,21 @@ Both landed under separate owner PR exceptions (#18 and #19). Main 9a40642 has s
 
 ### QOS-0038 · Qualify lower-cost local structured-model testing
 **Owner:** Sage. **Status:** follow-up proposed, not implemented/qualified live. Existing local adapter presets and current LM Studio/llama.cpp/vLLM documentation offer candidate routes, but installed-version/schema/quantization/context evidence is needed. Current generic local presets do not advertise native structured-output support. MODEL_TESTING.md records fixture/replay reuse, local routes and conditional subscription API-credit eligibility, with a bounded witness/replay contract. No provider capability flag, model installation, paid call, workflow grant or standing order changed. The Sol key and exact fresh revision scope remain pending owner setup.
+
+
+### QOS-0039 · Bounded verified canary runtime acquisition
+**Owner:** Sage. **Status:** candidate; platform CI/review/PR-specific owner merge decision pending.
+Run 42478678093 / job 128725616179 failed runtime installation with HTTP504/incomplete archive
+before inference. Earlier wrong-answer failures remain QOS-0031; the strict oracle is unchanged.
+This contribution replaces the streamed installer (QOS-0005 remainder) with a committed release
+URL/size/SHA-256, three transport-only attempts, fresh partial files and mandatory verification
+before private extraction. Separate phase summary and allowlisted infrastructure metadata retain
+failure evidence without changing model-evidence admission. Forty new offline fault/contract cases;
+no local runtime/weight download, model call or workflow dispatch. Actual extraction and new live
+path remain unobserved until a future approved merge and its normal main canary.
+
+### 2026-11-08 landed-state correction — QOS-0037
+Goal admission/publication landed in #20 at Verified signed 9f294afcd46771772e35f419343161559cf12bfd
+under its individual owner exception. Main CI 42484325300 passed all 13 jobs; keyless canary
+42484325250 passed. Earlier candidate text records preparation, not current merge state. This is
+not a strategic producer, general model competence or M1 exit experiment.

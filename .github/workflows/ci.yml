@@ -49,7 +49,9 @@ jobs:
           ruff check src tests scripts
           ruff format --check src tests scripts
       - name: Types
-        run: mypy
+        run: |
+          mypy
+          mypy scripts/canary_runtime.py
       - name: Tests
         run: pytest -m "not live" --ignore=tests/live
       - name: CLI smoke (real hive, real chain)

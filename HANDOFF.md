@@ -1,45 +1,76 @@
 # HANDOFF → next engineer on Queen-OS
 
-Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude is unavailable. Preserve Claude's work and attribution. Owner merge exceptions remain PR-specific.
+Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude
+is unavailable. Preserve Claude's work and attribution. Owner merge exceptions remain PR-specific.
 
 ## Verified main and retained history
 
-Main is **9a40642eb1b6675936e455ce931a7e3ec325949c**, Verified signed #19 squash, tree 98165a2977a1f6f8bfe495af0e6bd0a9ff3cfbfd. Main CI 42480079372 passed all 13 checks, and automatic keyless canary 42480079373 passed. Read canary job 128729897305: retained-path verification and separate expect-word bee both pass. This is dated producer evidence, not general model competence or independent containment acceptance.
+Main is **9f294afcd46771772e35f419343161559cf12bfd**, Verified signed #20 squash,
+tree **6f178fe3f78bf99dc21cece1ddde83eef964fc84**. Main CI **42484325300** passed all
+13 checks; automatic keyless canary **42484325250** passed. These are dated producer results,
+not general model competence or independent containment acceptance.
 
-- #16: QOS-0008 structured JSON slice landed; streaming/general tools and broad live compatibility remain unfinished.
-- #17: one-use Sol witness and QOS-0034 controlled-clock test landed.
-- #18: QOS-0035 source-verified bounded capsule landed under its specific owner exception.
-- #19: QOS-0036 absolute lease deadline correction landed under its separate owner exception. No capsule/fence/expiry check relaxed.
-- Preserve main CI 42478678377 (01e52d4 ARM64 clock drift) and keyless canary 42478678093 (HTTP504 runtime download before inference). Later green does not relabel either failure.
+- #16: QOS-0008 structured JSON slice landed; streaming/general tools and live compatibility remain open.
+- #17: one-use Sol witness and QOS-0034 controlled-clock test landed. No Sol dispatch occurred here.
+- #18/#19: source-verified bounded capsule and absolute lease deadline correction landed under
+  separate owner exceptions; no capsule/fence/expiry check was relaxed.
+- #20: QOS-0037 deterministic goal/task validation, atomic publication/recovery and shared task/goal
+  spend ceilings landed under its own exception. Strategic model production and live M1 exit remain open.
+- Preserve main CI 42478678377 (01e52d4 ARM64 clock drift) and canary 42478678093
+  (HTTP504 runtime download before inference). Later green does not relabel either failure.
 
-## Current candidate: QOS-0037 goal-to-task admission/publication
+## Current candidate: canary runtime acquisition (QOS-0039 / QOS-0005 remainder)
 
-Johnny asks to validate proposed task graphs and budgets before publication, and explore cheaper model testing while the Sol key is absent.
+Johnny asks to resume the canary fix after repeated failure notifications. The historical audit
+separates four strict-answer failures (QOS-0031, fixed by #13's system prompt), one early invalid
+workflow configuration, and the HTTP504/incomplete runtime download. The latest known main
+canary passes; the remaining acquisition weakness is still actionable.
 
-queen/oviposition.py validates inert UTF-8 proposals against a separate host objective and PlanBudget, derives existing valve profiles, rejects malformed/cyclic/oversize/external/M2-dependent work and atomically signs/appends every egg plus goal.planned. Stable goal ID gives exact canonical replay or conflict, and read_plan resolves uncertain postcommit returns without repeating writes.
+This candidate replaces streamed install.sh execution with a committed Linux AMD64 release
+URL, exact byte count and SHA-256. A stdlib helper records each attempt, retries transient byte
+acquisition at most three times with fresh partial files, and publishes an archive only after
+complete verification. Permanent, integrity and local readback errors stop. It never installs
+or calls a model. The workflow extracts privately under RUNNER_TEMP, verifies client/server
+versions and separates acquisition/runtime/model/inference/integrity/answer outcomes.
 
-queen/budget.py intersects later spending with admitted task calls/output/tools and goal call/completion-token ceilings in the existing writer transaction. Replaced capabilities cannot reset lifetime task allowance. Unknown effects retain their reservations. These units are requested completion ceilings, not input-token, USD, energy or wall-time accounting. No automatic provider, scheduler or tool dispatcher is introduced.
+The two original inference calls, per-call 16-token ceiling, T=0/system prompt and separate
+strict bee oracle remain unchanged. Existing model-evidence admission still gates its upload.
+Only a small allowlist of infrastructure metadata is retained even on failure. No trigger,
+permission, standing-order or notification setting is broadened. See CANARY_RUNTIME.md.
 
-CLI: plan validate / publish / show. See docs/GOAL_PLANNING.md and examples/goal-plan.json. 57 new offline cases; local full suite **432 passed / 9 skipped** (7 absent historical archive checks; 2 local credential-home fixture restrictions). Ruff/format and strict mypy (37 source files) pass. Platform CI and exact revision evidence belong to this PR. No merge approval or cross-lineage review yet.
+Forty new offline cases: local full suite **472 passed / 9 skipped** (7 absent historical archive
+checks; 2 local credential-home fixture restrictions). Ruff/format, strict core mypy (37 files)
+and explicit helper mypy (1 file) pass. Actionlint/platform CI and exact PR head/base evidence
+must be checked on the candidate. No actual runtime archive/weight download, local installation,
+model execution or workflow rerun occurred. The new extraction/live path remains unobserved
+until a future approved protected merge and its ordinary main canary. No new merge approval.
 
-## Model testing: preserve scope and use evidence honestly
+## Model testing and next steps
 
-See docs/MODEL_TESTING.md for current primary-source options: fixture/replay reuse, existing local providers, constrained output, and conditional subscription API credits. Repository presets already include local servers; generic compatible presets do not automatically advertise native structured-output support. QOS-0038 is a qualification follow-up, not a live result or provider change.
+QOS-0038 / MODEL_TESTING.md cover lower-cost testing. Local inventory remains in private work
+receipts; no provider capability flag, service, weight download/load or witness was changed here.
+Installed-version/schema/quantization/context evidence is needed for a bounded local witness.
+Keep protocol compatibility, schema validity, graph/budget validity and semantic goal quality distinct.
 
-Sol remains ONE gpt-6.1-sol request / 1024 total completion tokens / USD0.05 / no tools or retries. Key setup is owner-controlled; none was configured or read here and no Sol dispatch occurred. Original approval was pinned to bb99eac. Main moved, so bind a concrete current revision decision before launch; the fixed expiry remains 2026-11-10 00:00 UTC. Do not test key presence by consuming the first-run slot or silently extend expired admission. This does not extend SO-0001.
+Sol remains ONE gpt-6.1-sol request / 1024 total completion tokens / USD0.05 / no tools or retries.
+The key is not configured; key setup remains owner-controlled. Original approval was pinned to
+bb99eac. Main moved, so bind a concrete current revision decision before launch; expiry remains
+2026-11-10 00:00 UTC. Never test key presence by consuming the first-run slot or silently renew
+expired admission. This does not extend SO-0001.
 
-Local model inventory, host availability and account details stay in local work receipts, not public source. No weight download, model load or inference was performed in this contribution. No credential/session-token copying, service/startup changes or paid API request.
+1. Qualify/review this canary candidate and obtain its own owner merge decision while Claude
+   is unavailable. Exceptions for #15–#20 do not cover another PR.
+2. After an approved merge, inspect the ordinary main canary at its exact SHA/run/attempt.
+   Preserve failure evidence; no automatic rerun or oracle relaxation.
+3. Establish a bounded existing-local-model witness and replay evidence under a separate concrete scope.
+4. Wire a strategic proposal producer through witnessed providers and prepare the real M1 goal/worker/gate
+   exit experiment. A canned witness or fixture graph does not satisfy that milestone.
 
-## Next work
-
-1. Qualify/review QOS-0037 and obtain its own owner merge decision while Claude is unavailable; prior approvals only covered #15–#19 individually.
-2. Establish the exact existing local model/server/version and a bounded synthetic witness, then retain/replay evidence. Keep local protocol compatibility, schema validity, graph/budget validity and semantic goal quality distinct.
-3. Wire a strategic proposal producer through the existing witnessed-provider path only under a separate concrete call scope. The validator must still refuse bad proposals; model text never mints authority.
-4. Prepare an M1 exit experiment after the pieces fit, with exact candidate/provider/model/calls/tokens/cost/time and independent-review limits. A single canned witness or fixture graph is not the M1 exit.
-
-Read CLAUDE.md, ENGINEERS.md, latest LEDGER and BUILD_MAP before changes; baseline plus fresh signed hive verification. Contributions branch from main and land through protected signed squash merges.
-
-Frozen Astra v65 remains untouched/NO-GO: independent containment acceptance and a verified fresh-session adapter are absent. In-process repository controls, model adapters, CI and owner merge decisions do not replace those gates. The separate hourly stays read-only and documentary; manual construction is a distinct lane.
+Read CLAUDE.md, docs/ENGINEERS.md, latest LEDGER and BUILD_MAP; baseline plus fresh signed hive
+verification before changes. Work branches from main and lands through protected signed squash merges.
+Frozen Astra v65 remains untouched/NO-GO; independent containment acceptance and a verified
+fresh-session adapter are absent. Repository controls, CI and owner merge decisions do not replace
+those gates. The hourly lane stays read-only/documentary; manual construction is separate.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
