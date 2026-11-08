@@ -108,13 +108,24 @@ class Authority:
         self.ledger = ledger
         self.signer = signer
 
-    def issue(self, subject: str, scope: str, grant: Grant, ttl_ms: int) -> Capability:
+    def issue(
+        self, subject: str, scope: str, grant: Grant, ttl_ms: int, *, not_after_ms: int | None = None
+    ) -> Capability:
+        """Issue with a relative lifetime and optional absolute upper deadline.
+
+        The host may narrow expiry to a source lease's fixed deadline. Compute both
+        from this one clock read; never add an earlier caller's remaining TTL to a
+        later clock and accidentally extend authority beyond that lease.
+        """
         if ttl_ms <= 0 or grant.max_calls <= 0 or grant.max_output_tokens <= 0:
             raise ValueError("ttl, max_calls and max_output_tokens must be positive")
+        if not_after_ms is not None and type(not_after_ms) is not int:
+            raise ValueError("absolute expiry deadline must be an integer")
         now = self.ledger.now()
-        unsigned = Capability(
-            f"cap_{uuid.uuid4().hex}", self.signer.key_id, subject, scope, grant, now, now + ttl_ms, ""
-        )
+        expires = now + ttl_ms if not_after_ms is None else min(now + ttl_ms, not_after_ms)
+        if expires <= now:
+            raise AuthorityError("capability deadline has expired; no capability issued")
+        unsigned = Capability(f"cap_{uuid.uuid4().hex}", self.signer.key_id, subject, scope, grant, now, expires, "")
         signature = self.signer.sign(canonicalize(unsigned.body()))
         cap = Capability(**{**unsigned.__dict__, "signature": signature})
         self.ledger.append(ISSUED, f"authority:{self.signer.key_id}", cap.to_json(), op_id=f"{ISSUED}:{cap.token_id}")

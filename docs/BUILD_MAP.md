@@ -71,7 +71,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Hexagonal axial-coordinate comb grid (V2) | T1 | Cell addressing `(q, r)` as an index over task and domain space, used for locality in work stealing | `comb/hexgrid.py` | M2 |
 | CvRDT LWW cells + vector clocks for WAN (REMEDY §3.4) | T1 | Join-semilattice cell merges. Property tests check commutativity, associativity and idempotence. | `federation/crdt.py` | M5 |
 | Merkle Search Tree state healing (REMEDY §3.4) | T1 | MST over ledger keys, root-digest exchange | `federation/mst.py` | M5 |
-| Bounded resume capsules instead of context stuffing (V2 table) | T1 | Candidate canonical packet anchored to a verified signed head, bounded ancestor closure/effect refs and source readback. Same-worker live unspent claim restore only; spent/unknown effects block. See RESUME_CAPSULE.md for hard limits, stale-head refusal and omitted transitive outputs. Verification is linear; token savings unmeasured. | `comb/capsule.py`, `Worker.resume`, CLI | **M1 candidate, QOS-0035; 43 offline cases; platform CI/review pending** |
+| Bounded resume capsules instead of context stuffing (V2 table) | T1 | Canonical packet anchored to a verified signed head, bounded ancestor closure/effect refs and source readback. Same-worker live unspent claim restore only; spent/unknown effects block. See RESUME_CAPSULE.md for hard limits, stale-head refusal and omitted transitive outputs. Verification is linear; token savings unmeasured. | `comb/capsule.py`, `Worker.resume`, CLI | **Landed #18 / QOS-0035; PR matrix passed. Main exposed claim-expiry drift; QOS-0036 fix candidate, no full main pass yet.** |
 
 ### Plane 2 — Control Plane (Queen Core)
 
@@ -89,7 +89,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 | Concept | Tier | V5 realization | Module | Milestone |
 |---|---|---|---|---|
-| Page-Robinson stimulus-response claim + work stealing (Thesis §5.3) | T1 | Workers poll stimulus scores and claim through a fenced lease. Idle workers steal from neighbouring cells. | `workers/claim.py` | **M1 ✅** (#11; work-stealing by lease contention) |
+| Page-Robinson stimulus-response claim + work stealing (Thesis §5.3) | T1 | Workers poll stimulus scores and claim through a fenced lease. Idle workers steal from neighbouring cells. QOS-0036 candidate applies the lease's absolute deadline during capability signing; no expiry/fence check is relaxed. | `workers/claim.py` | **Landed #11; QOS-0036 claim-deadline correction pending qualification/review** |
 | Age-Polyethic State Machine driven by context use τ (Thesis §5.3) | T1 | Role state machine (Nurse→Maintenance→Forager→Vigil) driven by measured context utilization. Triggers compaction. | `workers/apsm.py` | M2 |
 | H2O KV compaction / RadixAttention pruning | T3 | Server-side inference internals. The harness-side analogue is context compaction plus prefix-cache-preserving prompt layout (copied from Hermes's "prompt cache is sacred" invariant). | `workers/context.py` | M2 |
 | Process isolation of workers | T1 / T2 | Subprocess workers on every OS. Landlock/seccomp (Linux), Job Objects (Windows) and sandbox-exec (macOS) are T2 providers. | `host/sandbox_*.py` | M3 |

@@ -382,3 +382,19 @@ Johnny requests a handoff/build-map refresh first, then the resume capsule. The 
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+---
+
+## 2026-11-08 · Sage/Codex · #18 merged; QOS-0036 absolute claim deadline correction
+
+- **Owner/merge readback:** Johnny authorizes PR #18 only. Signed squash 01e52d4dfb24bb1d2e9381e8849051ce3d4b7ef9 is GitHub Verified, parent bb99eac, tree a26cc13df291e05054ca73a2962922500319f61d identical to the 93-blob qualified candidate. Main and closed/merged PR were read back. PR run 42478326333 attempt 1 passed all 13 checks.
+- **Preserved main failure:** push CI 42478678377 at 01e52d4 failed ARM64/Python 3.13 job 128725617876, capsule reopen/resume: signed capability expiry exceeded its source lease. Other 12 jobs passed. Do not substitute PR green for main failure or rerun for a lucky clock alignment.
+- **Reproduction:** fresh isolated source matches all 93 public main blobs; fresh signed test-hive genesis verifies. Local unchanged baseline 366 passed / 9 skipped, demonstrating why timing luck is insufficient. New deterministic +1 ms-per-read claim test fails on unchanged code: capability expiry exceeds lease by 1 ms. Worker._bind computed a relative remaining TTL at an earlier clock, then Authority.issue added it to a later clock.
+- **Fix candidate:** optional integer not_after_ms on host Authority.issue clamps expiry at the issuer's single time read, and refuses an elapsed deadline before signing/appending. Worker supplies the absolute lease expiry. No wire field changes, model authority, budget expansion, extra lifetime, relaxed capsule/fence/expiry check or automatic retry. Default issuance is unchanged. Preexisting bad capabilities remain invalid for resume.
+- **Evidence:** 9 new offline regressions cover clock drift with real signed claim/capsule restore, boundary-time authorization, TTL not extended by later bound, ambiguous deadline refusal, and elapsed binding with no issued capability/claim. The already committed lease grant is retained on binding failure; no multi-event atomicity claim. Final local full suite 375 passed / 9 skips (7 absent historical archive, 2 credential-home fixture restrictions); ruff check/format and strict mypy pass (35 source files). Platform CI/revision evidence belongs to the new PR.
+- **Independent infrastructure failure:** keyless main canary 42478678093 / 128725616179 failed runtime download HTTP 504 and incomplete archive before inference. No semantic/receipt verdict, no rerun, and no Sol dispatch. This fix does not change the downloader.
+- **Continuation:** qualify this focused follow-up and obtain its own review/owner merge decision. #18 approval does not cover a new PR. Then oviposition/coordinator, followed by separately scoped M1 exit preparation. Keep Sol approval pinned to bb99eac; main movement requires a new scoped revision decision. Frozen Astra v65 remains untouched/NO-GO.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

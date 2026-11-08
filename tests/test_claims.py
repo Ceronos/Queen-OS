@@ -146,3 +146,44 @@ def test_end_to_end_claim_infer_deliver_with_witnessed_receipt(hive: Hive) -> No
         "lease.released",
     ]
     assert hive.ledger.verify_chain(require_signatures=True) == len(kinds)
+
+
+def test_claim_deadline_does_not_drift_between_clock_reads(hive: Hive, monkeypatch: pytest.MonkeyPatch) -> None:
+    from queen_os.comb.capsule import build_capsule
+
+    now = [hive.ledger.now()]
+
+    def advancing_clock() -> int:
+        now[0] += 1
+        return now[0]
+
+    monkeypatch.setattr(hive.ledger, "now", advancing_clock)
+    e = lay(hive, "g", "diploid", {"q": "x"}, STRICT, stimulus=0.9)
+    w = Worker(hive, "a")
+    claim = w.claim(ttl_ms=5_000)
+    assert claim is not None
+    assert claim.capability.expires_ms <= claim.lease.expires_ms
+    restored = w.resume(build_capsule(hive, e.egg_id).raw)
+    assert restored is not None and restored.capability == claim.capability
+
+
+def test_lease_expiring_before_issue_mints_no_claim_or_capability(hive: Hive, monkeypatch: pytest.MonkeyPatch) -> None:
+    from queen_os.authority.tokens import Authority
+
+    now = [hive.ledger.now()]
+    monkeypatch.setattr(hive.ledger, "now", lambda: now[0])
+    lay(hive, "g", "diploid", {"q": "x"}, STRICT, stimulus=0.9)
+    original = Authority.issue
+
+    def delay_issue(self: Authority, *args, **kwargs):  # type: ignore[no-untyped-def]
+        now[0] += 5_000
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Authority, "issue", delay_issue)
+    with pytest.raises(AuthorityError, match="deadline"):
+        Worker(hive, "a").claim(ttl_ms=5_000)
+    assert not list(hive.ledger.events(kind="capability.issued"))
+    assert not list(hive.ledger.events(kind="egg.claimed"))
+    # Lease acquisition already committed: retain that partial history, never
+    # pretend the whole bind was atomic or silently delete/retry the operation.
+    assert len(list(hive.ledger.events(kind="lease.granted"))) == 1
