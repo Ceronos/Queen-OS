@@ -61,3 +61,8 @@ The candidate adds 43 offline cases: reopen/resume and single delivery, stale/ta
 
 Local full suite on November 8: 366 passed, 9 skipped (7 historical archive checks with no private ZIP supplied; 2 credential-home checks unavailable in the local execution view). Ruff and strict mypy are required. Platform CI must establish its actual candidate revision and scope before qualification. No live provider call, cross-lineage review, runtime containment acceptance or M1 exit claim follows from these tests.
 
+
+
+## November 8 post-merge qualification finding
+
+The capsule landed in #18 (Verified signed 01e52d4); its PR matrix 42478326333 passed. Main run 42478678377 then exposed the existing claim binder's clock drift: its capability could expire after its lease. The capsule correctly refuses such a claim. QOS-0036 supplies an absolute issuance deadline; the resume check stays unchanged. Legacy malformed claims are not silently repaired. See HANDOFF and the QOS-0036 follow-up PR for current revision/CI evidence. The separate keyless canary failed before inference on a runtime-download HTTP 504, so there is no live verdict for this main revision.

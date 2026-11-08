@@ -115,7 +115,9 @@ class Worker:
             max_calls=profile.max_calls,
         )
         ttl = lease.expires_ms - self.hive.ledger.now()
-        cap = self.hive.authority().issue(self.actor, f"egg:{egg.egg_id}", grant, ttl_ms=max(ttl, 1))
+        cap = self.hive.authority().issue(
+            self.actor, f"egg:{egg.egg_id}", grant, ttl_ms=max(ttl, 1), not_after_ms=lease.expires_ms
+        )
         self.hive.ledger.append(
             "egg.claimed",
             self.actor,

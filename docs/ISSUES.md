@@ -99,3 +99,12 @@ Sage: structured JSON slice landed in #16; QOS-0008 remains partial for streamin
 ### QOS-0035 · Bounded verified resume context and existing-claim restore
 **Owner:** Sage. **Status:** candidate, platform CI/review/owner merge decision pending. Added comb/capsule.py, deferred ledger snapshots, Worker.resume and capsule build/verify CLI. Packet context grants no authority; stale heads, altered source, missing evidence, resource overflow and unrecorded artifacts fail closed. Same-worker live unspent claim only; a spend with no receipt is uncertain, not retry permission. Complete bounded ancestor closure; only direct-parent outputs inline. See RESUME_CAPSULE.md. 43 new offline cases; local full suite 366 passed / 9 skipped. No live call or independent acceptance. Larger-ledger checkpoints, reconciliation broker, oviposition, performance/token measurement and M1 exit experiment remain separate.
 
+
+
+### 2026-11-08 · QOS-0035 landed; QOS-0036 capability/lease deadline drift
+**Owner:** Sage. **QOS-0035 status:** landed #18 at Verified signed 01e52d4, under the owner's #18-only review exception. PR matrix 42478326333 passed; main push run 42478678377 failed ARM64/Python 3.13 job 128725617876 in capsule reopen/resume, with the remaining 12 jobs passing.
+**QOS-0036 status:** fix candidate; new CI/review/owner merge decision pending. Worker binding subtracted one clock reading from the lease deadline, then Authority.issue added a later reading to that relative TTL. The capability could outlive its lease by the elapsed interval. The capsule correctly rejects it. An advancing-clock test deterministically reproduced a +1 ms excess on unchanged main.
+
+Authority.issue now optionally clamps expiry to the host's absolute not_after_ms at its own clock read; an elapsed deadline signs/appends nothing. Worker binding supplies its lease deadline. Default callers/wire shape remain unchanged, and resume/fence/expiry checks are not loosened. 9 added offline cases, including exact deadline, later-bound no extension, invalid types, and expiry before binding (the preexisting committed lease grant remains). Local full suite 375 passed / 9 skipped; ruff/strict mypy pass. Legacy overlong caps are not rewritten or silently resumed.
+
+Separate infrastructure observation: main keyless canary 42478678093 / job 128725616179 failed the pinned Ollama installation with HTTP 504/incomplete archive, before inference. No semantic or receipt verdict exists for that revision; no rerun dispatched and no Sol slot consumed.
