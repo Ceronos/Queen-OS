@@ -45,7 +45,7 @@ class NonSimulationViolation(PermissionError):
 
 
 class StructuredOutputRejected(NonSimulationViolation):
-    """An HTTP-success response failed the output contract; its signed receipt is retained."""
+    """A received response failed the output contract; its signed receipt is retained."""
 
     def __init__(self, receipt: Event):
         self.receipt = receipt
@@ -218,6 +218,6 @@ def verify_receipt(hive: Hive, event: Event) -> InferenceResult:
         "finish_reason": result.finish_reason,
     }
     for key, derived in checks.items():
-        if p[key] != derived:
+        if p[key] != derived or (p["v"] == 2 and type(p[key]) is not type(derived)):
             raise NonSimulationViolation(f"seq {event.seq}: receipt field {key} does not match raw response")
     return result

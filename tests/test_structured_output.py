@@ -344,3 +344,15 @@ def test_schema_nested_nullable_array_and_enum() -> None:
     assert spec.validate('{"answer":["bee",null]}') == {"answer": ["bee", None]}
     with pytest.raises(StructuredOutputError):
         spec.validate('{"answer":["wasp"]}')
+
+
+def test_v2_receipt_usage_cannot_change_integer_to_boolean(hive: Hive) -> None:
+    data = envelope("openai")
+    data["usage"] = {"prompt_tokens": 2, "completion_tokens": 1}
+    raw = json.dumps(data).encode()
+    with httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(200, content=raw))) as client:
+        w = Inference(hive, client).run(provider("openai"), REQ, actor="w", capability=grant(hive))
+    assert verify_receipt(hive, w.receipt).output_tokens == 1
+    forged = hive.ledger.append("inference.receipt", "w", dict(w.receipt.payload, output_tokens=True))
+    with pytest.raises(NonSimulationViolation, match="output_tokens"):
+        verify_receipt(hive, forged)

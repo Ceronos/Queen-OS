@@ -43,7 +43,7 @@ For worker code, construct the output contract from the signed egg schema, pass 
 
 ## Evidence and boundaries
 
-Baseline: 256 offline tests passed with the separately retained historical artifact, one live test deselected, fresh signed test-hive chain verified. Candidate: **305 offline tests passed**, including 49 new tests; ruff and strict mypy passed. Tests cover immutable schemas, native literal wire fields, raw-byte custody, reopen/replay, rejected/error responses, spent budgets/no retry, unsupported mode, production fixture refusal, metadata tampering/downgrade, gate hatch/purge and CLI status.
+Baseline: 256 offline tests passed with the separately retained historical artifact, one live test deselected, fresh signed test-hive chain verified. Candidate: **306 offline tests passed**, including 50 new tests; ruff and strict mypy passed. Tests cover immutable schemas, native literal wire fields, raw-byte custody, reopen/replay, rejected/error responses, spent budgets/no retry, unsupported mode, production fixture refusal, metadata tampering/downgrade, gate hatch/purge and CLI status.
 
 Offline codec/mocked-HTTP tests do not establish a live vendor/runtime witness. Existing plaintext archive replay remains covered; ordinary CI skips seven archive-dependent cases unless the separately retained ZIP is provided. No raw ZIP, key or private research material is published.
 
