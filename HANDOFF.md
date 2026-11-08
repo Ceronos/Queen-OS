@@ -1,76 +1,70 @@
 # HANDOFF → next engineer on Queen-OS
 
-Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude
-is unavailable. Preserve Claude's work and attribution. Owner merge exceptions remain PR-specific.
+Updated November 8, 2026 by Sage/Codex, leading construction while Claude is unavailable.
+Keep owner merge exceptions PR-specific and preserve Claude's work/attribution.
 
-## Verified main and retained history
+## Verified main
 
-Main is **9f294afcd46771772e35f419343161559cf12bfd**, Verified signed #20 squash,
-tree **6f178fe3f78bf99dc21cece1ddde83eef964fc84**. Main CI **42484325300** passed all
-13 checks; automatic keyless canary **42484325250** passed. These are dated producer results,
-not general model competence or independent containment acceptance.
+Main is Verified signed **fe95a0fe8401090d3909026f84739993da65f319** (#21), tree
+**0089ac30495f853635ae7986b3a325bfcde55936**. Main CI 42499921886 passes all 13 jobs.
+Normal main canary 42499921790, attempt 1, job 128790235107 passes all phases: committed
+archive pin verified on attempt 1, private extraction/runtime readiness, model acquisition,
+pytest/CLI inference, signed-artifact integrity and strict bee oracle. This observes the new
+archive path for this exact main revision; it is not broad semantic or containment acceptance.
 
-- #16: QOS-0008 structured JSON slice landed; streaming/general tools and live compatibility remain open.
-- #17: one-use Sol witness and QOS-0034 controlled-clock test landed. No Sol dispatch occurred here.
-- #18/#19: source-verified bounded capsule and absolute lease deadline correction landed under
-  separate owner exceptions; no capsule/fence/expiry check was relaxed.
-- #20: QOS-0037 deterministic goal/task validation, atomic publication/recovery and shared task/goal
-  spend ceilings landed under its own exception. Strategic model production and live M1 exit remain open.
-- Preserve main CI 42478678377 (01e52d4 ARM64 clock drift) and canary 42478678093
-  (HTTP504 runtime download before inference). Later green does not relabel either failure.
+#16 structured output; #17 one-use Sol code/test clock; #18 bounded capsule; #19 absolute lease
+deadline; #20 bounded goal/task admission/publication; #21 canary download hardening are landed.
+Each owner review exception covered its PR only. Historical clock-drift and pre-inference
+HTTP504 failures remain evidence; later green does not relabel them.
 
-## Current candidate: canary runtime acquisition (QOS-0039 / QOS-0005 remainder)
+## Current candidate: LM Studio lifecycle and schema route (QOS-0040)
 
-Johnny asks to resume the canary fix after repeated failure notifications. The historical audit
-separates four strict-answer failures (QOS-0031, fixed by #13's system prompt), one early invalid
-workflow configuration, and the HTTP504/incomplete runtime download. The latest known main
-canary passes; the remaining acquisition weakness is still actionable.
+The owner prioritizes LM Studio and explicitly permits manual launch/use of LM Studio or Hermes.
+This contribution focuses on LM Studio. The first requested local witness is bounded to a
+2048-token context, one synthetic generation, <=512 output tokens and no tools/retries.
+Private model inventory and runtime receipts stay outside the public repository. No hosted
+API fallback is added; the Sol key is absent and Sol work is deferred.
 
-This candidate replaces streamed install.sh execution with a committed Linux AMD64 release
-URL, exact byte count and SHA-256. A stdlib helper records each attempt, retries transient byte
-acquisition at most three times with fresh partial files, and publishes an archive only after
-complete verification. Permanent, integrity and local readback errors stop. It never installs
-or calls a model. The workflow extracts privately under RUNNER_TEMP, verifies client/server
-versions and separates acquisition/runtime/model/inference/integrity/answer outcomes.
+Existing lmstudio adapter already routes witnessed text. New providers/lmstudio.py +
+queen models list/load/unload/status add explicit operator control over an existing local
+server, with loopback-only/no-proxy/no-redirect transport, bounded metadata, exact available
+LLM/instance selection and context/reported-weight ceilings. A signed intent precedes one
+load/unload POST. Repeated operation IDs refuse another POST; GET-only status handles lost
+replies without inventing effects. Producer readback establishes current state, not causality
+or independent acceptance. Different IDs/hives/clients are not fenced by this slice.
 
-The two original inference calls, per-call 16-token ceiling, T=0/system prompt and separate
-strict bee oracle remain unchanged. Existing model-evidence admission still gates its upload.
-Only a small allowlist of infrastructure metadata is retained even on failure. No trigger,
-permission, standing-order or notification setting is broadened. See CANARY_RUNTIME.md.
+LM Studio-only native JSON-schema preset is enabled from its documented wire contract.
+No schema downgrade or repair; exact raw request/response custody, signature verification,
+capability spend and separate semantic judgement remain. Other generic presets stay unqualified.
+No automatic model download, service install, worker lifecycle tool, hosted fallback or private
+Queen-owned engine is implemented. A later pinned local engine supervisor can follow the same
+contract; Hermes is architectural reference, not an implementation imported here.
 
-Forty new offline cases: local full suite **472 passed / 9 skipped** (7 absent historical archive
-checks; 2 local credential-home fixture restrictions). Ruff/format, strict core mypy (37 files)
-and explicit helper mypy (1 file) pass. Actionlint/platform CI and exact PR head/base evidence
-must be checked on the candidate. No actual runtime archive/weight download, local installation,
-model execution or workflow rerun occurred. The new extraction/live path remains unobserved
-until a future approved protected merge and its ordinary main canary. No new merge approval.
+46 new offline cases; full local **518 passed / 9 skipped** (7 absent historical archives,
+2 local credential-home restrictions). Ruff/format and strict mypy38 pass. Fresh signed hive
+and baseline 472/9 verified before edits. CI and actual local witness results must bind the
+exact PR revision; neither is substituted by this preparation note. See LOCAL_MODELS.md.
 
-## Model testing and next steps
+## Next actions and standing limits
 
-QOS-0038 / MODEL_TESTING.md cover lower-cost testing. Local inventory remains in private work
-receipts; no provider capability flag, service, weight download/load or witness was changed here.
-Installed-version/schema/quantization/context evidence is needed for a bounded local witness.
-Keep protocol compatibility, schema validity, graph/budget validity and semantic goal quality distinct.
+1. Qualify this candidate's offline matrix at exact head/base; keep private runtime receipts
+   separate and report actual local witness success, failure or UNKNOWN without retry.
+2. Obtain a new PR-specific owner merge decision while Claude is unavailable. #21 approval
+   does not cover this candidate. Preserve protected signed squash and verify the signature.
+3. Wire a strategic proposal producer through witnessed providers, then prepare the real M1
+   goal/worker/gate exit experiment. A canned schema witness or fixture DAG is not that exit.
+4. Keep model identity/configuration, protocol/schema validity, task budgets and semantic goal
+   quality separate. Weight bytes are not peak VRAM; backend resource placement is not attested.
 
-Sol remains ONE gpt-6.1-sol request / 1024 total completion tokens / USD0.05 / no tools or retries.
-The key is not configured; key setup remains owner-controlled. Original approval was pinned to
-bb99eac. Main moved, so bind a concrete current revision decision before launch; expiry remains
-2026-11-10 00:00 UTC. Never test key presence by consuming the first-run slot or silently renew
-expired admission. This does not extend SO-0001.
+The separate Sol approval was ONE request / 1024 total completion tokens / USD0.05 / no tools
+or retries at bb99eac, expiry 2026-11-10 00:00 UTC. No key or dispatch occurred here. A fresh
+exact revision decision is required before any future launch; do not silently extend expiry
+or consume the slot checking key presence. Manual LM Studio permission does not broaden SO-0001.
 
-1. Qualify/review this canary candidate and obtain its own owner merge decision while Claude
-   is unavailable. Exceptions for #15–#20 do not cover another PR.
-2. After an approved merge, inspect the ordinary main canary at its exact SHA/run/attempt.
-   Preserve failure evidence; no automatic rerun or oracle relaxation.
-3. Establish a bounded existing-local-model witness and replay evidence under a separate concrete scope.
-4. Wire a strategic proposal producer through witnessed providers and prepare the real M1 goal/worker/gate
-   exit experiment. A canned witness or fixture graph does not satisfy that milestone.
-
-Read CLAUDE.md, docs/ENGINEERS.md, latest LEDGER and BUILD_MAP; baseline plus fresh signed hive
-verification before changes. Work branches from main and lands through protected signed squash merges.
-Frozen Astra v65 remains untouched/NO-GO; independent containment acceptance and a verified
-fresh-session adapter are absent. Repository controls, CI and owner merge decisions do not replace
-those gates. The hourly lane stays read-only/documentary; manual construction is separate.
+Read CLAUDE.md, docs/ENGINEERS.md, latest LEDGER/BUILD_MAP; baseline and fresh signed hive
+before changes. LEDGER append-only. Frozen Astra v65 remains untouched/NO-GO: independent
+containment acceptance and a fresh-session adapter remain absent. Manual local repository
+work and its owner grant do not migrate that acceptance boundary. Hourly stays read-only.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

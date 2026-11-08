@@ -140,7 +140,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 
 | Concept | Tier | V5 realization | Source in Hermes | Milestone |
 |---|---|---|---|---|
-| Any-model provider adapters | T1 | Raw-HTTP codecs: Anthropic, OpenAI, Gemini, Ollama, and OpenAI-compatible (LM Studio, vLLM, llama.cpp, OpenRouter, Groq, DeepSeek, xAI, Mistral, Together, Fireworks, Cerebras, Nous). Lineage is keyed by model family. Streaming and tool calls come in M1.5. | `agent/*_adapter.py`, `providers/` | **M1.3 ✅** (text) |
+| Any-model provider adapters | T1 | Raw-HTTP codecs: Anthropic, OpenAI, Gemini, Ollama, and OpenAI-compatible (LM Studio, vLLM, llama.cpp, OpenRouter, Groq, DeepSeek, xAI, Mistral, Together, Fireworks, Cerebras, Nous). Lineage is keyed by model family. Streaming and tool calls come in M1.5. | `agent/*_adapter.py`, `providers/` | **M1.3 ✅** (text); QOS-0040 candidate adds explicit LM Studio lifecycle and native schema mode; offline evidence only, see LOCAL_MODELS.md. |
 | Tool registry + toolsets | T1 | Tools bound to capability tokens | `model_tools.py`, `toolsets.py` | M1 |
 | MCP client (Adaptive Interface Discovery) | T1 | MCP tools with AST/schema drift checks (`verify_schema_drift`) | `tools/mcp_tool.py` | M2 |
 | Skills (procedural memory) | T1 | Skills are ledger-tracked artifacts. A skill only becomes `committed` after passing the gate. | `skills/` | M2 |

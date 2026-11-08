@@ -453,3 +453,40 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+## 2026-11-08 · Sage — explicit LM Studio local-model lifecycle (QOS-0040 candidate)
+
+- **Main:** owner approved #21 only; merged as Verified signed fe95a0fe8401090d3909026f84739993da65f319,
+  tree 0089ac30495f853635ae7986b3a325bfcde55936. Main CI 42499921886 all13 success; normal
+  canary 42499921790 attempt1/job128790235107 passed archive verification on attempt1 and
+  all extraction/runtime/inference/integrity/strict-answer phases. No rerun dispatched.
+- **Owner direction:** focus on LM Studio; Queen-OS should load local models; Hermes is reference
+  for a managed runtime. Explicit manual LM Studio/Hermes launch/use permission followed.
+  This is not a recurring hourly grant, a merge exception or containment acceptance.
+- **Baseline:** all104 public blobs copied into an isolated source and verified against main.
+  472 passed/9 skipped plus fresh signed-genesis hive verified before edits.
+- **Implementation:** operator-only models list/load/unload/status; existing local LM Studio
+  native v1 API; loopback-only fixed routes, no proxy/redirect/auth discovery, bounded metadata,
+  exact target, context and reported-weight checks. A signed intent commits/readbacks before
+  one POST; repeated operation IDs cannot repeat effects even after lost responses or failed
+  intent readback. GET-only status records producer state with explicit causality limits.
+- **Inference:** documented LM Studio schema preset enabled; existing wire, scoped capability,
+  raw custody, strict response admission and signed replay reused. Generic presets unchanged.
+  Fixture transports/receipts are explicitly marked; production fixture mutation refused.
+- **Evidence:** 46 new offline cases including concurrent same-ID claim, uncertainty/recovery,
+  resource/identity/transport refusals, signed lifecycle cycle and schema custody/replay.
+  Local full518 passed/9 existing skips; ruff/format, mypy38 pass. Platform CI and concrete local
+  witness evidence remain to be attached to the exact candidate revision. Private launch,
+  local inventory and runtime receipts are kept only in local work, not source/GitHub artifacts.
+- **Limits:** existing backend required; no runtime/weight download, service install, automatic
+  loading during inference, model tool, engine supervisor or hosted fallback. Defaults 2048
+  context/16GiB reported-weight ceiling are not a GPU-memory guarantee. Operation IDs protect
+  one hive/request, not other clients or backend operations. Current-state readback does not
+  establish causal execution or independent acceptance. Sol deferred with no call/key change.
+- **Next:** qualify actual candidate CI; perform at most the owner-authorized one synthetic
+  <=512-token local witness with no tools/retries when reachable, inspect/replay private
+  evidence; preserve unknown effects. Obtain a new PR-specific owner merge decision.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

@@ -72,7 +72,13 @@ PRESETS: dict[str, Preset] = {
             extra_base_env="OLLAMA_HOST",
         ),
         Preset(
-            "lmstudio", "openai", "http://localhost:1234/v1", ("LMSTUDIO_API_KEY",), kind="local", key_required=False
+            "lmstudio",
+            "openai",
+            "http://localhost:1234/v1",
+            ("LMSTUDIO_API_KEY",),
+            kind="local",
+            key_required=False,
+            json_schema_output=True,
         ),
         Preset("vllm", "openai", "http://localhost:8000/v1", ("VLLM_API_KEY",), kind="local", key_required=False),
         Preset(
