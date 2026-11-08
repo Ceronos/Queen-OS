@@ -42,5 +42,5 @@ A hardware claim (TPM, PTP, NUMA, core pinning, hugepages) counts as evidence on
 `host.probe` event or a test result from the actual machine backs it. Anything else is a plan.
 
 ## Live inference
-Through `.github/workflows/live-inference.yml` (see `docs/LIVE_INFERENCE.md`), or the separately owner-approved one-use `.github/workflows/bounded-sol-smoke.yml` (see `docs/BOUNDED_SOL_SMOKE.md`). The latter is a candidate until owner approval; it does not extend SO-0001. Keys belong in the
+Through `.github/workflows/live-inference.yml` (see `docs/LIVE_INFERENCE.md`), or the separately owner-approved one-use `.github/workflows/bounded-sol-smoke.yml` (see `docs/BOUNDED_SOL_SMOKE.md`). The latter landed in #17 with an owner-approved one-use scope at bb99eac; it does not extend SO-0001 or automatically authorize later revisions. Keys belong in the
 `live-inference` **environment** secrets. They never go in chat, files or commits.

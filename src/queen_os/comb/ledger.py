@@ -26,7 +26,7 @@ import sqlite3
 import time
 import uuid
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -183,6 +183,33 @@ class Ledger:
             with self.transaction() as db:
                 db.execute("ALTER TABLE events ADD COLUMN op_id TEXT")
                 db.execute("CREATE UNIQUE INDEX IF NOT EXISTS events_op_id ON events(op_id)")
+
+    @contextmanager
+    def read_snapshot(self) -> Iterator[sqlite3.Connection]:
+        """One consistent WAL read view, without a writer reservation or persisted changes.
+
+        Do not nest inside another transaction. Incidental SQL writes are rolled back;
+        this is a trusted-caller consistency API, not a same-process access boundary.
+        """
+        if self._db.in_transaction:
+            raise LedgerError("read snapshot requires an idle connection")
+        self._db.execute("BEGIN")
+        primary: BaseException | None = None
+        try:
+            yield self._db
+        except BaseException as exc:
+            primary = exc
+            raise
+        finally:
+            try:
+                if self._db.in_transaction:
+                    self._db.execute("ROLLBACK")
+            except BaseException:
+                with suppress(BaseException):
+                    self._db.close()
+                if primary is None:
+                    raise
+                primary.add_note("Read snapshot cleanup failed; connection discarded. Reopen before further work.")
 
     def _register_signer(self, signer: Signer) -> None:
         with self.transaction() as db:

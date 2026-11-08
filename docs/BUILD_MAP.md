@@ -1,6 +1,6 @@
 # Queen-OS V5 Build Map
 
-**Status:** v0.2, 2026-11-07. v0.1 at the start of the V5 build; v0.2 adds the Pillar 1 spec review.
+**Status:** v0.3, 2026-11-08. Landed-state refresh through signed main bb99eac (#17); source read-coverage below remains historical, not a claim of newly read blueprints.
 **Purpose:** list every concept in the Queen-OS V1–V4 blueprint corpus, sort each one by what a
 software harness can actually run, and map it to a V5 module. V5 is the unified,
 non-simulated harness. Anything in Tier 1 that is not built is a gap. Anything in Tier 3 or
@@ -71,7 +71,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | Hexagonal axial-coordinate comb grid (V2) | T1 | Cell addressing `(q, r)` as an index over task and domain space, used for locality in work stealing | `comb/hexgrid.py` | M2 |
 | CvRDT LWW cells + vector clocks for WAN (REMEDY §3.4) | T1 | Join-semilattice cell merges. Property tests check commutativity, associativity and idempotence. | `federation/crdt.py` | M5 |
 | Merkle Search Tree state healing (REMEDY §3.4) | T1 | MST over ledger keys, root-digest exchange | `federation/mst.py` | M5 |
-| O(1) resume capsules instead of context stuffing (V2 table) | T1 | Service-generated state-head capsule handed to an agent instead of chat history. **This is the real token win.** "Zero-token" is inaccurate: agents still read the capsule. | `comb/capsule.py` | M1 |
+| Bounded resume capsules instead of context stuffing (V2 table) | T1 | Candidate canonical packet anchored to a verified signed head, bounded ancestor closure/effect refs and source readback. Same-worker live unspent claim restore only; spent/unknown effects block. See RESUME_CAPSULE.md for hard limits, stale-head refusal and omitted transitive outputs. Verification is linear; token savings unmeasured. | `comb/capsule.py`, `Worker.resume`, CLI | **M1 candidate, QOS-0035; 43 offline cases; platform CI/review pending** |
 
 ### Plane 2 — Control Plane (Queen Core)
 
@@ -102,8 +102,8 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | AF-SER-V1 canonicalization + 6-step post-write fetch (P2 §4) | T1 | Real RFC 8785 JCS (UTF-16 key order, ES6 number format). Non-NFC strings are **rejected** rather than silently normalized, so data is never mutated. Post-write fetch is applied to blobs, enclave promotion and ledger rows. | `serial/jcs.py`, `serial/afser.py` | **M0 ✅** |
 | VerificationGate staging→committed (P2 §3) | T1 | Append-only gate state machine. Promotion only with a passing evidence pack. | `gate/gate.py` | **M1 ✅** (#12: deterministic checks, fenced hatch/purge/hold; QOS-0032 landed #15: strict schema-valid canonical JSON receipt binding, ambiguity rejection) |
 | ADR-143 Evidence Packs (P2 §3.2) | T1 | Schema + collectors (exit code, runtime, digests, pytest, ruff, radon CC, mutmut). **Thresholds are per-profile config.** The 98.4% mutation / CC≤5 values ship as the `sovereign` profile, not the default, because a universal CC≤5 rule would reject most real code. | `gate/evidence.py` | **partial** (#12: JSON-output checks; code checks QOS-0029) |
-| InferenceReceipts (REMEDY §1.1) | T1 | Emitted by every provider adapter and host-signed. Raw bytes are stored, every claim is re-derivable, and fixtures are refused in production. | `providers/receipt.py` | **M1.3 ✅** (v1 text; QOS-0008 candidate adds v2 structured success/rejection custody/replay) |
-| Portable structured JSON output (QOS-0008) | T1 | Immutable bounded schema profile, native wire modes, strict response admission and versioned replay; no repair/retry or tool authority. Live compatibility unverified. | `providers/structured.py`, `providers/base.py`, `providers/adapters.py`, `providers/receipt.py`, `cli.py` | **M1 candidate** (offline fixture evidence; streaming/tools remain open) |
+| InferenceReceipts (REMEDY §1.1) | T1 | Emitted by every provider adapter and host-signed. Raw bytes are stored, every claim is re-derivable, and fixtures are refused in production. | `providers/receipt.py` | **M1.3 ✅** (v1 text plus #16 v2 structured success/rejection custody/replay; live structured compatibility unverified) |
+| Portable structured JSON output (QOS-0008) | T1 | Immutable bounded schema profile, native wire modes, strict response admission and versioned replay; no repair/retry or tool authority. Live compatibility unverified. | `providers/structured.py`, `providers/base.py`, `providers/adapters.py`, `providers/receipt.py`, `cli.py` | **M1 structured slice landed #16** (offline fixture/CI evidence; live structured witness, streaming/tools remain open) |
 | Tri-Sovereign heterogeneous 2-of-3 quorum (REMEDY §1.4) | T1 | Quorum across *distinct* provider lineages, enforced by lineage id. Invoked by Bresslau risk so cost scales with G. | `gate/quorum.py` | M2 |
 | Atomic Oophagy → /quarantine + signed receipt (Thesis §7.3) | T1 | `os.replace` into quarantine, signed tombstone event, worker termination | `gate/oophagy.py` | **M1 ✅** (#12: quarantine + capability revocation + signed `egg.purged`) |
 | Multi-channel alerts + disk DLQ (P2 §5.2) | T1 | Async dispatcher (webhook/Slack/Discord/PagerDuty/SMTP), JSONL DLQ, exponential backoff | `alerts/` | M3 |
@@ -200,4 +200,4 @@ The bounded live-smoke acceptance contribution adds an offline signed-artifact v
    encrypted secrets or the user's OS keyring. See `docs/SECRETS.md`.
 
 
-Bounded Sol witness candidate (QOS-0033): `scripts/bounded_sol_gate.py`, `scripts/bounded_sol_smoke.py` and the manual-only workflow concretize a single authorized test of the existing structured-output/receipt rows. This is experiment admission/evidence, not a new harness runtime module or recurring Sol order. Offline fixture evidence only until a separately approved live run; see BOUNDED_SOL_SMOKE.md.
+Bounded Sol witness landed #17 (QOS-0033): `scripts/bounded_sol_gate.py`, `scripts/bounded_sol_smoke.py` and the manual-only workflow concretize a single authorized test of the existing structured-output/receipt rows. This is experiment admission/evidence, not a new harness runtime module or recurring Sol order. Owner approved one request at bb99eac, 1024 completion tokens and USD 0.05; live execution is unobserved and key setup is pending. Later revisions need explicitly matched authorization. SO-0001 remains unchanged; see BOUNDED_SOL_SMOKE.md.

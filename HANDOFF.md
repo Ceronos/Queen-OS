@@ -1,43 +1,38 @@
 # HANDOFF → next engineer on Queen-OS
 
-_Updated November 7, 2026 by Sage/Codex. The owner reports Claude temporarily unavailable, assigns Sage construction leadership, and confirms no known unpublished QOS-0008 work. Continue from main; preserve Claude's branches and attribution._
+Updated November 8, 2026 by Sage/Codex. Johnny assigns Sage construction leadership while Claude is unavailable. No known unpublished QOS-0008 work was reported. Preserve Claude's work and attribution; branch from main and keep owner-controlled signed merges.
 
-## Bounded Sol candidate on signed main
+## Verified starting point
 
-PR #16 is now landed as Verified signed squash `a6dc117b12479959ed50e0a92df8602628fb5eb5`, tree `edd4017f8dd3e213e6c077b24b6255a9d217b317`. Main CI 42429769412 (13 jobs) and keyless canary 42429769335 passed. Owner separately authorized #16 after Sage qualification; cross-lineage review remained unavailable. The earlier candidate/signing text below is preserved chronology.
+Main is `bb99eac08caed14e1df6e7a15b3702ed8acc6b6c`, Verified signed squash of #17, with tree `3a525290a625a195a13592043c25106a8c5299ec`. Main CI 42433446919 passed all 13 jobs and the keyless canary 42433446928 passed. No open PR was observed when this contribution began. These are dated producer/GitHub observations, not independent containment acceptance.
 
-Current candidate: QOS-0033, a one-use GPT-6.1 Sol schema/receipt witness. See BOUNDED_SOL_SMOKE.md for the fixed request, 1024 completion-token cap, proposed USD 0.05 allowance, admission/evidence and launch blockers. This preparation performs no live request and does not broaden SO-0001. Owner merge and run approval, exact new main SHA, existing environment/account/secret availability and live result are pending. Resume capsule and oviposition remain the subsequent M1 build work.
+- #15 / QOS-0032 landed strict schema-valid canonical JSON receipt/output binding and ambiguity/type-substitution rejection. Its one-time review exception was scoped to #15.
+- #16 landed the structured-JSON slice of QOS-0008: immutable portable schemas, four native wire modes, raw accepted/rejected custody, signed v2 receipts, replay and CLI --json-schema. Main CI 42429769412 and keyless canary 42429769335 passed. Streaming/general tools remain unfinished and live structured compatibility is unverified.
+- #17 / QOS-0033 landed the one-use Sol witness; QOS-0034 replaced a runner-latency-dependent lease test with a controlled clock. Initial Windows failure 42432759896 is preserved; corrected-head CI 42433128022 passed all 13 jobs before the merge. No production fence was weakened.
+- Johnny separately approved #16 and #17 after author qualification while cross-lineage review was unavailable. Those decisions are not blanket approval of later PRs or independent review.
 
-## Previous #16 preparation chronology
+## Live Sol witness: approved, not executed
 
-- Base: `ef74948f63282f915bbcb70fee9e4454c1606757`, Verified squash of #15/QOS-0032. Exact tested tree preserved; main CI 42425715242 and automatic canary 42425715251 passed. Downloaded artifact hash and offline bee replay verified. The owner-review exception was #15 only, not a future-PR waiver.
-- This candidate implements the structured-output portion of **QOS-0008**: immutable portable schemas; four native wire modes; strict validation, raw success/failure custody, v2 receipts and replay; CLI `--json-schema` (received rejection exits 4). See `docs/STRUCTURED_OUTPUT.md` for source contracts and limitations.
-- Baseline 256 passed; candidate **306 passed**, one live deselected; 50 new tests. Ruff and strict mypy pass. All new inference/HTTP tests are signed fixture-marked and test-only. No live schema request or live credential was used.
-- Receipt v1 and existing text decoders remain supported; seven optional historical archive-replay cases passed locally. Unknown compatible presets fail preflight; unsupported schema features fail locally; no fallback, output repair or hidden retry.
-- Candidate until reviewed/merged. Final signed-head CI is separate from local checks. Cross-lineage review is not supplied by the author; the #15 exception does not apply here. The signed web-editor interface is currently unavailable; the connected file API produced unsigned commit 2d908fb8. Draft publication/CI may proceed, but a signed re-land is required before merge; do not weaken protections.
+The owner approved ONE gpt-6.1-sol request, 1024 completion tokens, USD 0.05 allowance, no tools or retries, at approved main `bb99eac08caed14e1df6e7a15b3702ed8acc6b6c`. The owner reports OPENAI_API_KEY is not yet configured. No Sol workflow dispatch or result has been observed. Account/model access and environment readiness remain unknown.
 
-## Next construction work
+Read BOUNDED_SOL_SMOKE.md and the exact workflow before launch. The one-use slot includes failures/cancellations and cannot be rerun; expiry is 2026-11-10 00:00 UTC. Do not dispatch to test credential setup. If main moves, the workflow's exact-SHA check requires a newly scoped owner decision before using the new revision; do not carry approval forward silently. SO-0001 is unchanged. Connected tools lack dispatch and the browser interface was unavailable; an owner launch may be needed.
 
-1. Review the current QOS-0008 structured-output candidate and observe final-head CI; obtain a correctly scoped review/owner decision before merging. Keep live compatibility as unverified until an authorized bounded witness exists.
-2. Reconcile actual structured-output provider/model support before the M1 live exit plan. Streaming/tool execution remain separate; do not invent tool authority or weaken schema/receipt checks.
-3. **Resume capsule**: bounded representation bound to verified ledger head, egg and parent digests, with stale/missing/tampered/reopen tests. Bound dependency expansion and bytes explicitly.
-4. **Oviposition/coordinator**: bounded untrusted goal-to-DAG proposals, validated before signed publication. Models cannot mint capabilities. Test graph, budget and interruption failures offline.
-5. **M1 exit test**: concrete authorized workflow/revision/provider/call/token limits, then decomposition → workers → gate promotion/purge → verified ledger and replayable evidence. This handoff is not a dispatch grant.
+## Current construction order
 
-Read `CLAUDE.md`, engineering protocol, issues, latest appended ledger and build map; run the offline baseline/fresh-hive chain check before source changes.
+1. The handoff and BUILD_MAP refresh is the first commit of codex/resume-capsule. Historical candidate text remains in the append-only LEDGER, not as current instructions here.
+2. Qualify the M1 resume-capsule candidate (QOS-0035), then obtain review/owner merge decision. See docs/RESUME_CAPSULE.md. It anchors bounded context to a verified signed head, includes dependency/effect references, refuses stale/missing/tampered/oversize sources, and restores only the same worker's existing live unspent claim. No automatic inference/retry, fresh capability or gate acceptance. Local suite: 366 passed, 9 skipped (7 absent historical archive, 2 local credential-home fixtures); ruff/strict mypy passed. Platform CI/revision evidence belongs to the PR; no new merge approval has been given.
+3. Build oviposition/coordinator: validate an untrusted goal-to-DAG proposal before signed publication, including graph and budget failures. Models cannot mint capabilities.
+4. Prepare the M1 exit test only after those pieces fit, with a separate exact revision/provider/call/token/cost scope. The single Sol witness does not authorize that experiment.
 
-## Review and execution limits
+Use offline fixtures while live setup waits. Before source changes, read CLAUDE.md, ENGINEERS.md, the latest LEDGER entry and BUILD_MAP, then run the offline baseline and a fresh signed hive verification. Record local/CI scope and actual tested revisions. New contributions remain candidates until reviewed/owner-decided and protected signed merges complete.
 
-Construction/offline testing can continue without Claude. Signed commits, owner-controlled merges and existing cross-lineage review requirements remain unchanged. Self-review/CI are producer evidence, not another lineage or independent containment acceptance. Keep the review gap explicit; prepare concrete diffs/evidence before any owner decision.
+## Boundaries and preserved failures
 
-Repository enclaves do not contain a hostile local process (QOS-0006). Code-egg checks remain incomplete (QOS-0029); quorum-demanding eggs stay HELD until M2 (QOS-0028). No arbitrary generated-code/shell execution is enabled. The separate hourly remains read-only.
+Repository enclaves are in-process policy, not hostile-process containment (QOS-0006). Code-egg checks remain partial (QOS-0029); quorum-demanding eggs remain HELD until M2 (QOS-0028). No generated-code/shell runner or model-authorized tool capability is introduced. The separate hourly remains read-only; manual construction is a distinct lane.
 
-## Smoke chronology and corrections
+Historical run 42373449340 answered Mosquito.: transport/path evidence did not establish the bee oracle. Later dated keyless artifacts passed their stated checks; do not relabel the earlier wrong answer. Keep path integrity, schema validity and semantic correctness distinct. Earlier unsigned feature commits and unavailable browser signing are publication history; #16/#17 landed through Verified protected squash commits without changing protections.
 
-- Historical 42373449340 CLI answered `Mosquito.`: path verified, explicit bee oracle failed. Preserve the wrong answer.
-- Main e59 run 42407907623's externally hash-matched artifact replayed offline: path VERIFIED and `ARCHIVED_SMOKE_PASS` for bee. Failed-answer retention was witnessed in 42386170198. These are dated producer observations, not independent acceptance.
-- Run 42380605862 was a feature-branch workflow_dispatch and failed in the earlier combined CLI step. T=0 does not guarantee a correct echo. Keep path integrity and answer quality distinct without relabeling failures or weakening promotion.
-- Frozen Astra v65 remains unchanged and NO-GO for A/B/C comparisons: independent acceptance and fresh-session adapter absent. Repository engineering does not inherit or mutate that boundary.
+Frozen Astra v65 is unchanged and NO-GO for A/B/C comparisons: independent containment acceptance and a verified fresh-session adapter are absent. Repository models/adapters, owner merge decisions and CI do not change that boundary.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

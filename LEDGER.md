@@ -355,3 +355,30 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 Candidate readback: 26 new offline admission/evidence tests pass; full local suite 323 passed, 9 explicit skips. Ruff check/format and strict mypy pass (34 package files and both new scripts). No live call or dispatch. Cross-platform CI and owner merge/run decision still pending.
 
 CI qualification finding (run 42432759896, Windows/Python 3.13 job 128585040430): existing test_claims lease test expired its 50 ms wall-clock lease during claim binding. All new Sol tests passed. Replaced that test's sleep with a controlled per-ledger lease/capability clock and explicit advance beyond expiry; production code/fencing is unchanged. The nine claim tests pass locally. This preserves the failed run and requires fresh candidate CI, rather than rerunning for a lucky pass.
+
+
+## 2026-11-08 — Sage: refresh landed-state handoff before capsule work
+
+Owner requests handoff/build-map refresh first, then resume-capsule implementation. Main bb99eac08caed14e1df6e7a15b3702ed8acc6b6c is the Verified signed #17 squash; CI 42433446919 (13 jobs) and keyless canary 42433446928 passed. #16's structured slice is landed, not a pending candidate; live structured compatibility and streaming/general tools remain open. The owner separately approved #17's ONE Sol attempt (1024 completion tokens, USD 0.05, no tools/retries), but reports the environment key is not yet configured. No live Sol result is observed; exact-SHA/expiry/first-run checks remain controlling. Later main revisions do not inherit that run approval.
+
+Rewrote HANDOFF for a cold reader, reconciled BUILD_MAP status/claims and the engineering protocol's stale candidate sentence. Historical entries, including unsigned publication and failed Windows CI, are preserved. Capsule row is the next slice, not built yet; removed unmeasured O(1)/token-win language. All 90 starting public blobs matched pinned main. Offline baseline: 323 passed, 9 explicit skips (7 retained-archive dependencies; 2 credential-home environment limitations). Fresh signed test-hive genesis verified. No runtime/provider/security/schedule changes or model calls in this refresh.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+---
+
+## 2026-11-08 · Sage/Codex · QOS-0035 bounded resume capsule candidate
+
+Johnny requests a handoff/build-map refresh first, then the resume capsule. The first contribution commit, 26bea37d41349a2d49a13dcf1164784be8c320ec, refreshes landed state from main bb99eac08caed14e1df6e7a15b3702ed8acc6b6c (tree 3a525290a625a195a13592043c25106a8c5299ec). The following implementation is proposed on the same codex/resume-capsule branch, not merged.
+
+- **Baseline/provenance:** 90 public source blobs individually match pinned main. Fresh disposable test-hive signed genesis verifies. Baseline 323 passed, 9 skipped; no private archived smoke ZIP copied and no credential contents read.
+- **Implementation:** service-derived canonical task packet anchored to an exact signed source head, a complete bounded ancestor closure and task/schema/artifact/receipt references. Retained files are hash-read back; source egg signatures and the whole bounded ledger chain are checked inside one WAL snapshot. Hard byte/history/graph/attempt limits fail closed. Only direct-parent outputs are inline; transitive outputs are omitted by documented contract. Verify rebuilds source and rejects stale, altered or incomplete context. No model-written summary, automatic refresh or silent truncation.
+- **Resume:** reconstruct only the same worker's existing unspent live claim, after current profile/provider/model grant, signature, revocation, time and lease-fence checks. Return the original cap/token, never issue a new one. Spent attempts, even with missing responses, require explicit effect reconciliation; delivered/terminal tasks do not replay inference or delivery. Unrecorded artifacts and mutable-lease/source divergence are refused. Existing inference/delivery/gate boundaries remain controlling.
+- **Validation:** 43 added offline cases; final local full suite 366 passed, 9 skipped (7 absent historical archive checks; 2 credential-home fixture checks unavailable in this local execution view). Ruff check/format and strict mypy (35 source files) pass. A fixture-corruption test initially failed because its owned committed file was read-only; the disposable test explicitly makes that file writable before tampering. Shared-DAG longest-path coverage and snapshot cleanup-failure coverage were added before qualification. Platform CI and tested commit/run evidence are recorded in the PR, rather than asserted ahead of execution.
+- **Limits:** derived integrity/context, not semantic acceptance or process containment. Receipt hashes are checked, not a substitute for Gate replay. Full history verification is linear within 4096 events/2 MiB payload bounds; no O(1), latency or token-saving claim. Filesystem checks are not hostile-process isolation. This is not a general reconciliation broker, goal decomposer, scheduler, oviposition implementation or completed M1 exit test.
+- **Authority/publication:** no live call, credential acquisition, workflow change or Sol slot consumed. Earlier PR-specific owner decisions do not authorize this merge. New candidate needs review/owner decision and a protected signed merge. Sol's one-use approval remains pinned to bb99eac; any later main revision needs explicitly scoped owner approval before live use. Frozen Astra v65 remains unchanged/NO-GO.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
