@@ -43,17 +43,21 @@ CLI preview/plan/show/recover/publish stops at publication. First PR has no auto
 workers. Fixture planner→three workers→gate tests exercise the shared four-call reservation
 and output/receipt binding, not semantic goal success. 53 new cases; full local 571 passed/9
 existing skips; ruff/format and strict mypy40 pass. Baseline518/9 and fresh genesis verified.
-Candidate platform CI and the new one-request local planning witness remain pending.
+At source075e6bf, PR CI42508631182 attempt1 passed all13 jobs, testing synthetic merge
+ccad023ac6ebfce081a33a9930f331fbf57ffad5 (parents f863ee6 +075e6bf; tree f03810b).
+The separately authorized one-request real planner witness passed:185 input/752 output tokens,
+finish_reason=stop; raw signed receipt, host expansion and atomic three-task publication replay
+verified after reopen (10 chain events). No real workers ran; semantics remain not_assessed.
+Private model/runtime evidence stays local. This final qualification amendment changes docs only.
 
 ## Next actions / limits
 
-1. Qualify exact candidate CI. A private backend template/tokenizer preflight measured185 chat
-   tokens plus separately120 schema tokens. With1024 output and128 headroom,1457 fits the loaded
-   2048 context. Confirm actual instance/configuration before the one authorized planner request;
-   compare actual usage afterward. Bytes are not tokens; this does not attest peak memory.
-2. Perform at most one bounded local planning request; preserve failed/unknown effects without
-   retry. Inspect original receipt, host expansion and complete publication after hive reopen.
-   Record exact source revision; do not export private model inventory or runtime receipts.
+1. Verify final-head CI for the docs-only qualification update and exact unchanged code,
+   examples, tests and workflows against witnessed075e6bf. The new planning request is completed;
+   do not repeat it. Backend prompt count185 matched preflight;185+752 actual tokens fit the
+   loaded2048 context. Backend-reported usage is not an independent memory/resource attestation.
+2. Preserve private receipts and the one-call/zero-worker witness. The graph is published, not
+   executed. Never describe its source admission as semantic goal acceptance or an M1 exit.
 3. Obtain a new PR-specific owner review/merge decision while Claude is unavailable; #22 does
    not cover this candidate. Preserve protected signed squash and verify final signature/CI.
 4. Next slice: explicit bounded worker requests from verified capsules, then a separate

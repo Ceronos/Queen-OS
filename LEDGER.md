@@ -548,3 +548,27 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-08 · QOS-0041 exact-source producer qualification
+Source075e6bf7fb78e9b6bf702ca01f85348e4046fba8, tree f03810b331524ec6e76ef5678acb356740323b66:
+PR #23 CI42508631182 attempt1 passed all13 jobs. Checkout logs identify synthetic merge
+ccad023ac6ebfce081a33a9930f331fbf57ffad5; API confirms parents f863ee6 +075e6bf and the same
+source tree. Sample Linux ARM64/macOS573 passed/7 archive skips; Windows3.14 572/8 including
+POSIX-only permissions. No live CI dispatch or workflow revision changed.
+
+The authorized new local planner witness made exactly one real request,1024 output reserved,
+no workers/tools/retries. Reported185 input/752 output, stop,25.545s; tokenizer preflight185
+matched actual reported prompt usage. Two extraction tasks and a combination depending on
+both were accepted. Original signed v2 receipt/raw-byte replay, exact host template expansion
+and complete atomic three-task publication read back after reopen; all10 events verified.
+One spend/one receipt retained,1024 reserved (not752 refunded). No model reload was needed.
+
+This is producer evidence for that source, not semantic objective success, real worker execution,
+M1 exit or independent identity/containment acceptance. Model/runtime inventory, raw receipts
+and detailed witness hive remain private. The request is complete; do not repeat for this
+docs-only amendment. Next: final-head CI, unchanged executable/test/workflow blob verification,
+then new PR23-only owner review decision before signed squash.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

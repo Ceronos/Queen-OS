@@ -173,3 +173,12 @@ to the original receipt; mismatched policy/source/graph refuses publication. No 
 model tools, hosted fallback or automatic worker execution. 53 new offline cases; full571/9,
 ruff/format and strict mypy40 pass. Exact candidate CI and one local planning witness pending.
 See LOCAL_PLANNER.md for exact bounds, recovery states and remaining semantic/worker/M1 gaps.
+
+
+### QOS-0041 qualification (source075e6bf; final docs-only CI pending)
+PR23 CI42508631182 attempt1 all13 passed at tested merge ccad023 (f863ee6 +075e6bf).
+One separately authorized local planning request passed source/receipt/template/publication
+readback after reopen: three tasks, one spend, zero real workers, reported185 input/752 output
+within1024 requested ceiling. Private runtime receipts remain local; semantic goal acceptance
+is not_assessed. Final amendment changes docs only; verify final CI and executable/test/workflow
+identity. Owner review/merge decision still pending; no new model request is required.

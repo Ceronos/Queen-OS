@@ -113,9 +113,23 @@ gate also exercises all four reservations and receipt/output binding; it is expl
 evidence. Local full suite: **571 passed / 9 skipped** (seven absent historical archive cases,
 two local credential-home restrictions). Ruff check/format and strict mypy pass.
 
-Exact candidate CI and the separately authorized one-request local planning witness are pending.
-Private local model inventory and receipts must remain outside this public repository. A real
-planning receipt would establish that observed producer path, not independent model identity,
-semantic goal quality, worker execution, M1 exit or frozen Astra containment acceptance. The
-next slice must explicitly build the bounded worker request path from verified capsules and
-define a separate source/quantity/completeness oracle before claiming end-to-end goal success.
+At source **075e6bf7fb78e9b6bf702ca01f85348e4046fba8**, PR CI **42508631182**, attempt1,
+passed all13 jobs. Its checkout was synthetic merge **ccad023ac6ebfce081a33a9930f331fbf57ffad5**,
+parents f863ee6 + 075e6bf, tree **f03810b331524ec6e76ef5678acb356740323b66**. Sample ARM64/Linux
+and macOS jobs report573 passed/7 historical-archive skips; Windows3.14 reports572/8 including
+the POSIX-permission skip.
+
+The separately owner-authorized local planning witness at that source made exactly one real
+request, with1024 output reserved and no tools/retries/workers. Backend-reported usage was185
+input /752 output tokens, finish_reason=stop, latency25.545s. It proposed two source extractions
+and one combination with both parents. Signed v2 raw-byte receipt replay, exact template expansion,
+atomic three-task publication and deep readback after hive reopen passed; all10 chain events
+verified. This is observed producer qualification. Semantic goal acceptance remains not_assessed.
+Private model inventory, raw receipts, hive and detailed evidence stay outside this public repo.
+
+The qualification amendment changes docs only. Recheck final-head CI and exact unchanged code,
+example, test and workflow blobs before carrying forward that source-revision witness; do not
+repeat the completed request for a documentation change. No independent model identity, worker
+execution, M1 exit or frozen Astra containment acceptance is established. The next slice must
+explicitly build bounded worker requests from verified capsules and define a separate
+source/quantity/completeness oracle before claiming end-to-end goal success.
