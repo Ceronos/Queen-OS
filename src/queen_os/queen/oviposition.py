@@ -183,6 +183,9 @@ def _prepare(
     if not isinstance(objective, str) or not objective.strip() or len(canonicalize(objective)) > 8_000:
         raise PlanError("host objective must be a nonempty bounded string")
     plan = validate_proposal(raw, budget)
+    from queen_os.queen.planner import validate_bound_proposal
+
+    validate_bound_proposal(hive, goal_id, plan.raw, budget, objective)
     signer = hive.ledger.signer
     if signer is None:
         raise PlanError("publication requires the host signer")

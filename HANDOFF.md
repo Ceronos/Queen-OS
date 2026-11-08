@@ -1,75 +1,74 @@
 # HANDOFF → next engineer on Queen-OS
 
 Updated November 8, 2026 by Sage/Codex, leading construction while Claude is unavailable.
-Keep owner merge exceptions PR-specific and preserve Claude's work/attribution.
+Preserve Claude's work/attribution. Owner review exceptions remain PR-specific.
 
 ## Verified main
 
-Main is Verified signed **fe95a0fe8401090d3909026f84739993da65f319** (#21), tree
-**0089ac30495f853635ae7986b3a325bfcde55936**. Main CI 42499921886 passes all 13 jobs.
-Normal main canary 42499921790, attempt 1, job 128790235107 passes all phases: committed
-archive pin verified on attempt 1, private extraction/runtime readiness, model acquisition,
-pytest/CLI inference, signed-artifact integrity and strict bee oracle. This observes the new
-archive path for this exact main revision; it is not broad semantic or containment acceptance.
+Main is Verified signed **f863ee67f2efa4517c580d5881421144f90a234e** (#22), tree
+**fc72dc1b5d03cc19d68a1eaced38cda56b444ba3**. Main CI42502496672 passes all13 jobs;
+normal main canary42502496682 passes. #16 structured output, #17 one-use Sol path,
+#18 resume capsule, #19 absolute claim deadline, #20 graph admission/publication,
+#21 canary acquisition hardening and #22 explicit LM Studio lifecycle/schema route landed.
+Historical failures remain evidence; later green does not relabel them.
 
-#16 structured output; #17 one-use Sol code/test clock; #18 bounded capsule; #19 absolute lease
-deadline; #20 bounded goal/task admission/publication; #21 canary download hardening are landed.
-Each owner review exception covered its PR only. Historical clock-drift and pre-inference
-HTTP504 failures remain evidence; later green does not relabel them.
+The owner-authorized #22 local unload/load and one <=512-output-token synthetic schema
+witness passed, with signed custody and offline replay. It is complete: do not repeat it.
+Its private inventory/receipts stay outside GitHub. Local permission covers manual LM Studio
+or Hermes use; current construction prioritizes LM Studio. A Queen-owned runtime supervisor
+is later work, not an implementation imported from Hermes. Sol remains deferred; no key.
 
-## Current candidate: LM Studio lifecycle and schema route (QOS-0040)
+## Current candidate: bounded local proposal producer (QOS-0041)
 
-The owner prioritizes LM Studio and explicitly permits manual launch/use of LM Studio or Hermes.
-This contribution focuses on LM Studio. The first requested local witness is bounded to a
-2048-token context, one synthetic generation, <=512 output tokens and no tools/retries.
-Private model inventory and runtime receipts stay outside the public repository. No hosted
-API fallback is added; the Sol key is absent and Sol work is deferred.
+See LOCAL_PLANNER.md for exact fields, allocations, commands, recovery states and limitations.
+The host selects a first item-note catalog with one or two source notes. The local model
+proposes IDs, two known task kinds, source references and dependencies only. Host templates
+set instructions, inputs, schema, diploid profile, tools=[] and stimulus=0.9. No free-form
+executor or general semantic goal evaluator is introduced.
 
-Existing lmstudio adapter already routes witnessed text. New providers/lmstudio.py +
-queen models list/load/unload/status add explicit operator control over an existing local
-server, with loopback-only/no-proxy/no-redirect transport, bounded metadata, exact available
-LLM/instance selection and context/reported-weight ceilings. A signed intent precedes one
-load/unload POST. Repeated operation IDs refuse another POST; GET-only status handles lost
-replies without inventing effects. Producer readback establishes current state, not causality
-or independent acceptance. Different IDs/hives/clients are not fenced by this slice.
+goal.run_prepared fixes the host objective/notes, exact request/provider/model, template/schema
+hashes and planning/worker allocations before capability spend. Defaults: one 1024-token planner
+request plus up to three 512-token workers, at most four calls/2560 requested completion tokens.
+Shared transactional spend checks survive replacement capabilities, refuse tools/routes/model
+changes and do not refund unused/failed/unknown requests. These are output reservations, not
+input/USD/energy/VRAM guarantees or OS containment.
 
-LM Studio-only native JSON-schema preset is enabled from its documented wire contract.
-No schema downgrade or repair; exact raw request/response custody, signature verification,
-capability spend and separate semantic judgement remain. Other generic presets stay unqualified.
-No automatic model download, service install, worker lifecycle tool, hosted fallback or private
-Queen-owned engine is implemented. A later pinned local engine supervisor can follow the same
-contract; Hermes is architectural reference, not an implementation imported here.
+The original witnessed v2 receipt is replayed and bound to a distinct host compilation in
+goal.plan_source. Existing deterministic admission and atomic eggs+goal publication are reused.
+Prepared goals cannot substitute an unwitnessed graph, objective or worker policy. A changed
+template refuses old source interpretation. Explicit receipt recovery and publication readback
+never generate; an unknown spend is not retry permission. Legacy manual goals are unchanged.
 
-46 new offline cases; full local **518 passed / 9 skipped** (7 absent historical archives,
-2 local credential-home restrictions). Ruff/format and strict mypy38 pass. Fresh signed hive
-and baseline 472/9 verified before edits. At source commit fbcd10003bf3c6d0af733ebd98961b1dff237674, PR CI 42501507581 attempt1
-passed all13 jobs (tested merge 5cb3a73a783c3efbc94851f1304478571eba60e7). The manually
-authorized real local unload/load and one bounded structured request passed; signed raw-byte
-receipt verification and offline replay after hive reopen passed. Evidence remains private,
-not independently accepted. This final handoff amendment changes docs only; recheck final-head
-CI and code-blob equality before carrying forward the source-revision witness. See LOCAL_MODELS.md.
+CLI preview/plan/show/recover/publish stops at publication. First PR has no automatic real
+workers. Fixture planner→three workers→gate tests exercise the shared four-call reservation
+and output/receipt binding, not semantic goal success. 53 new cases; full local 571 passed/9
+existing skips; ruff/format and strict mypy40 pass. Baseline518/9 and fresh genesis verified.
+Candidate platform CI and the new one-request local planning witness remain pending.
 
-## Next actions and standing limits
+## Next actions / limits
 
-1. Verify final-head CI after the docs-only qualification update and confirm the source/test
-   blobs equal the witnessed fbcd100 revision. The one-request local witness is completed;
-   do not repeat it. Keep private receipts separate from public source.
-2. Obtain a new PR-specific owner merge decision while Claude is unavailable. #21 approval
-   does not cover this candidate. Preserve protected signed squash and verify the signature.
-3. Wire a strategic proposal producer through witnessed providers, then prepare the real M1
-   goal/worker/gate exit experiment. A canned schema witness or fixture DAG is not that exit.
-4. Keep model identity/configuration, protocol/schema validity, task budgets and semantic goal
-   quality separate. Weight bytes are not peak VRAM; backend resource placement is not attested.
+1. Qualify exact candidate CI. A private backend template/tokenizer preflight measured185 chat
+   tokens plus separately120 schema tokens. With1024 output and128 headroom,1457 fits the loaded
+   2048 context. Confirm actual instance/configuration before the one authorized planner request;
+   compare actual usage afterward. Bytes are not tokens; this does not attest peak memory.
+2. Perform at most one bounded local planning request; preserve failed/unknown effects without
+   retry. Inspect original receipt, host expansion and complete publication after hive reopen.
+   Record exact source revision; do not export private model inventory or runtime receipts.
+3. Obtain a new PR-specific owner review/merge decision while Claude is unavailable; #22 does
+   not cover this candidate. Preserve protected signed squash and verify final signature/CI.
+4. Next slice: explicit bounded worker requests from verified capsules, then a separate
+   source/quantity/completeness oracle and the real M1 exit experiment. A canned JSON witness,
+   restricted plan or fixture DAG alone does not satisfy that exit.
 
-The separate Sol approval was ONE request / 1024 total completion tokens / USD0.05 / no tools
-or retries at bb99eac, expiry 2026-11-10 00:00 UTC. No key or dispatch occurred here. A fresh
-exact revision decision is required before any future launch; do not silently extend expiry
-or consume the slot checking key presence. Manual LM Studio permission does not broaden SO-0001.
+The historical Sol approval was ONE request/1024 completion tokens/USD0.05/no tools or retries
+at bb99eac, expiry2026-11-10 00:00UTC. No key/dispatch here. Require a fresh exact-revision decision
+before future launch; do not extend expiry or spend its slot checking access.
 
-Read CLAUDE.md, docs/ENGINEERS.md, latest LEDGER/BUILD_MAP; baseline and fresh signed hive
-before changes. LEDGER append-only. Frozen Astra v65 remains untouched/NO-GO: independent
-containment acceptance and a fresh-session adapter remain absent. Manual local repository
-work and its owner grant do not migrate that acceptance boundary. Hourly stays read-only.
+Read CLAUDE.md, docs/ENGINEERS.md and latest LEDGER/BUILD_MAP before edits. LEDGER append-only;
+BUILD_MAP new rows proposed in PR body. Frozen Astra v65 remains untouched/NO-GO with independent
+containment acceptance and fresh-session adapter absent. Manual repository work does not move
+that boundary. Hourly remains independent/read-only, quiet on unchanged state; it cannot run
+models, retry witnesses, merge code or confer acceptance.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

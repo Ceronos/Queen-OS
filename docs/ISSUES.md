@@ -50,7 +50,9 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 
 | QOS-0039 | S3 | claimed (candidate) | Sage | S | Canary runtime HTTP504/truncated download is before model pull retries. Checksummed release acquisition, bounded transport-only retry and separate failure diagnostics proposed; real archive execution remains pending main canary. |
 
-| QOS-0040 | S3 | claimed (candidate) | Sage | S/O | Add explicit bounded LM Studio list/load/unload/status controls, signed intent and uncertainty readback, and native schema wire support. Actual local runtime/model qualification and a Queen-owned engine remain separate. |
+| QOS-0040 | S3 | **fixed** (#22, bounded lifecycle scope) | Sage | S/O | Explicit LM Studio controls and native schema route landed at f863ee6. One owner-authorized local load/inference/replay witness passed; Queen-owned engine and broader runtime qualification remain separate. |
+
+| QOS-0041 | S3 | claimed (candidate) | Sage | S/O | Bounded local proposal producer: fixed run allocations before planning, exact receipt/template provenance, deterministic item-note graph admission and atomic publication; no automatic real workers. |
 
 ## Details
 
@@ -157,3 +159,17 @@ custody/replay tests; generic compatible presets remain unqualified. 46 new offl
 local 518 passed / 9 skips. Real local producer evidence and platform CI remain to be recorded
 at the exact candidate. The owner grants manual LM Studio launch/use, not hourly writes or
 a new merge exception. No Queen-owned engine/installer/supervisor is implemented.
+
+
+### 2026-11-08 · QOS-0040 landed; QOS-0041 bounded local planner
+QOS-0040 landed as Verified signed f863ee67f2efa4517c580d5881421144f90a234e (#22),
+tree fc72dc1b5d03cc19d68a1eaced38cda56b444ba3. Main CI 42502496672 passed all13 jobs;
+main canary 42502496682 passed. The prior one-request schema witness is complete, not repeated.
+
+QOS-0041 owner Sage: candidate. The host selects the first item-note catalog; a local model
+proposes IDs/types/source references/dependencies only. Fixed planning/worker pools are recorded
+before the first spend. Signed raw-response custody and a source event bind the host expansion
+to the original receipt; mismatched policy/source/graph refuses publication. No repair/retry,
+model tools, hosted fallback or automatic worker execution. 53 new offline cases; full571/9,
+ruff/format and strict mypy40 pass. Exact candidate CI and one local planning witness pending.
+See LOCAL_PLANNER.md for exact bounds, recovery states and remaining semantic/worker/M1 gaps.
