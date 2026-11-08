@@ -168,7 +168,7 @@ class Authority:
             ).fetchall()
         return [int(r[0]) for r in rows]
 
-    def _reserve(self, cap: Capability, actor: str, action: dict[str, Any]) -> int:
+    def _reserve(self, cap: Capability, actor: str, action: dict[str, Any], completion_tokens: int = 0) -> int:
         """Atomically: re-check revocation/expiry, check the budget, record the spend. Returns its seq."""
         with self.ledger.transaction() as db:
             if db.execute("SELECT 1 FROM events WHERE op_id=?", (f"{REVOKED}:{cap.token_id}",)).fetchone():
@@ -181,9 +181,16 @@ class Authority:
             ).fetchone()[0]
             if used >= cap.grant.max_calls:
                 raise AuthorityError(f"{cap.token_id}: call budget ({cap.grant.max_calls}) exhausted")
-            return self.ledger.append_locked(
-                db, SPENT, actor, {"action": action, "n": int(used) + 1, "token_id": cap.token_id}
-            )
+            from queen_os.queen.budget import PlanBudgetError, plan_charge
+
+            try:
+                charge = plan_charge(self.ledger, cap.scope, action, completion_tokens)
+            except (PlanBudgetError, KeyError, TypeError) as exc:
+                raise AuthorityError("published plan budget refused") from exc
+            payload = {"action": action, "n": int(used) + 1, "token_id": cap.token_id}
+            if charge is not None:
+                payload["plan"] = charge
+            return self.ledger.append_locked(db, SPENT, actor, payload)
 
     def authorize_inference(self, cap: Capability, actor: str, provider: str, model: str, max_tokens: int) -> int:
         """Check every rule, then reserve one call. Returns the ``capability.spent`` seq."""
@@ -198,7 +205,7 @@ class Authority:
             raise AuthorityError(f"{cap.token_id}: model {model!r} not granted")
         if max_tokens > g.max_output_tokens:
             raise AuthorityError(f"{cap.token_id}: {max_tokens} output tokens > granted {g.max_output_tokens}")
-        return self._reserve(cap, actor, {"type": "inference", "provider": provider, "model": model})
+        return self._reserve(cap, actor, {"type": "inference", "provider": provider, "model": model}, max_tokens)
 
     def authorize_tool(self, cap: Capability, actor: str, tool: str) -> int:
         self._verify_signature(cap)
