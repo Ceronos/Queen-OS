@@ -353,3 +353,5 @@ Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Candidate readback: 26 new offline admission/evidence tests pass; full local suite 323 passed, 9 explicit skips. Ruff check/format and strict mypy pass (34 package files and both new scripts). No live call or dispatch. Cross-platform CI and owner merge/run decision still pending.
+
+CI qualification finding (run 42432759896, Windows/Python 3.13 job 128585040430): existing test_claims lease test expired its 50 ms wall-clock lease during claim binding. All new Sol tests passed. Replaced that test's sleep with a controlled per-ledger lease/capability clock and explicit advance beyond expiry; production code/fencing is unchanged. The nine claim tests pass locally. This preserves the failed run and requires fresh candidate CI, rather than rerunning for a lucky pass.

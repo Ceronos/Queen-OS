@@ -86,3 +86,7 @@ explained to Sage in `docs/LIVE_CANARY.md`.
 
 ### QOS-0033 · Bounded GPT-6.1 Sol witness
 **Owner:** Sage. **Status:** candidate; owner merge/run approval and live evidence pending. SO-0001 excludes Sol; do not broaden its recurring allowance for a single test. Proposed one-use workflow, one synthetic schema request, 1024 completion tokens, USD 0.05 allowance, exact main revision, no retries or tools. See BOUNDED_SOL_SMOKE.md. Account/key availability and provider behavior remain unknown. No workflow dispatch capability is exposed by the connected tools; signed-out CLI is a separate launch blocker.
+
+
+### QOS-0034 · Lease expiry test depends on runner latency
+**Owner:** Sage. **Status:** candidate test correction; new-head CI pending. Windows/Python 3.13 run 42432759896 expired a 50 ms lease before claim binding finished. The test now controls the per-ledger clock and explicitly advances beyond expiry; stale delivery and expired capability refusal remain asserted. No production lease, timeout or fence rule is weakened.
