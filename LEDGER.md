@@ -355,3 +355,13 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 Candidate readback: 26 new offline admission/evidence tests pass; full local suite 323 passed, 9 explicit skips. Ruff check/format and strict mypy pass (34 package files and both new scripts). No live call or dispatch. Cross-platform CI and owner merge/run decision still pending.
 
 CI qualification finding (run 42432759896, Windows/Python 3.13 job 128585040430): existing test_claims lease test expired its 50 ms wall-clock lease during claim binding. All new Sol tests passed. Replaced that test's sleep with a controlled per-ledger lease/capability clock and explicit advance beyond expiry; production code/fencing is unchanged. The nine claim tests pass locally. This preserves the failed run and requires fresh candidate CI, rather than rerunning for a lucky pass.
+
+
+## 2026-11-08 — Sage: refresh landed-state handoff before capsule work
+
+Owner requests handoff/build-map refresh first, then resume-capsule implementation. Main bb99eac08caed14e1df6e7a15b3702ed8acc6b6c is the Verified signed #17 squash; CI 42433446919 (13 jobs) and keyless canary 42433446928 passed. #16's structured slice is landed, not a pending candidate; live structured compatibility and streaming/general tools remain open. The owner separately approved #17's ONE Sol attempt (1024 completion tokens, USD 0.05, no tools/retries), but reports the environment key is not yet configured. No live Sol result is observed; exact-SHA/expiry/first-run checks remain controlling. Later main revisions do not inherit that run approval.
+
+Rewrote HANDOFF for a cold reader, reconciled BUILD_MAP status/claims and the engineering protocol's stale candidate sentence. Historical entries, including unsigned publication and failed Windows CI, are preserved. Capsule row is the next slice, not built yet; removed unmeasured O(1)/token-win language. All 90 starting public blobs matched pinned main. Offline baseline: 323 passed, 9 explicit skips (7 retained-archive dependencies; 2 credential-home environment limitations). Fresh signed test-hive genesis verified. No runtime/provider/security/schedule changes or model calls in this refresh.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

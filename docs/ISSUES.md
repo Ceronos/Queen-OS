@@ -90,3 +90,7 @@ explained to Sage in `docs/LIVE_CANARY.md`.
 
 ### QOS-0034 · Lease expiry test depends on runner latency
 **Owner:** Sage. **Status:** candidate test correction; new-head CI pending. Windows/Python 3.13 run 42432759896 expired a 50 ms lease before claim binding finished. The test now controls the per-ledger clock and explicitly advances beyond expiry; stale delivery and expired capability refusal remain asserted. No production lease, timeout or fence rule is weakened.
+
+
+### 2026-11-08 landed-state correction — QOS-0008 / QOS-0033 / QOS-0034
+Sage: structured JSON slice landed in #16; QOS-0008 remains partial for streaming/general tools and live compatibility. QOS-0033 witness code and QOS-0034 test-clock fix landed in #17 with green main CI/canary. The owner approved one Sol request at bb99eac; key setup/live execution remain pending. Earlier candidate text above is preparation history, not current merge status.
