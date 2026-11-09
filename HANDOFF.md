@@ -40,23 +40,38 @@ Schema-valid wrong answers quarantine and revoke; no repair/substitution. Only a
 parents enter the combine request. Status verifies committed bytes and terminal gate evidence.
 This is a narrow synthetic goal, not general competence, OS containment or independent acceptance.
 
-## Qualification / next
+## Exact qualification / stopped experiment
 
-Baseline571 passed/9 existing skips and fresh signed genesis verified before changes. Initial
-full implementation run610/9; further targeted worker/planner tests101 passed after recovery/status
-hardening (48 new worker cases). Final full619 passed/9 existing skips; ruff/format and strict mypy41 plus canary-script types pass. PR CI pending.
-No new real worker request has run at this checkpoint. The authorized witness is at most three
-new local worker requests/512 output each on the existing goal, no tools/retries/replanning.
+Candidate sourcea54fd72f97ed081c963477f6301107a34d843cd9, tree90bec3612dd3c318538df8ee0b538fbd9c06d681.
+All115 remote blobs matched. Full619/9 locally,48 new cases,target101,lint/format/mypy41 and
+canary-script types pass. PR24 CI42597006552 attempt1 all13 succeeded. Actual tested merge
+b08bce94cd4b9a162e28131a01999ad97342bd91 has parents56ab8aa+a54fd72 and the same tree.
+ARM64 sample621/7; Windows620/8. No CI workflow or strict canary answer changed.
 
-1. Finish final full checks and exact-source PR CI on Windows/macOS/Linux. No workflow changes.
-2. Fresh selected-instance/context/tokenizer readback for each exact worker request. Keep private
-   measurements local. Execute no more than three new requests; any uncertainty stops automatic
-   progress. Reopen and verify raw receipts, exact delivery/oracle outcomes and whole-goal budgets.
-3. Update qualification docs from actual results. If only docs change afterward, compare all
-   code/test/example/workflow blobs to the witnessed source and recheck final-head CI.
-4. Obtain a new PR24-specific owner cross-review exception/merge decision while Claude is absent.
-   docs/ENGINEERS.md requires the other engineer's review; PR23 approval does not cover PR24.
-   Preserve protected signed squash, exact-head checks and final signature/CI verification.
+Exactly TWO new local workers ran on the already published goal; the original planner did not
+repeat. Both fresh backend preflights167 prompt+86 schema+512 output+128 headroom=893 fit2048
+context; actual reported prompt167 matched. First worker369 output,stop: raw receipt replay,
+exact delivery and item oracle/gate promotion passed. Second worker512 completion including505
+reported reasoning,finish_reason=length,empty content: signed structured rejection retained.
+No delivery/artifact invented. Combination NOT started.29-event signed chain and refusal of
+receipt recovery/further preparation read back; refusal checks added no ledger events.
+Current goal3 calls/2048 reserved including original planner. No retries/refunds/new authority.
+
+End-to-end goal/M1 exit did NOT pass. This is a successful first worker and a correctly retained
+rejection/blocked dependency. Public docs contain only aggregate producer evidence; private
+inventory/raw reasoning/receipts/hive stay local. QOS-0043: explicit host reasoning policy is
+needed before another run; current native-schema route has no qualified reasoning control.
+
+1. This final qualification amendment changes five docs only. Verify unchanged other110 blobs
+   against witnesseda54fd72 and final-head CI before carrying its evidence forward.
+2. Do NOT run the old witness again, even after expiry. A fresh separately authorized goal/budget
+   is required for another attempt. Proposed next contract is in BOUNDED_WORKERS.md: advertised
+   capability, explicit immutable reasoning policy, schema/receipt compatibility, offline guards
+   then fresh native qualification. Do not assume native reasoning controls apply to /v1/chat.
+3. PR24 fixes the two recovery/selection gaps and adds the bounded worker/gate foundation; the
+   live end-to-end milestone remains open. Obtain a new PR24-only owner cross-review/merge
+   exception while Claude is unavailable. PR23 approval does not cover this PR. Preserve protected
+   signed squash and verify final signature/main CI; no merge grant exists at this checkpoint.
 
 Sol remains deferred/no key/request; the old one-use bb99eac approval expires2026-11-10T00:00Z
 and is not migrated here. No downloads, installs, hosted fallback, protected settings changes,

@@ -122,15 +122,53 @@ task. It never loops across a goal. Prepare each next task only after the prior 
 Runtime permission remains an owner/manual decision; these commands do not authorize hourly
 automations or consume the separate Sol approval.
 
-## Qualification state
+## Exact-source qualification and bounded local result
 
-Baseline signed main56ab8aa (#23), all112 public blobs verified, baseline571 passed/9 existing
-skips and fresh signed genesis verified before edits. New offline tests cover goal isolation,
-historical provenance/current-head refusal, exact requests/measurements, concurrent spend,
-replacement-cap refusal, lost receipt/staging/delivery returns, orphan effects, deterministic
-quarantine, committed readback, CLI and fixture planner→workers→gate integration. Full local619 passed/9 existing skips; ruff/format and strict mypy41 plus canary-script types pass.
-Platform CI and real worker witness are pending; no real worker result is claimed
-by this document. Reuse the completed planner/publication witness, never repeat it for this PR.
+Sourcea54fd72f97ed081c963477f6301107a34d843cd9, tree90bec3612dd3c318538df8ee0b538fbd9c06d681:
+all115 public blobs matched the isolated source. Full local619 passed/9 existing skips;
+ruff/format and strict mypy41 plus canary-script types pass. CI42597006552 attempt1 passed all13
+jobs: Linux x64/ARM64, macOS, Windows × Python3.12/3.13/3.14, plus actionlint. Checkout logs and
+Git parents identify tested mergeb08bce94cd4b9a162e28131a01999ad97342bd91 (56ab8aa + a54fd72),
+with the same tree. Sample ARM64:621 passed/7 archive skips; Windows:620/8 (one POSIX-only skip).
+No workflows or strict canary oracle changed.
+
+The existing real planner/publication was continued, without another planner call. Exactly
+TWO new local worker requests ran, each512 output maximum/no tools/no retries. Both native
+preflights measured167 prompt+86 schema+512 output+128 headroom=893, below loaded2048 context.
+Actual backend-reported prompt usage167 matched each preflight.
+
+- Worker1:369 reported output tokens,stop; original raw receipt replay, exact model JSON
+  delivery and deterministic source/item/quantity/completeness gate passed. Artifact promoted.
+- Worker2:HTTP200,512 reported completion tokens including505 reported reasoning tokens,
+  finish_reason=length, empty content. Signed v2 rejection/raw custody retained. Offline
+  replay confirmed structured rejection; no artifact/delivery was manufactured or promoted.
+- Dependent combination was NOT started. Explicit receipt recovery and further preparation
+  refused, with no new ledger events during those refusal checks. Reopen verified29 signed
+  events. Whole goal retains3 calls/2048 requested completion tokens including its original
+  planning request; reservations are not refunded or recycled.
+
+This is one successful worker/gate plus an observed fail-closed model rejection. It is NOT a
+successful end-to-end goal or M1 exit. Completion/reasoning budget exhaustion is reported by
+this backend; native context fit is a separate successful check. Detailed private model
+inventory, raw responses, reasoning text, receipts and hive stay local. No private originals
+were exported. This qualification amendment changes docs only; final-head CI/blob equality
+must be verified before carrying forward the source result. Do not repeat either worker or
+its completed planner. QOS-0043 records the next gap.
+
+## Proposed follow-up: explicit reasoning policy (not implemented)
+
+Before another run, qualify a host-owned reasoning policy for the exact selected backend/model
+and bind it into prepared run/request hashes and receipt replay. LM Studio documents advertised
+[reasoning capabilities](https://lmstudio.ai/docs/developer/rest/list) and a reasoning setting
+on its [native chat route](https://lmstudio.ai/docs/developer/rest/chat). That does not establish
+that the current OpenAI-compatible schema route accepts the same setting. Do not silently
+change routes, templates, model defaults or signed requests, or treat a requested setting as
+proof it was honored. Preserve schema/raw-receipt strictness and no-tool/no-retry boundaries.
+
+An offline extension must refuse unsupported/mismatched policy before spend, retain reasoning
+versus visible-output usage honestly, and preserve old source interpretation. Then a fresh
+separately authorized goal/budget can test the qualified policy. The spent task in this goal
+must never be retried, re-signed into new authority or reset to create another attempt.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

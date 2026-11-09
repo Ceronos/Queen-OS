@@ -53,7 +53,8 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0040 | S3 | **fixed** (#22, bounded lifecycle scope) | Sage | S/O | Explicit LM Studio controls and native schema route landed at f863ee6. One owner-authorized local load/inference/replay witness passed; Queen-owned engine and broader runtime qualification remain separate. |
 
 | QOS-0041 | S3 | claimed (candidate) | Sage | S/O | Bounded local proposal producer: fixed run allocations before planning, exact receipt/template provenance, deterministic item-note graph admission and atomic publication; no automatic real workers. |
-| QOS-0042 | S2 | claimed (candidate) | Sage | S/O | Goal-scoped claims, exact capsule-derived workers, per-task single spend, known-receipt recovery and item-note correctness gate. See BOUNDED_WORKERS.md. |
+| QOS-0042 | S2 | fixed (candidate; CI13) | Sage | S/O | Goal-scoped claims, exact capsule-derived workers, per-task single spend, known-receipt recovery and item-note correctness gate. 48 new cases/sourcea54fd72 CI13; one real promotion and one retained rejection; end-to-end M1 open. BOUNDED_WORKERS.md. |
+| QOS-0043 | S3 | open | Sage | S | Explicit model reasoning policy is not yet qualified on the local structured worker route. A worker consumed512 completion tokens (505 reported reasoning) and returned empty content. Preserve spent task; qualify a new immutable policy before a fresh authorized run. |
 
 ## Details
 
@@ -187,10 +188,24 @@ identity. Owner review/merge decision still pending; no new model request is req
 
 ### QOS-0042 worker qualification
 
-48 new offline cases; exact-source platform CI and local worker witness pending. See BOUNDED_WORKERS.md.
+48 new cases; sourcea54fd72 CI42597006552 attempt1 all13 passed. One real worker/oracle promotion; second structured rejection retained and dependent task unstarted. Final docs-only CI/equality pending. See BOUNDED_WORKERS.md.
 
 QOS-0042 limits: no general semantic judge or autonomous worker loop; unsupported note grammar
 refuses before a claim. Context reports are host/backend measurements, not independent attestation.
 Expired authority is not migrated. Missing receipts/unknown terminal filesystem effects remain HOLD,
 not retry permission; a gate effect-intent journal remains later work. No containment/M1 acceptance
 is inferred from this candidate. PR24 requires its own cross-review/owner merge decision.
+
+
+### QOS-0043 reasoning-policy qualification
+
+Observed producer result at sourcea54fd72: native context preflight fit893<=2048; actual reported
+prompt167 matched. The second worker used its512 completion ceiling, with505 reasoning tokens
+reported and empty content/length. This is not context overflow or a successful semantic result.
+Two new worker calls only; no retry or third call. Source-bound single-spend remains controlling.
+
+Next contract (unimplemented): inspect advertised reasoning capability; explicitly bind any supported
+host policy into exact route/request/source and receipt verification, with schema compatibility and
+unsupported-policy tests before effects. Native /api/v1/chat documentation does not qualify the
+current /v1/chat/completions route. Another attempt requires a fresh separately authorized goal/budget;
+never reset/reissue this spent task. Do not solve this by silently increasing the existing ceiling.
