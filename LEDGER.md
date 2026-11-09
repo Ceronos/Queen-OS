@@ -572,3 +572,55 @@ then new PR23-only owner review decision before signed squash.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-09 · QOS-0042 bounded goal workers and known-receipt recovery — Sage/Codex
+- Owner approved goal-scoped claim and spent-attempt recovery fixes, followed by explicit
+  capsule-derived workers and deterministic item-note oracle on the already published goal.
+  Manual construction is separate from read-only hourly/frozen Astra lab. No PR24 merge grant.
+- Signed baseline56ab8aa (#23), tree0692b82; all112 public blobs verified in isolated source.
+  Baseline571/9 and fresh signed genesis verified. Completed planner call is not repeated.
+- Goal filter precedes claim effects; source-bound publication/membership reverified before
+  worker preparation. Immutable capsule/wire provenance, exact schema/provider/model/endpoint,
+  512 output/no tools; historical capsule replay grants no current authority. Native context
+  counts remain retained operator/backend measurements, not independent attestation.
+- Transactional current-token/actor/claim/fence and per-task spend checks prevent retries via
+  replacement caps; whole-goal planning/worker ceilings remain. Unknown/failed requests stay
+  spent. Known receipt recovery restores original live authority only for exact delivery,
+  reads back orphan staging without repeating its write, and refuses mismatches/dead claims.
+- Item-note-lines-v1 oracle requires exact source/name/quantity/multiplicity/completeness;
+  deterministic gate quarantine/revocation on wrong schema-valid replies. Status rechecks
+  committed artifacts and passing evidence. Unknown promotion is preserved/manual HOLD.
+- 48 new worker cases; hardened worker+planner target101 pass. Initial full implementation
+ 610/9 before additional cases; final full/CI and bounded local worker witness pending.
+  Ruff/format and strict mypy41 pass. No new real worker calls or broad M1 acceptance yet.
+- Next: final exact-source platform CI, fresh actual token/context qualification and <=3 new
+  local workers on the existing goal, private receipt/oracle replay, docs-only qualification
+  if applicable, then a new PR24-only owner review exception before protected signed squash.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+QOS-0042 local qualification before publication: final619 passed/9 existing skips in65.49s; ruff/format and strict mypy41 plus canary-script types pass. Platform CI/local witness remain pending.
+
+
+### 2026-11-09 · QOS-0042 exact-source platform qualification and stopped local experiment
+Sourcea54fd72, tree90bec361;115 blobs matched remote. CI42597006552 attempt1 all13 passed,
+tested mergeb08bce94 (parents56ab8aa+a54fd72), same tree. Sample ARM64621/7, Windows620/8.
+The completed planner/publication was continued; no new planner. TWO local worker calls only,
+512 output each/no tools/retries. Fresh backend preflight893 conservative tokens<=2048, actual
+reported167 input matched each native prompt count. Worker1 reported369 output,stop, exact
+receipt/delivery/item oracle promotion passed. Worker2 HTTP200,512 completion including505
+reported reasoning,length,empty content; signed structured rejection retained and replayed.
+No second-worker delivery or combination call.29 signed events verified after reopen; explicit
+recovery and further preparation refused without new events.3 total goal calls/2048 reserved,
+including original planner. No reset/refund/re-sign/retry. End-to-end goal/M1 exit did NOT pass.
+
+New QOS-0043 records reasoning-policy qualification before a fresh separately authorized goal.
+Native API reasoning settings do not establish current OpenAI-compatible schema-route behavior.
+Private inventory/raw responses/reasoning/receipts remain local. Final amendment changes only
+HANDOFF,LEDGER,BOUNDED_WORKERS,BUILD_MAP,ISSUES; verify other110 blobs and final-head CI before
+carrying source evidence. PR24-only owner review/merge exception remains absent.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

@@ -72,11 +72,17 @@ class Worker:
         threshold: float = 0.5,
         providers: tuple[str, ...] = ("*",),
         models: tuple[str, ...] = ("*",),
+        goal_id: str | None = None,
     ) -> None:
         if not _WORKER_RE.match(worker_id):
             raise ValueError(f"worker id {worker_id!r} must match {_WORKER_RE.pattern}")
         if not 0.0 < threshold <= 1.0:
             raise ValueError("threshold must be in (0, 1]")
+        if goal_id is not None and (
+            not isinstance(goal_id, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", goal_id) is None
+        ):
+            raise ValueError("invalid goal filter")
+        self.goal_id = goal_id
         self.hive = hive
         self.actor = f"worker:{worker_id}"
         self.threshold = threshold
@@ -86,7 +92,11 @@ class Worker:
     # -- choosing ------------------------------------------------------------------
 
     def candidates(self) -> list[EggView]:
-        eggs = [e for e in ready(fold_eggs(self.hive.ledger)) if response(e.stimulus, self.threshold) >= 0.5]
+        eggs = [
+            e
+            for e in ready(fold_eggs(self.hive.ledger))
+            if (self.goal_id is None or e.goal_id == self.goal_id) and response(e.stimulus, self.threshold) >= 0.5
+        ]
         return sorted(eggs, key=lambda e: (-response(e.stimulus, self.threshold), e.laid_seq))
 
     # -- claiming ------------------------------------------------------------------
@@ -147,28 +157,44 @@ class Worker:
         )
 
     def resume(self, capsule: bytes) -> Claim | None:
-        """Restore only this worker's existing, live, unspent claim; never mint or execute.
-
-        Delivered/terminal/unclaimed tasks return None. A spent attempt is explicitly
-        blocked even if its capability has budget left: a receipt/recovery decision is
-        needed before any deliberate new attempt. Normal inference/delivery still recheck
-        capability scope, expiry, budget and lease fencing when used.
-        """
+        """Restore only a current-head, live, unspent claim. Never mint or execute."""
         context = verify_capsule(self.hive, capsule).payload
         if context["task"]["state"] != "claimed":
             return None
-        if context["next_step"] == "reconcile_effect":
-            raise ResumeBlocked("prior inference attempt requires evidence reconciliation")
+        return self._restore_claim(context["task"]["egg_id"], expected_head=context["head"]["hash"])
+
+    def recover_receipt(self, egg_id: str, receipt_seq: int) -> Claim | None:
+        """Restore an existing live claim for delivery of ONE established response.
+
+        No new capability, lease, inference or refund. The exact unique v2 receipt
+        must bind this actor/current claim/schema. An uncertain spend cannot restore.
+        Historical capsules are never accepted as current authority here.
+        """
+        return self._restore_claim(egg_id, receipt_seq=receipt_seq)
+
+    def _restore_claim(
+        self, egg_id: str, *, expected_head: str | None = None, receipt_seq: int | None = None
+    ) -> Claim | None:
+        from queen_os.providers.receipt import verify_receipt
+        from queen_os.providers.structured import JsonSchemaOutput
+
         with self.hive.ledger.read_snapshot() as db:
+            self.hive.ledger.verify_chain(require_signatures=True)
             head = self.hive.ledger.head()
-            if head is None or head.hash != context["head"]["hash"]:
+            if expected_head is not None and (head is None or head.hash != expected_head):
                 raise StaleCapsule("state moved during resume; rebuild")
-            egg = load(self.hive, context["task"]["egg_id"])
-            last = context["last_claim"]
-            if last is None or last["actor"] != self.actor:
-                raise AuthorityError("claim belongs to a different worker")
-            if any(d["egg_id"] in egg.parents and d["state"] != "hatched" for d in context["dependencies"]):
+            egg = load(self.hive, egg_id)
+            if self.goal_id is not None and egg.goal_id != self.goal_id:
+                raise ResumeBlocked("task is outside the selected goal")
+            views = fold_eggs(self.hive.ledger)
+            if views[egg_id].state != "claimed":
+                return None
+            if any(views[p].state != "hatched" for p in egg.parents):
                 raise ResumeBlocked("parent work is not complete")
+            claims = [e for e in self.hive.ledger.events(kind="egg.claimed") if e.payload["egg_id"] == egg_id]
+            if not claims or claims[-1].actor != self.actor:
+                raise AuthorityError("claim belongs to a different worker")
+            last = claims[-1].payload
             issue = self.hive.ledger.find_op(f"{ISSUED}:{last['token_id']}")
             if issue is None:
                 raise ResumeBlocked("claim has no issued capability")
@@ -176,9 +202,9 @@ class Worker:
             profile = profile_for(egg)
             expected = Grant(egg.tools, self.providers, self.models, profile.max_output_tokens, profile.max_calls)
             if (
-                canonicalize(cap.to_json()) != canonicalize(issue.payload)
-                or cap.subject != self.actor
-                or cap.scope != f"egg:{egg.egg_id}"
+                cap.subject != self.actor
+                or canonicalize(cap.to_json()) != canonicalize(issue.payload)
+                or cap.scope != f"egg:{egg_id}"
                 or canonicalize(cap.grant.to_json()) != canonicalize(expected.to_json())
             ):
                 raise AuthorityError("claim capability differs from current worker/task profile")
@@ -189,22 +215,52 @@ class Worker:
                 raise AuthorityError("claim capability is revoked")
             if not cap.not_before_ms <= self.hive.ledger.now() < cap.expires_ms:
                 raise AuthorityError("claim capability has expired or is not yet valid")
+            spends = [
+                e for e in self.hive.ledger.events(kind="capability.spent") if e.payload.get("token_id") == cap.token_id
+            ]
+            if receipt_seq is None:
+                if spends:
+                    raise ResumeBlocked("prior inference attempt requires evidence reconciliation")
+            else:
+                receipts = [
+                    e
+                    for e in self.hive.ledger.events(kind="inference.receipt")
+                    if e.payload.get("token_id") == cap.token_id
+                ]
+                if len(spends) != 1 or len(receipts) != 1 or receipts[0].seq != receipt_seq:
+                    raise ResumeBlocked("one exact spend/receipt is required; ambiguous or missing evidence")
+                receipt = receipts[0]
+                verify_receipt(self.hive, receipt)
+                if (
+                    receipt.actor != self.actor
+                    or spends[0].actor != self.actor
+                    or receipt.payload.get("v") != 2
+                    or receipt.payload["structured_output"]["schema_sha"] != JsonSchemaOutput(egg.schema).sha256
+                ):
+                    raise ResumeBlocked("receipt actor/schema differs from current claim")
             row = db.execute(
-                "SELECT holder,token,expires_ms FROM leases WHERE resource=?", (f"egg:{egg.egg_id}",)
+                "SELECT holder,token,expires_ms FROM leases WHERE resource=?", (f"egg:{egg_id}",)
             ).fetchone()
-            expected_lease = context["lease"]
+            history = [
+                e
+                for e in self.hive.ledger.events()
+                if e.payload.get("resource") == f"egg:{egg_id}"
+                and e.kind in {"lease.granted", "lease.renewed", "lease.released"}
+            ]
+            signed = None if not history else history[-1]
             if (
                 row is None
-                or expected_lease is None
+                or signed is None
                 or row[0] != self.actor
                 or row[1] != last["lease_token"]
-                or canonicalize(dict(zip(["holder", "token", "expires_ms"], row, strict=True)))
-                != canonicalize(expected_lease)
+                or signed.actor != row[0]
+                or signed.payload["token"] != row[1]
+                or row[2] != (0 if signed.kind == "lease.released" else signed.payload["expires_ms"])
                 or row[2] <= self.hive.ledger.now()
                 or cap.expires_ms > row[2]
             ):
                 raise ResumeBlocked("lease no longer supports this claim")
-            lease = Lease(f"egg:{egg.egg_id}", row[0], row[1], row[2])
+            lease = Lease(f"egg:{egg_id}", row[0], row[1], row[2])
         self.hive.ledger.check_fence_now(*lease.fence)
         return Claim(egg, lease, cap, profile)
 
@@ -218,6 +274,10 @@ class Worker:
         self.hive.ledger.check_fence_now(*claim.lease.fence)  # don't stage anything for a lapsed claim
         body = canonicalize({"egg_id": claim.egg.egg_id, "output": output})
         sha = self.hive.enclaves.stage(f"{claim.egg.egg_id}.json", body)
+        return self._record_delivery(claim, sha)
+
+    def _record_delivery(self, claim: Claim, sha: str) -> str:
+        """Record an already read-back staging effect, fenced by the existing claim."""
         self.hive.ledger.append(
             "egg.delivered",
             self.actor,

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from queen_os.comb.ledger import Event, LedgerError
-from queen_os.comb.projection import EggView, fold_eggs
+from queen_os.comb.projection import EggView, fold_events
 from queen_os.hive import Hive
 from queen_os.queen.egg import TaskEgg, load
 from queen_os.serial.afser import sha256_hex
@@ -114,13 +114,18 @@ def _bounded_head(hive: Hive) -> tuple[Event, list[Event]]:
     return events[-1], events
 
 
-def _build(hive: Hive, egg_id: str, max_bytes: int) -> ResumeCapsule:
+def _build(hive: Hive, egg_id: str, max_bytes: int, at_seq: int | None = None) -> ResumeCapsule:
     if type(max_bytes) is not int or not 1 <= max_bytes <= MAX_CAPSULE_BYTES:
         raise CapsuleError("capsule byte budget must be an integer within the hard limit")
     if not isinstance(egg_id, str) or _EGG.fullmatch(egg_id) is None:
         raise CapsuleError("invalid task identifier")
     head, events = _bounded_head(hive)
-    views = fold_eggs(hive.ledger)
+    if at_seq is not None:
+        if type(at_seq) is not int or not 1 <= at_seq <= len(events):
+            raise CapsuleError("invalid historical head")
+        events = events[:at_seq]
+        head = events[-1]
+    views = fold_events(events)
     eggs: dict[str, TaskEgg] = {}
     laid: dict[str, Event] = {}
     visiting: set[str] = set()
@@ -153,8 +158,10 @@ def _build(hive: Hive, egg_id: str, max_bytes: int) -> ResumeCapsule:
     visit(egg_id, 0)
     egg, view = eggs[egg_id], views[egg_id]
     artifact = _artifact(hive, view)
-    if view.state in {"laid", "claimed"} and any(
-        (hive.root / location / (egg_id + ".json")).exists() for location in ["staging", "committed"]
+    if (
+        at_seq is None
+        and view.state in {"laid", "claimed"}
+        and any((hive.root / location / (egg_id + ".json")).exists() for location in ["staging", "committed"])
     ):
         raise CapsuleError("unrecorded artifact effect requires reconciliation")
     claims = [e for e in events if e.kind == "egg.claimed" and e.payload.get("egg_id") == egg_id]
@@ -195,7 +202,7 @@ def _build(hive: Hive, egg_id: str, max_bytes: int) -> ResumeCapsule:
         "SELECT holder, token, expires_ms FROM leases WHERE resource=?", (resource,)
     ).fetchone()
     actual = None if row is None else {"holder": row[0], "token": row[1], "expires_ms": row[2]}
-    if canonicalize(actual) != canonicalize(lease):
+    if at_seq is None and canonicalize(actual) != canonicalize(lease):
         raise CapsuleError("mutable lease view differs from signed history")
     last = claims[-1] if claims else None
     dependencies = []
@@ -297,3 +304,32 @@ def verify_capsule(hive: Hive, raw: bytes, max_bytes: int = MAX_CAPSULE_BYTES) -
         raise
     except (OSError, KeyError, TypeError, ValueError, LedgerError, RecursionError) as exc:
         raise CapsuleError(f"cannot verify capsule: {type(exc).__name__}") from exc
+
+
+def _verify_recorded(hive: Hive, raw: bytes) -> ResumeCapsule:
+    """Historical readback inside the caller's verified snapshot/transaction."""
+    if not isinstance(raw, bytes) or len(raw) > MAX_CAPSULE_BYTES:
+        raise CapsuleError("capsule encoding or size limit")
+    value = _json(raw)
+    if not isinstance(value, dict) or type(value.get("v")) is not int or value["v"] != 1:
+        raise CapsuleError("unknown capsule version")
+    expected = _build(hive, value["task"]["egg_id"], MAX_CAPSULE_BYTES, value["head"]["seq"])
+    if expected.raw != raw:
+        raise CapsuleError("recorded capsule differs from verified prefix")
+    return expected
+
+
+def verify_recorded_capsule(hive: Hive, raw: bytes) -> ResumeCapsule:
+    """Replay a historical prefix for provenance only; NEVER restores current authority.
+
+    Current ledger signatures and bounded source files still verify. Later lease rows
+    and later unrecorded artifacts cannot describe that old prefix; current resume
+    retains its strict head/lease/artifact checks through verify_capsule instead.
+    """
+    try:
+        with hive.ledger.read_snapshot():
+            return _verify_recorded(hive, raw)
+    except CapsuleError:
+        raise
+    except (OSError, KeyError, TypeError, ValueError, LedgerError, RecursionError) as exc:
+        raise CapsuleError(f"cannot replay capsule: {type(exc).__name__}") from exc

@@ -12,16 +12,14 @@ import pytest
 from queen_os.authority import Grant
 from queen_os.authority.tokens import AuthorityError
 from queen_os.cli import main
-from queen_os.gate.gate import Gate
 from queen_os.hive import Hive
-from queen_os.providers import FixtureProvider, InferenceRequest, JsonSchemaOutput, Message
-from queen_os.providers.receipt import Inference, verify_receipt
+from queen_os.providers import FixtureProvider
+from queen_os.providers.receipt import verify_receipt
 from queen_os.queen import planner
 from queen_os.queen.oviposition import PlanBudget, publish_plan, read_plan
 from queen_os.queen.run_budget import SOURCE, RunBudget, RunBudgetError
 from queen_os.serial.afser import DigestDivergence
 from queen_os.serial.jcs import canonicalize
-from queen_os.workers.claim import Worker
 
 OBJECTIVE = "Extract item names and quantities from each note and combine them, preserving source IDs."
 NOTES = {"note_a": "Item apple; quantity 2.", "note_b": "Item pear; quantity 3."}
@@ -83,27 +81,33 @@ def test_witness_compile_publish_and_reopen_preserve_provenance(hive):
 def test_planner_plus_workers_share_fixed_allocations_and_gate_contract(hive):
     accepted(hive)
     planner.publish(hive, "test_goal")
-    worker = Worker(hive, "fixture_worker", providers=("local_plan_fixture",), models=("m",))
+    from queen_os.workers import execution
+
     expected = [
         {"source_id": "note_a", "item": "apple", "quantity": 2},
         {"source_id": "note_b", "item": "pear", "quantity": 3},
     ]
     for _ in range(3):
-        claim = worker.claim()
-        assert claim is not None
-        if "source" in claim.egg.input:
-            items = [i for i in expected if i["source_id"] == claim.egg.input["source"]["id"]]
-        else:
-            items = expected
-        result = {"items": items}
-        provider = FixtureProvider("local_plan_fixture", [json.dumps(result)])
-        request = InferenceRequest(
-            "m", (Message("user", "synthetic task"),), max_tokens=512, output=JsonSchemaOutput(claim.egg.schema)
-        )
-        witnessed = Inference(hive).run(provider, request, worker.actor, claim.capability)
-        worker.deliver(claim, json.loads(witnessed.result.text))
-        assert Gate(hive).review(claim.egg.egg_id).verdict == "hatched"
-    assert worker.claim() is None
+        prepared = execution.prepare_next(hive, "test_goal", "fixture_worker")
+        egg_id = prepared.payload["egg_id"]
+        _, request = execution.preview(hive, egg_id)
+        task = json.loads(request.messages[0].content)["task"]
+        items = [i for i in expected if i["source_id"] == task["source"]["id"]] if "source" in task else expected
+        proof = {
+            "v": 1,
+            "request_sha256": prepared.payload["request_sha256"],
+            "model": "m",
+            "provider_kind": "fixture",
+            "context_tokens": 2048,
+            "prompt_tokens": 200,
+            "schema_tokens": 100,
+            "method": "operator_backend_tokenizer",
+        }
+        fit = execution.ContextFit(2048, 200, 100, hive.blobs.put(canonicalize(proof)))
+        provider = FixtureProvider("local_plan_fixture", [json.dumps({"items": items})])
+        receipt = execution.generate(hive, egg_id, "fixture_worker", fit, provider)
+        assert execution.recover(hive, egg_id, receipt.seq, "fixture_worker").verdict == "hatched"
+    assert execution.prepare_next(hive, "test_goal", "fixture_worker") is None
     state = planner.inspect(hive, "test_goal")
     assert (state["reserved_calls"], state["reserved_completion_tokens"]) == (4, 2560)
     spends = list(hive.ledger.events(kind="capability.spent"))

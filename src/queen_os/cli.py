@@ -207,6 +207,82 @@ def cmd_goal(args: argparse.Namespace) -> int:
         return 2
 
 
+def cmd_work(args: argparse.Namespace) -> int:
+    from queen_os.providers.structured import strict_json
+    from queen_os.queen import planner
+    from queen_os.serial.afser import sha256_hex
+    from queen_os.serial.jcs import canonicalize
+    from queen_os.workers import execution
+
+    try:
+        with Hive.open(Path(args.hive)) as hive:
+            if args.work_cmd == "prepare":
+                event = execution.prepare_next(hive, args.goal_id, args.worker)
+                print(
+                    json.dumps(
+                        {
+                            "prepared_seq": None if event is None else event.seq,
+                            "egg_id": None if event is None else event.payload["egg_id"],
+                        }
+                    )
+                )
+            elif args.work_cmd == "show":
+                print(json.dumps(execution.inspect(hive, args.goal_id)))
+            elif args.work_cmd == "preview":
+                event, request = execution.preview(hive, args.egg_id)
+                run = planner._load(hive, event.payload["goal_id"])
+                wire = execution._provider(run).encode(request)
+                print(
+                    json.dumps(
+                        {
+                            "request": strict_json(wire.body),
+                            "request_sha256": sha256_hex(wire.body),
+                            "model": request.model,
+                            "max_output_tokens": 512,
+                            "context_fit": "requires_backend_tokenizer_qualification",
+                            "authority": "none",
+                        }
+                    )
+                )
+            else:
+                if args.work_cmd == "execute":
+                    with Path(args.measurement).open("rb") as stream:
+                        raw = stream.read(4097)
+                    if len(raw) > 4096:
+                        raise execution.ExecutionError("measurement byte bound")
+                    proof = strict_json(raw)
+                    fit = execution.ContextFit(
+                        proof["context_tokens"],
+                        proof["prompt_tokens"],
+                        proof["schema_tokens"],
+                        hive.blobs.put(canonicalize(proof)),
+                    )
+                    receipt = execution.generate(hive, args.egg_id, args.worker, fit)
+                    receipt_seq = receipt.seq
+                else:
+                    receipt_seq = args.receipt_seq
+                decision = execution.recover(hive, args.egg_id, receipt_seq, args.worker)
+                print(
+                    json.dumps(
+                        {
+                            "egg_id": decision.egg_id,
+                            "verdict": decision.verdict,
+                            "evidence_sha256": decision.evidence_sha,
+                            "receipt_seq": receipt_seq,
+                            "failed": decision.failed,
+                            "independent_acceptance": False,
+                        }
+                    )
+                )
+        return 0
+    except (ValueError, PermissionError, KeyError, TypeError, OSError) as exc:
+        print(
+            f"worker operation refused ({type(exc).__name__}); inspect ledger/receipts; never retry a spent call",
+            file=sys.stderr,
+        )
+        return 2
+
+
 def cmd_capsule(args: argparse.Namespace) -> int:
     from queen_os.comb.capsule import MAX_CAPSULE_BYTES, build_capsule, verify_capsule
 
@@ -428,6 +504,23 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "recover":
             command.add_argument("--receipt-seq", type=int, required=True)
         command.set_defaults(func=cmd_goal)
+
+    work = sub.add_parser("work", help="explicit bounded item workers for a published local-planner goal")
+    wsub = work.add_subparsers(dest="work_cmd", required=True)
+    for name in ["prepare", "show", "preview", "execute", "recover"]:
+        command = wsub.add_parser(name)
+        command.add_argument("--hive", required=True)
+        if name in {"prepare", "show"}:
+            command.add_argument("--goal-id", required=True)
+        else:
+            command.add_argument("--egg-id", required=True)
+        if name in {"prepare", "execute", "recover"}:
+            command.add_argument("--worker", required=True)
+        if name == "execute":
+            command.add_argument("--measurement", required=True, help="retained backend tokenizer measurement JSON")
+        if name == "recover":
+            command.add_argument("--receipt-seq", required=True, type=int)
+        command.set_defaults(func=cmd_work)
 
     capsule = sub.add_parser("capsule", help="build or verify bounded task context without executing work")
     csub = capsule.add_subparsers(dest="capsule_cmd", required=True)
