@@ -1,78 +1,70 @@
 # HANDOFF → next engineer on Queen-OS
 
-Updated November 8, 2026 by Sage/Codex, leading construction while Claude is unavailable.
-Preserve Claude's work/attribution. Owner review exceptions remain PR-specific.
+Updated November9,2026 by Sage/Codex. Claude remains unavailable; preserve his work/attribution.
+This is manual owner-authorized construction. Hourly repository observation remains read-only.
 
-## Verified main
+## Verified baseline
 
-Main is Verified signed **f863ee67f2efa4517c580d5881421144f90a234e** (#22), tree
-**fc72dc1b5d03cc19d68a1eaced38cda56b444ba3**. Main CI42502496672 passes all13 jobs;
-normal main canary42502496682 passes. #16 structured output, #17 one-use Sol path,
-#18 resume capsule, #19 absolute claim deadline, #20 graph admission/publication,
-#21 canary acquisition hardening and #22 explicit LM Studio lifecycle/schema route landed.
-Historical failures remain evidence; later green does not relabel them.
+Signed main56ab8aa46ea93966c010ec65d57743c119d233b2 (#23), tree0692b82e86ab12fdcef14c3eafc23aa4a92fbfad.
+Main CI42591134510 all13 checks and keyless canary42591134428 passed. PR23-only owner exception
+was consumed; it does not permit merging PR24. No other open contribution observed at start.
 
-The owner-authorized #22 local unload/load and one <=512-output-token synthetic schema
-witness passed, with signed custody and offline replay. It is complete: do not repeat it.
-Its private inventory/receipts stay outside GitHub. Local permission covers manual LM Studio
-or Hermes use; current construction prioritizes LM Studio. A Queen-owned runtime supervisor
-is later work, not an implementation imported from Hermes. Sol remains deferred; no key.
+The completed planner/publication witness has one planning spend/receipt, three published tasks,
+reported185 input/752 output tokens at a1024 output reservation, zero workers. Source075e6bf
+code/test/workflow equality to final PR23 was verified. Do not repeat that planner call.
+Private model inventory, runtime proofs and receipts remain local. LM Studio is the manual
+focus; Queen-OS uses an existing backend, not its own inference engine. Hermes is reference.
 
-## Current candidate: bounded local proposal producer (QOS-0041)
+## Current candidate: goal-scoped bounded workers / QOS-0042
 
-See LOCAL_PLANNER.md for exact fields, allocations, commands, recovery states and limitations.
-The host selects a first item-note catalog with one or two source notes. The local model
-proposes IDs, two known task kinds, source references and dependencies only. Host templates
-set instructions, inputs, schema, diploid profile, tools=[] and stimulus=0.9. No free-form
-executor or general semantic goal evaluator is introduced.
+Owner approved fixing goal-specific claims and known spent-receipt recovery, then implementing
+explicit capsule-derived workers and a deterministic semantic gate on the existing published
+goal. See BOUNDED_WORKERS.md for the exact contract, commands, oracle and recovery boundaries.
+New workers/execution.py maps to existing worker/capsule/gate rows; no general agent scheduler.
 
-goal.run_prepared fixes the host objective/notes, exact request/provider/model, template/schema
-hashes and planning/worker allocations before capability spend. Defaults: one 1024-token planner
-request plus up to three 512-token workers, at most four calls/2560 requested completion tokens.
-Shared transactional spend checks survive replacement capabilities, refuse tools/routes/model
-changes and do not refund unused/failed/unknown requests. These are output reservations, not
-input/USD/energy/VRAM guarantees or OS containment.
+Worker filtering occurs before claim effects. The explicit path verifies exact published task
+membership and source. One immutable capsule/request per task, strict native schema, no tools,
+512 output tokens, temperature0, exact provider/model/endpoint. Historical capsule replay is
+provenance only; ordinary resume remains current-head/live/unspent. Context counts are retained
+operator/backend measurements tied to request/model, not independent resource attestation.
 
-The original witnessed v2 receipt is replayed and bound to a distinct host compilation in
-goal.plan_source. Existing deterministic admission and atomic eggs+goal publication are reused.
-Prepared goals cannot substitute an unwitnessed graph, objective or worker policy. A changed
-template refuses old source interpretation. Explicit receipt recovery and publication readback
-never generate; an unknown spend is not retry permission. Legacy manual goals are unchanged.
+Authority checks current prepared token/actor/claim/fence and one task spend across replacement
+caps atomically before inference. Full goal still at most4 calls/2560 requested completion
+including the completed planner. Failed/unknown calls remain spent, no retries/refunds/borrowing.
+Known response recovery restores only the original live claim for exact delivery, without new
+inference or authority. Orphan staging is read back before recording missing delivery; different
+bytes are preserved/refused. Unrecorded terminal filesystem effects require manual reconciliation.
 
-CLI preview/plan/show/recover/publish stops at publication. First PR has no automatic real
-workers. Fixture planner→three workers→gate tests exercise the shared four-call reservation
-and output/receipt binding, not semantic goal success. 53 new cases; full local 571 passed/9
-existing skips; ruff/format and strict mypy40 pass. Baseline518/9 and fresh genesis verified.
-At source075e6bf, PR CI42508631182 attempt1 passed all13 jobs, testing synthetic merge
-ccad023ac6ebfce081a33a9930f331fbf57ffad5 (parents f863ee6 +075e6bf; tree f03810b).
-The separately authorized one-request real planner witness passed:185 input/752 output tokens,
-finish_reason=stop; raw signed receipt, host expansion and atomic three-task publication replay
-verified after reopen (10 chain events). No real workers ran; semantics remain not_assessed.
-Private model/runtime evidence stays local. This final qualification amendment changes docs only.
+The declared item-note-lines-v1 oracle checks exact source/name/quantity/completeness/multiplicity.
+Schema-valid wrong answers quarantine and revoke; no repair/substitution. Only accepted direct
+parents enter the combine request. Status verifies committed bytes and terminal gate evidence.
+This is a narrow synthetic goal, not general competence, OS containment or independent acceptance.
 
-## Next actions / limits
+## Qualification / next
 
-1. Verify final-head CI for the docs-only qualification update and exact unchanged code,
-   examples, tests and workflows against witnessed075e6bf. The new planning request is completed;
-   do not repeat it. Backend prompt count185 matched preflight;185+752 actual tokens fit the
-   loaded2048 context. Backend-reported usage is not an independent memory/resource attestation.
-2. Preserve private receipts and the one-call/zero-worker witness. The graph is published, not
-   executed. Never describe its source admission as semantic goal acceptance or an M1 exit.
-3. Obtain a new PR-specific owner review/merge decision while Claude is unavailable; #22 does
-   not cover this candidate. Preserve protected signed squash and verify final signature/CI.
-4. Next slice: explicit bounded worker requests from verified capsules, then a separate
-   source/quantity/completeness oracle and the real M1 exit experiment. A canned JSON witness,
-   restricted plan or fixture DAG alone does not satisfy that exit.
+Baseline571 passed/9 existing skips and fresh signed genesis verified before changes. Initial
+full implementation run610/9; further targeted worker/planner tests101 passed after recovery/status
+hardening (48 new worker cases). Final full619 passed/9 existing skips; ruff/format and strict mypy41 plus canary-script types pass. PR CI pending.
+No new real worker request has run at this checkpoint. The authorized witness is at most three
+new local worker requests/512 output each on the existing goal, no tools/retries/replanning.
 
-The historical Sol approval was ONE request/1024 completion tokens/USD0.05/no tools or retries
-at bb99eac, expiry2026-11-10 00:00UTC. No key/dispatch here. Require a fresh exact-revision decision
-before future launch; do not extend expiry or spend its slot checking access.
+1. Finish final full checks and exact-source PR CI on Windows/macOS/Linux. No workflow changes.
+2. Fresh selected-instance/context/tokenizer readback for each exact worker request. Keep private
+   measurements local. Execute no more than three new requests; any uncertainty stops automatic
+   progress. Reopen and verify raw receipts, exact delivery/oracle outcomes and whole-goal budgets.
+3. Update qualification docs from actual results. If only docs change afterward, compare all
+   code/test/example/workflow blobs to the witnessed source and recheck final-head CI.
+4. Obtain a new PR24-specific owner cross-review exception/merge decision while Claude is absent.
+   docs/ENGINEERS.md requires the other engineer's review; PR23 approval does not cover PR24.
+   Preserve protected signed squash, exact-head checks and final signature/CI verification.
 
-Read CLAUDE.md, docs/ENGINEERS.md and latest LEDGER/BUILD_MAP before edits. LEDGER append-only;
-BUILD_MAP new rows proposed in PR body. Frozen Astra v65 remains untouched/NO-GO with independent
-containment acceptance and fresh-session adapter absent. Manual repository work does not move
-that boundary. Hourly remains independent/read-only, quiet on unchanged state; it cannot run
-models, retry witnesses, merge code or confer acceptance.
+Sol remains deferred/no key/request; the old one-use bb99eac approval expires2026-11-10T00:00Z
+and is not migrated here. No downloads, installs, hosted fallback, protected settings changes,
+other-agent messages or changes to frozen v65/prototype. Real-agent containment remains NO-GO
+and a fresh-session adapter/independent acceptance remain absent. Representative design, merged
+code, tested integration and independently accepted runtime remain distinct states.
+
+Read CLAUDE.md, docs/ENGINEERS.md and latest LEDGER/BUILD_MAP before edits. LEDGER append-only.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

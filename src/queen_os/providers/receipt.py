@@ -14,6 +14,7 @@ R = ⟨model id, h_prompt, h_completion, Δt, hardware envelope, raw bytes, σ_c
 
 from __future__ import annotations
 
+import math
 import platform
 import sys
 from dataclasses import dataclass
@@ -83,7 +84,15 @@ class Inference:
         self.hive = hive
         self.client = client or httpx.Client(follow_redirects=False)
 
-    def run(self, provider: Provider, request: InferenceRequest, actor: str, capability: Capability) -> Witnessed:
+    def run(
+        self,
+        provider: Provider,
+        request: InferenceRequest,
+        actor: str,
+        capability: Capability,
+        *,
+        timeout_s: float | None = None,
+    ) -> Witnessed:
         """One witnessed call. ``capability`` must grant this actor/provider/model/size.
 
         Order: refuse fixtures in production, then authorize and reserve budget (ledger),
@@ -94,12 +103,21 @@ class Inference:
             raise NonSimulationViolation(
                 f"fixture provider {provider.name!r} refused: hive {self.hive.node_id} is a production hive"
             )
+        if timeout_s is not None and (not math.isfinite(timeout_s) or timeout_s <= 0):
+            raise ValueError("timeout must be finite and positive")
+        from queen_os.workers.execution import validate_inference
+
+        validate_inference(self.hive, provider, request, actor, capability)
         provider.validate_request(request)
         codec = codec_of(provider)
         spend_seq = self.hive.authority().authorize_inference(
             capability, actor, provider.name, request.model, request.max_tokens
         )
-        exchange = provider.send(request, self.client)
+        exchange = (
+            provider.send(request, self.client)
+            if timeout_s is None
+            else provider.send(request, self.client, timeout_s=timeout_s)
+        )
         if provider.credential is not None:
             key = provider.credential.reveal().encode()
             if key in exchange.call.body or key in exchange.response:

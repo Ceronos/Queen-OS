@@ -53,6 +53,7 @@ This is **separate from `LEDGER.md`**, which records what happened in each sessi
 | QOS-0040 | S3 | **fixed** (#22, bounded lifecycle scope) | Sage | S/O | Explicit LM Studio controls and native schema route landed at f863ee6. One owner-authorized local load/inference/replay witness passed; Queen-owned engine and broader runtime qualification remain separate. |
 
 | QOS-0041 | S3 | claimed (candidate) | Sage | S/O | Bounded local proposal producer: fixed run allocations before planning, exact receipt/template provenance, deterministic item-note graph admission and atomic publication; no automatic real workers. |
+| QOS-0042 | S2 | claimed (candidate) | Sage | S/O | Goal-scoped claims, exact capsule-derived workers, per-task single spend, known-receipt recovery and item-note correctness gate. See BOUNDED_WORKERS.md. |
 
 ## Details
 
@@ -182,3 +183,14 @@ readback after reopen: three tasks, one spend, zero real workers, reported185 in
 within1024 requested ceiling. Private runtime receipts remain local; semantic goal acceptance
 is not_assessed. Final amendment changes docs only; verify final CI and executable/test/workflow
 identity. Owner review/merge decision still pending; no new model request is required.
+
+
+### QOS-0042 worker qualification
+
+48 new offline cases; exact-source platform CI and local worker witness pending. See BOUNDED_WORKERS.md.
+
+QOS-0042 limits: no general semantic judge or autonomous worker loop; unsupported note grammar
+refuses before a claim. Context reports are host/backend measurements, not independent attestation.
+Expired authority is not migrated. Missing receipts/unknown terminal filesystem effects remain HOLD,
+not retry permission; a gate effect-intent journal remains later work. No containment/M1 acceptance
+is inferred from this candidate. PR24 requires its own cross-review/owner merge decision.

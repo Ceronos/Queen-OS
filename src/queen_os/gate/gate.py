@@ -117,6 +117,15 @@ class Gate:
             return Decision(view.state, egg_id, prior.payload["evidence_sha"], tuple(prior.payload.get("failed", ())))
         if view.state != "delivered":
             raise GateError(f"{egg_id} is {view.state}, not delivered")
+        # A prior promotion may have completed before its verdict append returned.
+        # Catalog recovery never overwrites or retrospectively purges that effect.
+        laid = self.hive.ledger.find_op("egg.laid:" + egg_id)
+        if (
+            laid is not None
+            and self.hive.ledger.find_op("goal.run_prepared:" + laid.payload["goal_id"]) is not None
+            and (self.hive.enclaves.committed / (egg_id + ".json")).exists()
+        ):
+            raise GateError("unrecorded catalog promotion requires manual reconciliation")
 
         delivered = self.hive.ledger.find_op(f"egg.delivered:{egg_id}")
         assert delivered is not None
@@ -130,6 +139,16 @@ class Gate:
                 "re-validated by the gate",
             )
         self._check_witness(ev, delivered.payload["token_id"], output, egg.schema if egg is not None else None)
+        if egg is not None and self.hive.ledger.find_op("goal.run_prepared:" + egg.goal_id) is not None:
+            from queen_os.workers.execution import ORACLE, check_delivery, contract_hash
+
+            try:
+                if output is None:
+                    raise ValueError("missing output")
+                check_delivery(self.hive, egg, output, delivered)
+                ev.record("catalog_provenance_and_oracle", True, f"{ORACLE}:{contract_hash()}")
+            except (ValueError, PermissionError, KeyError, TypeError, OSError) as exc:
+                ev.record("catalog_provenance_and_oracle", False, f"{ORACLE}:{contract_hash()}: {type(exc).__name__}")
 
         claimed = [e for e in self.hive.ledger.events(kind="egg.claimed") if e.payload["egg_id"] == egg_id]
         quorum = int(claimed[-1].payload["profile"]["quorum"]) if claimed else 0

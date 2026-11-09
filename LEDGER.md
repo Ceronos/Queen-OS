@@ -572,3 +572,33 @@ then new PR23-only owner review decision before signed squash.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-09 · QOS-0042 bounded goal workers and known-receipt recovery — Sage/Codex
+- Owner approved goal-scoped claim and spent-attempt recovery fixes, followed by explicit
+  capsule-derived workers and deterministic item-note oracle on the already published goal.
+  Manual construction is separate from read-only hourly/frozen Astra lab. No PR24 merge grant.
+- Signed baseline56ab8aa (#23), tree0692b82; all112 public blobs verified in isolated source.
+  Baseline571/9 and fresh signed genesis verified. Completed planner call is not repeated.
+- Goal filter precedes claim effects; source-bound publication/membership reverified before
+  worker preparation. Immutable capsule/wire provenance, exact schema/provider/model/endpoint,
+  512 output/no tools; historical capsule replay grants no current authority. Native context
+  counts remain retained operator/backend measurements, not independent attestation.
+- Transactional current-token/actor/claim/fence and per-task spend checks prevent retries via
+  replacement caps; whole-goal planning/worker ceilings remain. Unknown/failed requests stay
+  spent. Known receipt recovery restores original live authority only for exact delivery,
+  reads back orphan staging without repeating its write, and refuses mismatches/dead claims.
+- Item-note-lines-v1 oracle requires exact source/name/quantity/multiplicity/completeness;
+  deterministic gate quarantine/revocation on wrong schema-valid replies. Status rechecks
+  committed artifacts and passing evidence. Unknown promotion is preserved/manual HOLD.
+- 48 new worker cases; hardened worker+planner target101 pass. Initial full implementation
+ 610/9 before additional cases; final full/CI and bounded local worker witness pending.
+  Ruff/format and strict mypy41 pass. No new real worker calls or broad M1 acceptance yet.
+- Next: final exact-source platform CI, fresh actual token/context qualification and <=3 new
+  local workers on the existing goal, private receipt/oracle replay, docs-only qualification
+  if applicable, then a new PR24-only owner review exception before protected signed squash.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+QOS-0042 local qualification before publication: final619 passed/9 existing skips in65.49s; ruff/format and strict mypy41 plus canary-script types pass. Platform CI/local witness remain pending.

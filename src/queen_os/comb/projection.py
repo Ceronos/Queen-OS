@@ -12,10 +12,11 @@ nor purged. Ready eggs with no live lease are what workers may claim.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Literal
 
-from queen_os.comb.ledger import Ledger
+from queen_os.comb.ledger import Event, Ledger
 
 State = Literal["laid", "claimed", "delivered", "hatched", "purged"]
 TERMINAL: frozenset[str] = frozenset({"hatched", "purged"})
@@ -34,8 +35,13 @@ class EggView:
 
 
 def fold_eggs(ledger: Ledger) -> dict[str, EggView]:
+    return fold_events(ledger.events())
+
+
+def fold_events(events: Iterable[Event]) -> dict[str, EggView]:
+    """Fold an explicitly verified event prefix; no mutable tables or effects."""
     eggs: dict[str, EggView] = {}
-    for ev in ledger.events():
+    for ev in events:
         p = ev.payload
         if ev.kind == "egg.laid":
             eggs[p["egg_id"]] = EggView(

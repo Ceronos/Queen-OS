@@ -186,7 +186,7 @@ class Authority:
 
             try:
                 charge = plan_charge(self.ledger, cap.scope, action, completion_tokens)
-                run = run_charge(self.ledger, cap.scope, action, completion_tokens)
+                run = run_charge(self.ledger, cap.scope, action, completion_tokens, token_id=cap.token_id, actor=actor)
             except (PlanBudgetError, RunBudgetError, KeyError, TypeError) as exc:
                 raise AuthorityError("published plan budget refused") from exc
             payload = {"action": action, "n": int(used) + 1, "token_id": cap.token_id}

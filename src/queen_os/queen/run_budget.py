@@ -76,7 +76,15 @@ def read_run(ledger: Ledger, goal_id: str) -> Event:
     return run
 
 
-def run_charge(ledger: Ledger, scope: str, action: dict[str, Any], completion_tokens: int) -> dict[str, Any] | None:
+def run_charge(
+    ledger: Ledger,
+    scope: str,
+    action: dict[str, Any],
+    completion_tokens: int,
+    *,
+    token_id: str | None = None,
+    actor: str | None = None,
+) -> dict[str, Any] | None:
     """Reserve requested ceilings, not measured usage; no pool borrowing or refunds."""
     if scope.startswith("planner:"):
         goal_id, phase = scope[8:], "planning"
@@ -115,11 +123,39 @@ def run_charge(ledger: Ledger, scope: str, action: dict[str, Any], completion_to
         ):
             raise RunBudgetError("worker publication/source mismatch")
     tokens: dict[str, str] = {}
+    scopes: dict[str, str] = {}
     for event in ledger.events(kind="capability.issued"):
         cap_scope = event.payload.get("scope")
         if cap_scope == "planner:" + goal_id or cap_scope in {"egg:" + t for t in tasks}:
             ledger._check_event(event)
             tokens[event.payload["token_id"]] = "planning" if cap_scope == "planner:" + goal_id else "workers"
+            scopes[event.payload["token_id"]] = cap_scope
+    if phase == "workers":
+        prepared = ledger.find_op("worker.request_prepared:" + scope[4:])
+        if prepared is None:
+            raise RunBudgetError("worker requires a frozen capsule-derived request")
+        ledger._check_event(prepared)
+        q = prepared.payload
+        row = ledger._db.execute("SELECT holder, token, expires_ms FROM leases WHERE resource=?", (scope,)).fetchone()
+        claims = [e for e in ledger.events(kind="egg.claimed") if e.payload.get("egg_id") == scope[4:]]
+        if (
+            prepared.kind != "worker.request_prepared"
+            or prepared.actor != actor
+            or q["token_id"] != token_id
+            or q["run_hash"] != run.hash
+            or completion_tokens != 512
+            or row is None
+            or row[0] != actor
+            or row[1] != q["lease_token"]
+            or row[2] != q["lease_expires_ms"]
+            or row[2] <= ledger.now()
+            or not claims
+            or claims[-1].actor != actor
+            or claims[-1].payload["token_id"] != token_id
+            or ledger.find_op("egg.delivered:" + scope[4:]) is not None
+            or ledger.find_op("egg.purged:" + scope[4:]) is not None
+        ):
+            raise RunBudgetError("prepared worker claim/fence is no longer current")
     calls, reserved = {"planning": 0, "workers": 0}, {"planning": 0, "workers": 0}
     for event in ledger.events(kind="capability.spent"):
         tag = event.payload.get("run")
@@ -127,6 +163,8 @@ def run_charge(ledger: Ledger, scope: str, action: dict[str, Any], completion_to
         if not related and not (isinstance(tag, dict) and tag.get("goal_id") == goal_id):
             continue
         ledger._check_event(event)
+        if phase == "workers" and scopes.get(event.payload.get("token_id", "")) == scope:
+            raise RunBudgetError("task allowance already spent; replacement claims cannot retry")
         expected_phase = tokens.get(event.payload.get("token_id", ""))
         if (
             not related
