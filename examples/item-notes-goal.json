@@ -1,0 +1,7 @@
+{
+  "objective": "Extract item names and integer quantities from each note, then combine them while preserving source IDs.",
+  "notes": {
+    "note_a": "Item apple; quantity 2.",
+    "note_b": "Item pear; quantity 3."
+  }
+}

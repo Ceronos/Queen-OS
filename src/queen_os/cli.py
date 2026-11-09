@@ -157,6 +157,56 @@ def cmd_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_goal(args: argparse.Namespace) -> int:
+    from queen_os.queen import planner
+    from queen_os.queen.run_budget import RunBudget
+
+    try:
+        if args.goal_cmd in {"preview", "plan"}:
+            with Path(args.file).open("rb") as stream:
+                raw = stream.read(planner.MAX_BRIEF_BYTES + 1)
+            objective, notes = planner.brief(raw)
+            budget = RunBudget(args.calls, args.completion_tokens, args.max_tasks, args.planner_tokens)
+            provider = planner.local_provider(args.base_url)
+            request = planner.request_for(args.model, objective, notes, budget)
+            wire = provider.encode(request)
+            if len(wire.body) > planner.MAX_REQUEST_BYTES:
+                raise planner.PlannerError("request byte bound")
+            if args.goal_cmd == "preview":
+                print(
+                    json.dumps(
+                        {
+                            "request_bytes": len(wire.body),
+                            "schema_bytes": len(planner.output_contract().schema_bytes),
+                            "budget": budget.to_json(),
+                            "worker_calls": budget.max_tasks,
+                            "worker_completion_tokens": 512 * budget.max_tasks,
+                            "native_token_count": None,
+                            "context_fit": "requires_backend_tokenizer_qualification",
+                            "authority": "none",
+                        }
+                    )
+                )
+                return 0
+        with Hive.open(Path(args.hive)) as hive:
+            if args.goal_cmd == "plan":
+                planner.prepare(hive, args.goal_id, objective, notes, budget, provider, args.model)
+                planner.generate(hive, args.goal_id, provider)
+                planner.publish(hive, args.goal_id)
+            elif args.goal_cmd == "recover":
+                planner.accept_receipt(hive, args.goal_id, args.receipt_seq)
+            elif args.goal_cmd == "publish":
+                planner.publish(hive, args.goal_id)
+            print(json.dumps(planner.inspect(hive, args.goal_id)))
+        return 0
+    except (ValueError, PermissionError) as exc:
+        print(
+            f"goal operation refused ({type(exc).__name__}); inspect retained ledger evidence before another effect",
+            file=sys.stderr,
+        )
+        return 2
+
+
 def cmd_capsule(args: argparse.Namespace) -> int:
     from queen_os.comb.capsule import MAX_CAPSULE_BYTES, build_capsule, verify_capsule
 
@@ -359,6 +409,25 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "publish":
             command.add_argument("--objective", required=True)
         command.set_defaults(func=cmd_plan)
+
+    goal = sub.add_parser("goal", help="bounded local item-note planning; never execute workers")
+    gsub = goal.add_subparsers(dest="goal_cmd", required=True)
+    for name in ["preview", "plan", "show", "recover", "publish"]:
+        command = gsub.add_parser(name)
+        if name != "preview":
+            command.add_argument("goal_id")
+            command.add_argument("--hive", default=str(default_home()))
+        if name in {"preview", "plan"}:
+            command.add_argument("file")
+            command.add_argument("--model", required=True)
+            command.add_argument("--base-url", default="http://127.0.0.1:1234/v1")
+            command.add_argument("--calls", type=int, default=4)
+            command.add_argument("--completion-tokens", type=int, default=2560)
+            command.add_argument("--max-tasks", type=int, default=3)
+            command.add_argument("--planner-tokens", type=int, default=1024)
+        if name == "recover":
+            command.add_argument("--receipt-seq", type=int, required=True)
+        command.set_defaults(func=cmd_goal)
 
     capsule = sub.add_parser("capsule", help="build or verify bounded task context without executing work")
     csub = capsule.add_subparsers(dest="capsule_cmd", required=True)

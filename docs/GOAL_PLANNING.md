@@ -88,3 +88,12 @@ Validation opens no hive. Publish is an explicit operator action using the host 
 
 Local full suite: 432 passed, 9 skips (7 absent historical archive checks; 2 credential-home fixtures unavailable locally). Ruff check/format and strict mypy pass. Cross-platform CI must qualify the exact PR revision. No fresh real-model planning result, semantic goal acceptance, cross-lineage review, independent containment acceptance or M1 exit is claimed.
 
+
+
+## Source-bound local producer (QOS-0041 candidate)
+LOCAL_PLANNER.md describes the deliberately restricted first proposal producer. A prepared
+goal additionally requires its original witnessed receipt, fixed run pools and exact host
+template expansion before publication. Existing manual/standalone goals keep the above
+contract. The model response and compiled TaskEgg proposal are separate signed provenance
+steps; the original response is never mislabeled as the expanded graph. This extension
+stops at publication and does not establish semantic goal success or the real M1 exit.

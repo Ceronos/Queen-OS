@@ -515,3 +515,60 @@ new PR-specific owner review/merge decision, then the next bounded planning/work
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-08 · QOS-0041 bounded local proposal producer — Sage/Codex
+- Owner authorized the reviewed next slice: first-template local planning, fixed allocations
+  before the call, strict graph admission and recovery without uncertain-call replay. Manual
+  construction permission is separate from the read-only hourly and frozen Astra lab.
+- Baseline: Verified signed main f863ee67f2efa4517c580d5881421144f90a234e (#22), tree
+  fc72dc1b5d03cc19d68a1eaced38cda56b444ba3; all107 public blobs hash-matched in an isolated
+  source. Main CI42502496672 all13 and canary42502496682 passed. Baseline518/9, fresh signed
+  genesis verified. Prior local schema witness is complete, not repeated. Sol deferred.
+- Implemented first item-note catalog; model selects only local IDs, known kinds, sources and
+  dependencies. Host owns inputs/instructions/schema/profile/tools/budgets. Unknown fields,
+  bad coverage/edges, duplicate IDs, malformed JSON and template mismatch refuse; no repair.
+- goal.run_prepared fixes exact request/configuration and planning/worker allocations before
+  scoped authority spend. Shared transactional checks span replacement capabilities and
+  phases; failed/uncertain calls and short replies do not refund reservations.
+- Original v2 receipt/raw response is replayed before a signed source binds host expansion.
+  Only that graph/objective/policy publishes; existing atomic egg+goal commit and idempotent
+  readback reused. CLI preview/plan/show/recover/publish stops before real workers.
+- 53 offline cases include concurrent replacement-cap denial, source/corruption/refusal,
+  lost response/commit return recovery and fixture planner+three worker/gate path. Full571
+  passed/9 existing skips; ruff/format and strict mypy40 pass. Exact PR CI remains pending.
+- Private backend template/tokenizer readback measured185 prompt tokens, separately120 schema
+  tokens; 1024 output plus128 headroom totals1457, below the existing2048 context. This
+  preflight makes no generation and does not prove HTTP template equivalence or peak memory.
+- Limits: first catalog only; no general semantic oracle, automatic workers, tools, downloads,
+  paid/hosted requests or M1 exit. New real planning witness remains one explicit local
+  request with no retries; private model/runtime receipts stay outside public artifacts.
+- Next: exact-revision platform CI, then the authorized bounded local planning witness and
+  source/receipt/publication replay; new PR-specific owner review decision before signed squash.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+
+### 2026-11-08 · QOS-0041 exact-source producer qualification
+Source075e6bf7fb78e9b6bf702ca01f85348e4046fba8, tree f03810b331524ec6e76ef5678acb356740323b66:
+PR #23 CI42508631182 attempt1 passed all13 jobs. Checkout logs identify synthetic merge
+ccad023ac6ebfce081a33a9930f331fbf57ffad5; API confirms parents f863ee6 +075e6bf and the same
+source tree. Sample Linux ARM64/macOS573 passed/7 archive skips; Windows3.14 572/8 including
+POSIX-only permissions. No live CI dispatch or workflow revision changed.
+
+The authorized new local planner witness made exactly one real request,1024 output reserved,
+no workers/tools/retries. Reported185 input/752 output, stop,25.545s; tokenizer preflight185
+matched actual reported prompt usage. Two extraction tasks and a combination depending on
+both were accepted. Original signed v2 receipt/raw-byte replay, exact host template expansion
+and complete atomic three-task publication read back after reopen; all10 events verified.
+One spend/one receipt retained,1024 reserved (not752 refunded). No model reload was needed.
+
+This is producer evidence for that source, not semantic objective success, real worker execution,
+M1 exit or independent identity/containment acceptance. Model/runtime inventory, raw receipts
+and detailed witness hive remain private. The request is complete; do not repeat for this
+docs-only amendment. Next: final-head CI, unchanged executable/test/workflow blob verification,
+then new PR23-only owner review decision before signed squash.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952

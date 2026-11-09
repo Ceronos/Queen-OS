@@ -182,14 +182,18 @@ class Authority:
             if used >= cap.grant.max_calls:
                 raise AuthorityError(f"{cap.token_id}: call budget ({cap.grant.max_calls}) exhausted")
             from queen_os.queen.budget import PlanBudgetError, plan_charge
+            from queen_os.queen.run_budget import RunBudgetError, run_charge
 
             try:
                 charge = plan_charge(self.ledger, cap.scope, action, completion_tokens)
-            except (PlanBudgetError, KeyError, TypeError) as exc:
+                run = run_charge(self.ledger, cap.scope, action, completion_tokens)
+            except (PlanBudgetError, RunBudgetError, KeyError, TypeError) as exc:
                 raise AuthorityError("published plan budget refused") from exc
             payload = {"action": action, "n": int(used) + 1, "token_id": cap.token_id}
             if charge is not None:
                 payload["plan"] = charge
+            if run is not None:
+                payload["run"] = run
             return self.ledger.append_locked(db, SPENT, actor, payload)
 
     def authorize_inference(self, cap: Capability, actor: str, provider: str, model: str, max_tokens: int) -> int:
