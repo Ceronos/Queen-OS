@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from check_local_markdown_links import missing_targets
+from scripts.check_local_markdown_links import missing_targets
 
 
 class LinkCheckTests(unittest.TestCase):
