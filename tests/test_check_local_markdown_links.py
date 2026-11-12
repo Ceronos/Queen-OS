@@ -29,6 +29,17 @@ class LinkCheckTests(unittest.TestCase):
             )
             self.assertEqual(missing_targets(root), ["docs/index.md: ../missing.md"])
 
+    def test_inline_and_fenced_code_not_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "`[inline](missing-inline.md)`\n"
+                "```md\n[fenced](missing-fenced.md)\n```\n"
+                "~~~md\n[tilde](missing-tilde.md)\n~~~\n"
+                "[real](missing-real.md)\n", encoding="utf-8"
+            )
+            self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
+
 
 if __name__ == "__main__":
     unittest.main()
