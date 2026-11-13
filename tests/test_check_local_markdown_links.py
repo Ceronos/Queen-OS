@@ -15,7 +15,8 @@ class LinkCheckTests(unittest.TestCase):
             (root / "docs" / "ok.md").write_text("ok", encoding="utf-8")
             (root / "README.md").write_text(
                 "[ok](docs/ok.md) [missing](docs/no.md) [web](https://example.org) "
-                "[anchor](#intro) [encoded](docs/ok.md#heading)", encoding="utf-8"
+                "[anchor](#intro) [encoded](docs/ok.md#heading)",
+                encoding="utf-8",
             )
             self.assertEqual(missing_targets(root), ["README.md: docs/no.md"])
 
@@ -24,9 +25,7 @@ class LinkCheckTests(unittest.TestCase):
             root = Path(tmp)
             (root / "docs").mkdir()
             (root / "a b.md").write_text("ok", encoding="utf-8")
-            (root / "docs" / "index.md").write_text(
-                "[space](../a%20b.md) [absent](../missing.md)", encoding="utf-8"
-            )
+            (root / "docs" / "index.md").write_text("[space](../a%20b.md) [absent](../missing.md)", encoding="utf-8")
             self.assertEqual(missing_targets(root), ["docs/index.md: ../missing.md"])
 
     def test_inline_and_fenced_code_not_links(self):
@@ -36,23 +35,18 @@ class LinkCheckTests(unittest.TestCase):
                 "`[inline](missing-inline.md)`\n"
                 "```md\n[fenced](missing-fenced.md)\n```\n"
                 "~~~md\n[tilde](missing-tilde.md)\n~~~\n"
-                "[real](missing-real.md)\n", encoding="utf-8"
+                "[real](missing-real.md)\n",
+                encoding="utf-8",
             )
             self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
-
 
     def test_fence_closer_with_trailing_text_is_not_a_closer(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_text(
-                "```python\n"
-                "```not-a-closer\n"
-                "[fake](missing-fake.md)\n"
-                "```\n"
-                "[real](missing-real.md)\n", encoding="utf-8"
+                "```python\n```not-a-closer\n[fake](missing-fake.md)\n```\n[real](missing-real.md)\n", encoding="utf-8"
             )
             self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
-
 
     def test_indented_closing_fences_restore_prose(self):
         for indent in (1, 2, 3):
@@ -64,14 +58,10 @@ class LinkCheckTests(unittest.TestCase):
                     root = Path(tmp)
                     (root / "README.md").write_text(
                         f"{delimiter}python\n"
-                        "[fake](missing-fake.md)\n"
-                        + " " * indent + f"{delimiter}\n"
-                        + "[real](missing-real.md)\n",
+                        "[fake](missing-fake.md)\n" + " " * indent + f"{delimiter}\n" + "[real](missing-real.md)\n",
                         encoding="utf-8",
                     )
-                    self.assertEqual(
-                        missing_targets(root), ["README.md: missing-real.md"]
-                    )
+                    self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
 
 
 if __name__ == "__main__":
