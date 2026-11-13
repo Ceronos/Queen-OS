@@ -24,7 +24,9 @@ def _prose_only(content: str) -> str:
     for line in content.splitlines(keepends=True):
         marker = _FENCE.match(line.rstrip("\r\n"))
         if fence_char:
-            if marker and marker.group(1)[0] == fence_char and len(marker.group(1)) >= fence_length:
+            if (marker and marker.group(1)[0] == fence_char
+                    and len(marker.group(1)) >= fence_length
+                    and not marker.group(0)[len(marker.group(1)):].strip()):
                 fence_char = ""
                 fence_length = 0
             lines.append("\n")
