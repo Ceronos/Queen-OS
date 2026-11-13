@@ -41,5 +41,18 @@ class LinkCheckTests(unittest.TestCase):
             self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
 
 
+    def test_fence_closer_with_trailing_text_is_not_a_closer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "```python\n"
+                "```not-a-closer\n"
+                "[fake](missing-fake.md)\n"
+                "```\n"
+                "[real](missing-real.md)\n", encoding="utf-8"
+            )
+            self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
+
+
 if __name__ == "__main__":
     unittest.main()
