@@ -57,19 +57,21 @@ class LinkCheckTests(unittest.TestCase):
     def test_indented_closing_fences_restore_prose(self):
         for indent in (1, 2, 3):
             for delimiter in (chr(96) * 3, "~~~"):
-                with self.subTest(indent=indent, delimiter=delimiter):
-                    with tempfile.TemporaryDirectory() as tmp:
-                        root = Path(tmp)
-                        (root / "README.md").write_text(
-                            f"{delimiter}python\n"
-                            "[fake](missing-fake.md)\n"
-                            + " " * indent + f"{delimiter}\n"
-                            + "[real](missing-real.md)\n",
-                            encoding="utf-8",
-                        )
-                        self.assertEqual(
-                            missing_targets(root), ["README.md: missing-real.md"]
-                        )
+                with (
+                    self.subTest(indent=indent, delimiter=delimiter),
+                    tempfile.TemporaryDirectory() as tmp,
+                ):
+                    root = Path(tmp)
+                    (root / "README.md").write_text(
+                        f"{delimiter}python\n"
+                        "[fake](missing-fake.md)\n"
+                        + " " * indent + f"{delimiter}\n"
+                        + "[real](missing-real.md)\n",
+                        encoding="utf-8",
+                    )
+                    self.assertEqual(
+                        missing_targets(root), ["README.md: missing-real.md"]
+                    )
 
 
 if __name__ == "__main__":
