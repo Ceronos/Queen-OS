@@ -14,7 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -125,7 +125,7 @@ def make_receipt(request: dict[str, str], at: datetime, gpu: dict[str, Any] | No
         "protocol": PROTOCOL,
         "request_id": request["request_id"],
         "issue_number": int(request["issue_number"]),
-        "observed_at": at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "observed_at": at.astimezone(UTC).isoformat().replace("+00:00", "Z"),
         "kind": "probe_receipt",
         "result": result,
         "result_sha256": hashlib.sha256(canonical(result).encode("utf-8")).hexdigest(),
@@ -138,8 +138,11 @@ def post_comment(repo: str, issue_number: int, body: str) -> None:
     """Reuse local GitHub CLI authentication; no token extraction or shell execution."""
     if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo, re.ASCII):
         raise ValueError("invalid repository name")
-    subprocess.run(  # noqa: S603 - fixed gh executable and API path, no shell
-        ["gh", "api", "--method", "POST", f"repos/{repo}/issues/{issue_number}/comments", "-f", f"body={body}"],
+    binary = shutil.which("gh")
+    if binary is None:
+        raise OSError("GitHub CLI is unavailable")
+    subprocess.run(  # noqa: S603 - fixed executable and API path, no shell
+        [binary, "api", "--method", "POST", f"repos/{repo}/issues/{issue_number}/comments", "-f", f"body={body}"],
         check=True,
         capture_output=True,
         text=True,
@@ -166,7 +169,7 @@ def save_processed(path: Path, processed: set[str]) -> None:
 
 
 def run(*, post: bool, state: Path, repo: str = REPO, author: str = AUTHOR) -> int:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     processed = load_processed(state)
     admitted = 0
     for issue in github_issues(repo):
