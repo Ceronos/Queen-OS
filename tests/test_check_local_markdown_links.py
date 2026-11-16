@@ -1,10 +1,15 @@
 """Offline tests for the read-only Markdown link checker."""
 
+import runpy
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.check_local_markdown_links import missing_targets
+# The checker is a standalone script, not an installed Python package.
+# Resolve it from this test file so pytest collection works without repo-root PYTHONPATH.
+missing_targets = runpy.run_path(
+    str(Path(__file__).resolve().parents[1] / "scripts" / "check_local_markdown_links.py")
+)["missing_targets"]
 
 
 class LinkCheckTests(unittest.TestCase):
