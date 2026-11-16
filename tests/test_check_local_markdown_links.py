@@ -69,5 +69,56 @@ class LinkCheckTests(unittest.TestCase):
                     self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
 
 
+
+    def test_a081_tab_indented_fences_do_not_hide_links(self):
+        for leading in ("\t", " \t", "  \t"):
+            with (
+                self.subTest(leading=repr(leading)),
+                tempfile.TemporaryDirectory() as tmp,
+            ):
+                root = Path(tmp)
+                (root / "README.md").write_text(
+                    f"{leading}```python\n"
+                    "[visible](missing-visible.md)\n",
+                    encoding="utf-8",
+                )
+                self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
+    def test_a081_invalid_backtick_info_strings_do_not_hide_links(self):
+        for opener in ("```python`bad", "```` ` ", "```lang`"):
+            with (
+                self.subTest(opener=opener),
+                tempfile.TemporaryDirectory() as tmp,
+            ):
+                root = Path(tmp)
+                (root / "README.md").write_text(
+                    f"{opener}\n[visible](missing-visible.md)\n",
+                    encoding="utf-8",
+                )
+                self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
+    def test_a081_unequal_inline_backtick_runs_do_not_hide_links(self):
+        for snippet in ("`[visible](missing-visible.md)``", "``[visible](missing-visible.md)`"):
+            with (
+                self.subTest(snippet=snippet),
+                tempfile.TemporaryDirectory() as tmp,
+            ):
+                root = Path(tmp)
+                (root / "README.md").write_text(f"{snippet}\n", encoding="utf-8")
+                self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
+    def test_a081_valid_fences_and_equal_inline_runs_still_mask_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "   ```python\n[hidden](missing-fence.md)\n```\n"
+                "~~~lang`extra\n[hidden](missing-tilde.md)\n~~~\n"
+                "`[hidden](missing-inline.md)`\n"
+                "``[hidden](missing-double.md)``\n"
+                "[visible](missing-visible.md)\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
 if __name__ == "__main__":
     unittest.main()
