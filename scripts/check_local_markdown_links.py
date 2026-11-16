@@ -59,7 +59,7 @@ def missing_targets(root: Path) -> list[str]:
             if not path.is_relative_to(root):
                 continue  # Outside the checked tree: do not traverse it.
             if not path.exists():
-                missing.append(f"{source.relative_to(root)}: {target}")
+                missing.append(f"{source.relative_to(root).as_posix()}: {target}")
     return sorted(missing)
 
 
