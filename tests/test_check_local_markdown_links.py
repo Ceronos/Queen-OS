@@ -68,8 +68,6 @@ class LinkCheckTests(unittest.TestCase):
                     )
                     self.assertEqual(missing_targets(root), ["README.md: missing-real.md"])
 
-
-
     def test_a081_tab_indented_fences_do_not_hide_links(self):
         for leading in ("\t", " \t", "  \t"):
             with (
@@ -119,6 +117,7 @@ class LinkCheckTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
 
 if __name__ == "__main__":
     unittest.main()
