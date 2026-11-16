@@ -4,7 +4,7 @@ import importlib.util
 import json
 import sys
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,7 +15,7 @@ bridge = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = bridge
 SPEC.loader.exec_module(bridge)
 
-NOW = datetime(2026, 11, 16, 18, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 11, 16, 18, 0, tzinfo=UTC)
 
 
 def valid_issue():
@@ -25,7 +25,12 @@ def valid_issue():
         "kind": "probe",
         "expires_at": (NOW + timedelta(days=3)).isoformat().replace("+00:00", "Z"),
     }
-    return {"number": 31, "title": bridge.TITLE, "user": {"login": "Ceronos"}, "body": bridge.MARKER + "\n" + json.dumps(data)}
+    return {
+        "number": 31,
+        "title": bridge.TITLE,
+        "user": {"login": "Ceronos"},
+        "body": bridge.MARKER + "\n" + json.dumps(data),
+    }
 
 
 class AdmissionTests(unittest.TestCase):
@@ -100,11 +105,13 @@ class AdmissionTests(unittest.TestCase):
             bridge.github_issues("evil.com/repo?redirect=https://x")
 
     def test_no_command_execution_during_dry_run(self):
-        with patch.object(bridge, "github_issues", return_value=[valid_issue()]), patch.object(
-            bridge, "post_comment"
-        ) as post, patch.object(bridge, "make_receipt", return_value="RECEIPT"):
-            with patch.object(bridge, "load_processed", return_value=set()):
-                self.assertEqual(bridge.run(post=False, state=Path("unused")), 0)
+        with (
+            patch.object(bridge, "github_issues", return_value=[valid_issue()]),
+            patch.object(bridge, "post_comment") as post,
+            patch.object(bridge, "make_receipt", return_value="RECEIPT"),
+            patch.object(bridge, "load_processed", return_value=set()),
+        ):
+            self.assertEqual(bridge.run(post=False, state=Path("unused")), 0)
         post.assert_not_called()
 
 
