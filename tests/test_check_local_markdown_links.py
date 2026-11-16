@@ -76,8 +76,7 @@ class LinkCheckTests(unittest.TestCase):
             ):
                 root = Path(tmp)
                 (root / "README.md").write_text(
-                    f"{leading}```python\n"
-                    "[visible](missing-visible.md)\n",
+                    f"{leading}```python\n[visible](missing-visible.md)\n",
                     encoding="utf-8",
                 )
                 self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
