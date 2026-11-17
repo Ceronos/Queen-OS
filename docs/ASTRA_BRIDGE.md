@@ -1,10 +1,10 @@
 # Astra Bridge — v0 probe pilot (draft)
 
-**Research status:** source and offline tests only; no Astra execution verified. This is deliberately a one-shot bridge, not a daemon, agent runtime, unattended control plane, model training engine, or security attestation.
+**Pilot scope.** One operator-invoked read-only probe. A dry-run witnesses GitHub-to-Astra delivery. An authenticated reply and independent readback are required to witness the return path.
 
 ## Why this exists
 
-The interactive Sage session can create GitHub issues and read issue comments, but GitHub connector access is **not** direct Thelio Astra host access. An owner-started listener on Astra can pull an explicitly bounded request from GitHub and return a bounded receipt to that same issue. That provides the first end-to-end transport witness before any authority is delegated for model research. This design does not claim continuity between ChatGPT and a local agent process.
+The GitHub connector handles issues and comments. The operator starts the probe on Astra's terminal. The probe pulls one bounded request from GitHub and can return a bounded receipt to the same issue. This tests transport before any authority is delegated for model research.
 
 ## Protocol v0
 
@@ -15,23 +15,25 @@ ASTRA-BRIDGE-V0
 {"protocol":"astra-bridge-v0","request_id":"astra-20261116-001","kind":"probe","expires_at":"2026-11-22T00:00:00Z"}
 ```
 
-The request expires no later than seven days after the listener checks it. Only `kind=probe` is implemented. Other keys, kind strings, actors, PRs, titles and malformed payloads fail closed. Issue contents are untrusted data, never commands. The listener reads the newest 100 open issues only; older unseen requests do not automatically run.
+The request must be open and expire within seven days of the check. The script fetches only the supplied issue number, and the request ID must match the explicit argument. It accepts just `kind=probe` and rejects unexpected or repeated fields, other authors, pull requests, nonmatching titles, malformed payloads and HTTP redirects. The issue body supplies data for the fixed probe.
 
 An Astra operator reviews the source and runs:
 
 ```bash
-# From a checked-out branch containing this proposal (not yet main):
-python3 scripts/astra_bridge_probe.py              # read-only discovery, no GitHub writes
-# Inspect results. If expected, authenticate gh locally with issues-comment rights.
-gh auth status
-python3 scripts/astra_bridge_probe.py --post       # one-shot; returns one comment per fresh request
+# From a checkout of the reviewed proposal:
+python3 scripts/astra_bridge_probe.py --issue 32 --request-id astra-20261116-001
+# After reviewing the dry-run and confirming the authorized posting identity:
+gh auth status --hostname github.com
+python3 scripts/astra_bridge_probe.py --issue 32 --request-id astra-20261116-001 --post
 ```
 
 `--post` uses the local `gh` CLI authentication to post a bounded sanitized JSON receipt in the matching issue. Never paste an auth token into the chat, issue body, public repo or script. Run with a minimally scoped GitHub account/token; do not enable a self-hosted GitHub Actions runner on public untrusted PR code. The script is not installed as a service or cron, and does not start at boot. Owner-controlled scheduling can be considered *after* the pilot has a verified result and stronger cryptographic authorization.
 
 The host probe reports only OS family, machine architecture, Python major.minor and coarse NVIDIA GPU model/memory (if `nvidia-smi` exists). It intentionally does not collect hostname, IP, device serial, path, environment variables, network topology or credential values. The `result_sha256` is a reproducible digest, **not an authenticity signature**. The GitHub issue comment's attributed author proves who posted the comment under GitHub's account model, not what hardware executed the code.
 
-Local processed-ID state is kept at `~/.local/state/queen-os/astra-bridge-v0.json` only after a successful comment POST. A lost reply/ack or crash can lead to a duplicate, so treat receipts as *at least once* and deduplicate by `(issue_number, request_id)` when inspecting them. No background retries are scheduled. The operator can stop by simply not invoking the command again.
+The default state path is `~/.local/state/queen-os/astra-bridge-v0.json`. Keep one operator-controlled state path per Astra pilot. A lock prevents concurrent posts through that path. Before posting, the script checks one bounded page of issue comments for the same request and authenticated CLI login, then rechecks the request. State is saved only after the post succeeds or an existing matching comment is observed. After a crash, inspect GitHub for the reply and confirm the process exited before removing a stale `.lock` directory. Across different state paths, accounts or hosts, deduplicate independently by `(issue_number, request_id)`. GitHub provides no atomic check-and-post operation. Invoke this once for the explicitly authorized issue.
+
+For readback, fetch issue comments independently of the host CLI. Check the exact issue and request IDs, expected GitHub posting account, observation time against the request window, field allowlist and duplicate count. Recompute SHA-256 over the UTF-8 JSON encoding of `result` with sorted keys, ASCII escaping and separators `,` and `:` without spaces. Treat the posting account and the observed host execution as separate pieces of evidence.
 
 ## Acceptance gate before any model research
 
