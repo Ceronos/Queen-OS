@@ -1,8 +1,11 @@
 """Network-free admission and receipt tests for the Astra one-shot probe bridge."""
 
+import hashlib
 import importlib.util
 import json
+import subprocess
 import sys
+import tempfile
 import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -27,6 +30,7 @@ def valid_issue():
     }
     return {
         "number": 31,
+        "state": "open",
         "title": bridge.TITLE,
         "user": {"login": "Ceronos"},
         "body": bridge.MARKER + "\n" + json.dumps(data),
@@ -45,6 +49,16 @@ class AdmissionTests(unittest.TestCase):
     def test_pull_request_refused(self):
         issue = valid_issue()
         issue["pull_request"] = {}
+        self.assertIsNone(bridge.validate_request(issue, NOW))
+
+    def test_closed_or_missing_author_refused(self):
+        for fields in ({"state": "closed"}, {"user": None}):
+            with self.subTest(fields=fields):
+                self.assertIsNone(bridge.validate_request(valid_issue() | fields, NOW))
+
+    def test_duplicate_json_field_refused(self):
+        issue = valid_issue()
+        issue["body"] = issue["body"].replace('"kind": "probe"', '"kind": "run_shell", "kind": "probe"')
         self.assertIsNone(bridge.validate_request(issue, NOW))
 
     def test_expired_request_refused(self):
@@ -89,30 +103,72 @@ class AdmissionTests(unittest.TestCase):
 
     def test_receipt_hash_is_rederivable(self):
         request = bridge.validate_request(valid_issue(), NOW)
-        with patch.object(bridge.platform, "system", return_value="Linux"), patch.object(
-            bridge.platform, "machine", return_value="x86_64"
+        with (
+            patch.object(bridge.platform, "system", return_value="Linux"),
+            patch.object(bridge.platform, "machine", return_value="x86_64"),
         ):
             text = bridge.make_receipt(request, NOW, gpu={"status": "unavailable"})
         obj = json.loads(text.split("\n", 1)[1])
-        import hashlib
-
         self.assertEqual(obj["result_sha256"], hashlib.sha256(bridge.canonical(obj["result"]).encode()).hexdigest())
         self.assertEqual(obj["attestation"], "none; producer self-report only")
         self.assertEqual(obj["result"]["os"], "Linux")
 
     def test_repo_cannot_redirect_github_lookups(self):
         with self.assertRaises(ValueError):
-            bridge.github_issues("evil.com/repo?redirect=https://x")
+            bridge.github_read("evil.com/repo?redirect=https://x")
+        self.assertIsNone(bridge.NoRedirect().redirect_request(None, None, 302, "", {}, "https://example.com"))
 
-    def test_no_command_execution_during_dry_run(self):
+    def test_dry_run_reads_only_the_selected_issue_and_uses_no_gh(self):
+        issue = valid_issue()
+        expires = (datetime.now(UTC) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        issue["body"] = issue["body"].replace("2026-11-19T18:00:00Z", expires)
         with (
-            patch.object(bridge, "github_issues", return_value=[valid_issue()]),
-            patch.object(bridge, "post_comment") as post,
+            patch.object(bridge, "github_read", return_value=issue) as read,
+            patch.object(bridge, "github_cli") as gh,
             patch.object(bridge, "make_receipt", return_value="RECEIPT"),
-            patch.object(bridge, "load_processed", return_value=set()),
+            tempfile.TemporaryDirectory() as directory,
         ):
-            self.assertEqual(bridge.run(post=False, state=Path("unused")), 0)
-        post.assert_not_called()
+            state = Path(directory) / "state.json"
+            self.assertEqual(bridge.run(issue_number=31, request_id="astra-001", post=False, state=state), 0)
+            self.assertFalse(state.exists())
+        read.assert_called_once_with(31)
+        gh.assert_not_called()
+
+    def test_wrong_issue_or_id_refused_before_probe(self):
+        with (
+            patch.object(bridge, "github_read", return_value=valid_issue()),
+            patch.object(bridge, "datetime", wraps=datetime) as clock,
+            patch.object(bridge, "make_receipt") as probe,
+        ):
+            clock.now.return_value = NOW
+            self.assertEqual(bridge.run(issue_number=32, request_id="astra-001", post=False, state=Path("unused")), 2)
+            self.assertEqual(bridge.run(issue_number=31, request_id="other", post=False, state=Path("unused")), 2)
+        probe.assert_not_called()
+
+    def test_acknowledgment_loss_recovers_from_same_author_receipt(self):
+        issue = valid_issue()
+        receipt = bridge.make_receipt({"issue_number": "31", "request_id": "astra-001"}, NOW, {"status": "unavailable"})
+        comments = [{"user": {"login": "astra-producer"}, "body": receipt}]
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(bridge, "github_read", side_effect=[issue, [], issue, issue, comments]),
+            patch.object(bridge, "datetime", wraps=datetime) as clock,
+            patch.object(
+                bridge,
+                "github_cli",
+                side_effect=["astra-producer", subprocess.TimeoutExpired("gh", 20), "astra-producer"],
+            ) as gh,
+            patch.object(bridge, "make_receipt", return_value=receipt),
+        ):
+            clock.now.return_value = NOW
+            state = Path(directory) / "state.json"
+            with self.assertRaises(subprocess.TimeoutExpired):
+                bridge.run(issue_number=31, request_id="astra-001", post=True, state=state)
+            self.assertFalse(state.exists())
+            self.assertEqual(bridge.run(issue_number=31, request_id="astra-001", post=True, state=state), 0)
+            self.assertEqual(bridge.load_processed(state), {"31:astra-001"})
+            self.assertFalse(state.with_name("state.json.lock").exists())
+        self.assertEqual(sum("--method" in call.args for call in gh.call_args_list), 1)
 
 
 if __name__ == "__main__":
