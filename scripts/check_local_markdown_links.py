@@ -17,16 +17,22 @@ _BACKTICK_RUN = re.compile(r"`+")
 
 
 def _mask_inline_code(content: str) -> str:
-    """Mask only code spans delimited by equal-length backtick runs."""
+    """Mask code spans delimited by equal-length backtick runs in linear time."""
     runs = list(_BACKTICK_RUN.finditer(content))
+    next_same: list[int | None] = [None] * len(runs)
+    next_by_length: dict[int, int] = {}
+    for index in range(len(runs) - 1, -1, -1):
+        run = runs[index]
+        length = run.end() - run.start()
+        next_same[index] = next_by_length.get(length)
+        next_by_length[length] = index
+
     masked: list[str] = []
     cursor = 0
     i = 0
     while i < len(runs):
-        j = i + 1
-        while j < len(runs) and len(runs[j].group()) != len(runs[i].group()):
-            j += 1
-        if j == len(runs):
+        j = next_same[i]
+        if j is None:
             i += 1
             continue
         masked.append(content[cursor : runs[i].start()])
@@ -63,6 +69,12 @@ def _prose_only(content: str) -> str:
             fence_char = marker.group(1)[0]
             fence_length = len(marker.group(1))
             chunks.append("\n")
+            continue
+        if not line.strip():
+            if prose:
+                chunks.append(_mask_inline_code("".join(prose)))
+                prose.clear()
+            chunks.append(line)
             continue
         prose.append(line)
     if prose:
