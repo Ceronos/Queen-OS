@@ -145,7 +145,7 @@ Hermes Agent reference: `NousResearch/hermes-agent` @ `af5c2014` (MIT, Python �
 | MCP client (Adaptive Interface Discovery) | T1 | MCP tools with AST/schema drift checks (`verify_schema_drift`) | `tools/mcp_tool.py` | M2 |
 | Skills (procedural memory) | T1 | Skills are ledger-tracked artifacts. A skill only becomes `committed` after passing the gate. | `skills/` | M2 |
 | Session memory + FTS search | T1 | SQLite FTS5 over ledger projections | `hermes_state_fts.py` | M2 |
-| Messaging gateway (Telegram/Discord/Slack…) | T1 | Plugin, not core | `gateway/` | M4 |
+| Messaging gateway (Telegram/Discord/Slack…) | T1 | Plugin, not core. Candidate one-shot public GitHub probe relay/readback only; no scheduler or dispatch. See docs/ASTRA_BRIDGE.md. | `gateway/`; pilot `scripts/astra_bridge_return.py` | M4; bounded pilot locally tested, live return blocked pending explicit publication approval |
 | Cron / scheduled eggs | T1 | Scheduled oviposition | `cron/` | M3 |
 
 ### Research & frontier (stigmergic alignment and beyond)

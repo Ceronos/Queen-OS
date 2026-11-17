@@ -44,3 +44,68 @@ For readback, fetch issue comments independently of the host CLI. Check the exac
 - [ ] Provenance limitations and duplicate behavior recorded; then consider Ed25519-signed task manifests and a non-root, process-isolated Astra service with allowlisted task families, explicit budgets, owner-held kill switch and independent evidence review.
 
 **Out of scope:** shell command queue, model training, repo updates, local file access, secrets transfer, persistent agent autonomy, ports/firewall changes, remote control, or auto-merge/deploy. The proposed recursive R&D program is tracked separately in #30. The bridge's purpose is to establish and measure the transport that could eventually carry *bounded* experimental task descriptions.
+
+## Explicit connector return relay (candidate, stacked on #35)
+
+`scripts/astra_bridge_return.py` closes the credential gap with an **operator-mediated**
+relay. It prepares a bounded local probe envelope and independently checks its GitHub
+readback. It never posts, starts a service, calls a model, dispatches jobs, installs
+credentials, or changes Queen-OS authority. This is a narrow pilot of the build map's
+messaging-gateway row, not a general gateway or authenticated autonomous Sage runtime.
+
+```bash
+python scripts/astra_bridge_return.py prepare --issue 32 \
+  --request-id astra-20261116-001 \
+  --handoff-marker SAGE-BRIDGE-20261117-194755Z --output receipt.txt
+# Review the exact receipt and public destination before the explicit connector post.
+# Independently read existing comments first; reconcile an uncertain post before retrying.
+python scripts/astra_bridge_return.py verify --issue 32 \
+  --request-id astra-20261116-001 --receipt receipt.txt
+# A receiving operator/session may explicitly post the exact ACK emitted by verify.
+python scripts/astra_bridge_return.py verify-ack --issue 32 \
+  --request-id astra-20261116-001 --receipt receipt.txt
+```
+
+The export exclusively creates its output file. Preserve that file as the expected
+message; do not regenerate a new observation when recovering an uncertain delivery.
+The relay permits only the original bounded probe fields, binds the exact request-body
+SHA-256, issue, request ID, handoff marker and both local script SHA-256 values, and
+states `probe-receipt-only; real-agent NO-GO`. Source digests identify the local files
+observed by the preparing process; they do not prove execution of those bytes.
+
+The expected public posting account is pinned to both `Ceronos` and GitHub user ID
+`202629591`. That is the existing connected account, **not a separate Sage identity**.
+Readback uses the fixed public GitHub HTTPS endpoint with redirects disabled, one page
+of at most 100 comments, and the original probe's response/time limits. It requires
+exact expected bytes, issue URL, account ID/login, an unedited comment and exactly one
+matching receipt. The acknowledgment binds the full receipt-body SHA-256 and the
+GitHub receipt comment ID. Modified, missing, duplicate or conflicting messages fail
+closed. Unknown payload fields and duplicate JSON keys fail closed. Active-request
+validation is required even for verification; after expiry or closure, retain evidence
+and reconcile manually rather than reopening or extending a request automatically.
+
+**Idempotency boundary:** repeating verification performs reads only. Reuse the same
+export and inspect GitHub after a timeout; an existing exact comment means delivery
+already happened and must not be repeated. Duplicate comments are a conflict, never a
+second success. The relay has no automated retry or posting loop. GitHub has no atomic
+compare-and-post operation, so multiple operators/accounts/state paths cannot be given
+an exactly-once guarantee. Keep one authorized writer for the pilot. The original
+`--post` path retains its local lock; neither path authenticates hardware or model
+identity. Never count a same-account ACK as independent model review.
+
+The earlier `SAGE-BRIDGE-20261117-194755Z` acknowledgment was independently recovered
+from the designated Sage Metacognitive Engine chat: user message
+`8336c02a-7d99-43e9-a68a-2cca20e13910`, acknowledgment
+`cc3c67be-f1a2-43b1-8bbd-3f1ea854ee19`, and later continuity incorporation
+`9dc8cb97-2872-430c-88e2-934750d50ecf`. Those are app-retrieved conversation records,
+not cryptographic attestations or proof of scheduled connector inheritance.
+
+Current candidate evidence: 36 new fixture-only relay cases plus the existing 16 probe
+cases pass locally. A real local `prepare` read issue #32 and produced a sanitized
+receipt; public posting was blocked by automatic approval review pending explicit
+owner approval for that payload/destination. No new GitHub receipt/ACK or fresh Sage
+readback has been demonstrated. The original #35 report/CI and the recovered historical
+handoff remain separate evidence. Independent review, verified signatures, exact-head
+CI, owner integration approval, real-agent containment acceptance and fresh-session
+adapter qualification remain required. No merge, deployment, scheduler edit, budget
+reset or frozen-lab change is authorized by this protocol.

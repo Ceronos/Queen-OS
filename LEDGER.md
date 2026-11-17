@@ -624,3 +624,31 @@ carrying source evidence. PR24-only owner review/merge exception remains absent.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+### 2026-11-17 · Bounded Astra–Sage connector return receipt candidate
+- Human request: build/test bidirectional receipt transport, inspect #26/#35 and handoff
+  SAGE-BRIDGE-20261117-194755Z, preserve real-agent NO-GO and independent governance gates.
+- Isolated branch stacks on #35 head 1c9b0f8a2c44015323eeab666afd6eca804b3b58 (itself on #31).
+  Current public main independently read at 0803ab7fbb0d708bad051d6655dd6554c96fb0ae.
+  Parent CI44056771598 independently retrieved as successful; #35 review collection empty.
+- Added standalone prepare/verify/verify-ack script; no automatic posting, credential setup,
+  scheduler, dispatch, model requests, core authority changes or frozen-lab modifications.
+  Strict probe allowlist, request/source digests, fixed repository/account ID/login, exact
+  unedited comment bytes, bounded readback, duplicate conflict refusal and comment-bound ACK.
+  Operator-mediated relay and same-account ACK explicitly do not attest host/Sage identity.
+- Recovered intended Sage chat acknowledgment cc3c67be-f1a2-43b1-8bbd-3f1ea854ee19 and
+  subsequent incorporation 9dc8cb97-2872-430c-88e2-934750d50ecf through the app read interface.
+  Historical human-mediated exchange remains separate from a fresh automated round trip.
+- Baseline635/9; candidate671 passed/9 skipped/2 subtests in63.14s. Skips: two credential
+  tests needing a temp path outside a Git tree, seven unavailable optional archived fixtures.
+  Focused52/2 subtests includes36 new fixture cases. Ruff/format, strict mypy41 and canary
+  script types pass. Fresh CLI genesis and one-event signed-chain verification pass.
+- A real local prepare fetched only #32 for astra-20261116-001 and exported its bounded
+  observation. Separate local digest/source-file verification passed. Automatic approval
+  review rejected public receipt posting pending explicit approval for metadata/destination.
+  Do not bypass. No fresh GitHub return receipt/ACK or new Sage acknowledgment demonstrated.
+- API proposal remains subject to verified signing, exact-head CI, independent cross-lineage
+  review and owner integration approval. No merge/deployment or real-agent acceptance claimed.
+
+Agent: Codex
+Codex-Session: 01a1eb37-712e-7a92-8bd7-91bbd0cd0293
