@@ -117,7 +117,6 @@ class LinkCheckTests(unittest.TestCase):
             )
             self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
 
-
     def test_a081_unmatched_backticks_do_not_pair_across_paragraphs(self):
         for blank_line in ("\n", " \t\n"):
             with (
