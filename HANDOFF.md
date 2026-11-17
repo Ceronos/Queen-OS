@@ -1,5 +1,48 @@
 # HANDOFF → next engineer on Queen-OS
 
+Updated November 17, 2026 by Codex for the Astra–Sage return-receipt candidate.
+This isolated branch depends on draft #35 at 1c9b0f8a2c44015323eeab666afd6eca804b3b58,
+which depends on draft #31. Main independently read at 0803ab7fbb0d708bad051d6655dd6554c96fb0ae.
+No parent PR is merged by this work. Preserve Claude/Sage's earlier attribution and evidence.
+
+The existing handoff SAGE-BRIDGE-20261117-194755Z was independently recovered from the
+Sage Metacognitive Engine chat, including acknowledgment cc3c67be-f1a2-43b1-8bbd-3f1ea854ee19.
+It remains human-mediated context, not direct host access or independent attestation.
+
+New standalone scripts/astra_bridge_return.py prepares a fixed-scope receipt for an
+explicit connector relay, verifies exact unedited account-attributed comment readback,
+and verifies a reverse ACK bound to the full receipt body and comment ID. It never posts
+or dispatches work. See docs/ASTRA_BRIDGE.md for commands, scope and duplicate recovery.
+Expected connected account Ceronos/202629591 is not an independent Sage signing identity.
+
+Baseline 635 passed/9 skipped; focused candidate 52 passed plus 2 subtests (36 new relay
+cases + 16 probe cases). Full candidate671 passed/9 skipped/2 subtests; lint/format/types and fresh signed CLI
+genesis verification pass. Remote CI must be recorded in the PR.
+The initial public-post approval block was resolved by Johnny's explicit approval of
+that exact payload and one bounded Sage verification exchange. Return receipt6960534846
+and ACK6960605672 are posted on#32. A real Astra process independently verified both
+through public GitHub HTTPS, with exact body/digest/account/URL/timestamp checks.
+The specialized comment connector returns null timestamps; use generic REST fetch for
+original metadata, retaining fail-closed checks. See docs/ASTRA_BRIDGE.md and PR#37.
+Source commit289c35a matches tested files; this qualification update changes docs only.
+Remote CI and fresh Sage-response retrieval status belong in the final PR evidence.
+No recurring synchronization or extra messaging allowance follows from this witness.
+
+Keep the #26 lane boundaries, independent cross-lineage review, signatures, exact-head CI
+and owner integration approval. Do not merge on green CI alone. Real-agent status remains
+NO-GO; containment acceptance, combined sibling integration and fresh-session adapter are
+unestablished. No services, credentials, schedulers, frozen v65 files or experimental
+budgets were changed. QOS-0043 and the stopped/spent QOS-0042 experiment remain as recorded
+below; do not repeat them to test this transport.
+
+Agent: Codex
+Codex-Session: 01a1eb37-712e-7a92-8bd7-91bbd0cd0293
+
+---
+
+## Preserved predecessor handoff (historical; not a new current-main claim)
+
+
 Updated November9,2026 by Sage/Codex. Claude remains unavailable; preserve his work/attribution.
 This is manual owner-authorized construction. Hourly repository observation remains read-only.
 
