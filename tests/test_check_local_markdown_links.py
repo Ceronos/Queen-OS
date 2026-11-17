@@ -133,9 +133,7 @@ class LinkCheckTests(unittest.TestCase):
                     + "`unmatched run in third paragraph\n",
                     encoding="utf-8",
                 )
-                self.assertEqual(
-                    missing_targets(root), ["README.md: missing-between.md"]
-                )
+                self.assertEqual(missing_targets(root), ["README.md: missing-between.md"])
 
     def test_a081_many_distinct_unmatched_runs_preserve_links(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -145,9 +143,7 @@ class LinkCheckTests(unittest.TestCase):
                 unmatched_runs + "\n[visible](missing-visible.md)\n",
                 encoding="utf-8",
             )
-            self.assertEqual(
-                missing_targets(root), ["README.md: missing-visible.md"]
-            )
+            self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
 
 
 if __name__ == "__main__":
