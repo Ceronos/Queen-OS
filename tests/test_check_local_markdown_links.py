@@ -117,6 +117,34 @@ class LinkCheckTests(unittest.TestCase):
             )
             self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
 
+    def test_a081_unmatched_backticks_do_not_pair_across_paragraphs(self):
+        for blank_line in ("\n", " \t\n"):
+            with (
+                self.subTest(blank_line=repr(blank_line)),
+                tempfile.TemporaryDirectory() as tmp,
+            ):
+                root = Path(tmp)
+                (root / "README.md").write_text(
+                    "```text\n[hidden](missing-fenced.md)\n```\n"
+                    "`unmatched opener in first paragraph\n"
+                    + blank_line
+                    + "[visible](missing-between.md)\n"
+                    + blank_line
+                    + "`unmatched run in third paragraph\n",
+                    encoding="utf-8",
+                )
+                self.assertEqual(missing_targets(root), ["README.md: missing-between.md"])
+
+    def test_a081_many_distinct_unmatched_runs_preserve_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            unmatched_runs = "\n".join("`" * length for length in range(1, 257))
+            (root / "README.md").write_text(
+                unmatched_runs + "\n[visible](missing-visible.md)\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(missing_targets(root), ["README.md: missing-visible.md"])
+
 
 if __name__ == "__main__":
     unittest.main()
