@@ -652,3 +652,26 @@ Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
 
 Agent: Codex
 Codex-Session: 01a1eb37-712e-7a92-8bd7-91bbd0cd0293
+
+### 2026-11-17 · Return-receipt live qualification (docs-only amendment)
+- The initial automatic public-post rejection was resolved by explicit owner approval
+  of the exact prepared receipt and one bounded verification exchange with the existing
+  Sage Metacognitive Engine chat. No other posting route or expanded authority was used.
+- Request#32 was re-read open/unchanged with no existing comments. Exact export posted as
+  receipt6960534846 at20:46:22Z; real local public-HTTPS verifier accepted exact exported
+  bytes, userID/login, issue URL, request/digests and original unedited timestamps.
+- Sage first refused because the specialized connector normalized comment timestamps
+  to null. Generic public REST fetch supplies the unchanged authoritative metadata;
+  the same scoped exchange continued without relaxing verification requirements.
+- ACK6960605672 appeared at20:49:26Z, binding receipt6960534846 and body SHA-256
+  123188c4ecdc32590f58d6490fcf3a00d547a80bd30438b4286550882327eba7.
+  The real local verifier accepted the exact ACK/account/URL/timestamp chain.
+- This records an operator-mediated account-attributed round trip, not separate Sage
+  cryptographic identity, hardware attestation, unattended synchronization, independent
+  cross-lineage review or deployment/containment acceptance. No recurring grant exists.
+- Source289c35a exactly matched the locally tested tree; this amendment changes only
+  docs. Source/final-head platform CI and Sage's fresh returned session report are
+  recorded separately in PR#37. All signing/review/owner integration holds remain.
+
+Agent: Codex
+Codex-Session: 01a1eb37-712e-7a92-8bd7-91bbd0cd0293

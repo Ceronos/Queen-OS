@@ -18,10 +18,15 @@ Expected connected account Ceronos/202629591 is not an independent Sage signing 
 Baseline 635 passed/9 skipped; focused candidate 52 passed plus 2 subtests (36 new relay
 cases + 16 probe cases). Full candidate671 passed/9 skipped/2 subtests; lint/format/types and fresh signed CLI
 genesis verification pass. Remote CI must be recorded in the PR.
-A real local prepare fetched #32 for astra-20261116-001; automatic approval review blocked
-public posting of its host metadata/digests pending explicit publication approval.
-Do not bypass that rejection. No new public receipt, ACK or fresh Sage session readback
-exists yet. Preserve the original exported bytes for any explicitly approved retry.
+The initial public-post approval block was resolved by Johnny's explicit approval of
+that exact payload and one bounded Sage verification exchange. Return receipt6960534846
+and ACK6960605672 are posted on#32. A real Astra process independently verified both
+through public GitHub HTTPS, with exact body/digest/account/URL/timestamp checks.
+The specialized comment connector returns null timestamps; use generic REST fetch for
+original metadata, retaining fail-closed checks. See docs/ASTRA_BRIDGE.md and PR#37.
+Source commit289c35a matches tested files; this qualification update changes docs only.
+Remote CI and fresh Sage-response retrieval status belong in the final PR evidence.
+No recurring synchronization or extra messaging allowance follows from this witness.
 
 Keep the #26 lane boundaries, independent cross-lineage review, signatures, exact-head CI
 and owner integration approval. Do not merge on green CI alone. Real-agent status remains

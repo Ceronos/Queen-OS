@@ -100,12 +100,39 @@ from the designated Sage Metacognitive Engine chat: user message
 `9dc8cb97-2872-430c-88e2-934750d50ecf`. Those are app-retrieved conversation records,
 not cryptographic attestations or proof of scheduled connector inheritance.
 
-Current candidate evidence: 36 new fixture-only relay cases plus the existing 16 probe
-cases pass locally. A real local `prepare` read issue #32 and produced a sanitized
-receipt; public posting was blocked by automatic approval review pending explicit
-owner approval for that payload/destination. No new GitHub receipt/ACK or fresh Sage
-readback has been demonstrated. The original #35 report/CI and the recovered historical
-handoff remain separate evidence. Independent review, verified signatures, exact-head
-CI, owner integration approval, real-agent containment acceptance and fresh-session
-adapter qualification remain required. No merge, deployment, scheduler edit, budget
-reset or frozen-lab change is authorized by this protocol.
+## November 17 live qualification
+
+Local baseline635/9; candidate671 passed/9 skipped/2 subtests, including36 new
+fixture-only relay cases and16 existing probe cases. Lint/format/types and a fresh
+signed CLI-ledger smoke check pass. Published source commit
+`289c35a6950f73527b5a3d0d26daca665dd6efaf` exactly matched the tested local tree.
+
+Automatic approval review initially blocked public posting of the prepared host
+metadata/digest payload. Johnny then explicitly approved that exact receipt and one
+bounded verification exchange with the designated Sage chat. The original export was
+preserved; no alternate route was used to bypass the rejection.
+
+- [Return receipt6960534846](https://github.com/Ceronos/Queen-OS/issues/32#issuecomment-6960534846)
+  was posted at2026-11-17T20:46:22Z. A real Astra process independently read it through
+  public HTTPS and verified exact bytes, account ID/login, URL, request and timestamps.
+- [Reverse ACK6960605672](https://github.com/Ceronos/Queen-OS/issues/32#issuecomment-6960605672)
+  was posted at2026-11-17T20:49:26Z. The real Astra verifier accepted its exact binding
+  to the receipt comment ID and full body digest
+  `123188c4ecdc32590f58d6490fcf3a00d547a80bd30438b4286550882327eba7`.
+- The specialized comment connector normalized original timestamps to null. Sage's
+  first attempt correctly stopped without writing. The connector's generic public
+  REST fetch preserves the authoritative fields: use
+  `https://api.github.com/repos/Ceronos/Queen-OS/issues/32/comments?per_page=100`
+  or the specific `/issues/comments/6960534846` resource. Missing metadata remains a
+  refusal, never an exemption from the timestamp check.
+
+This demonstrates a bounded operator-mediated account-attributed receipt/ACK chain.
+It does not authenticate a distinct model identity or hardware, establish unattended
+synchronization, or complete the five-engine integration in#26. Parent#35 evidence,
+source-commit CI and any final documentation-head CI must be recorded separately in
+[PR#37](https://github.com/Ceronos/Queen-OS/pull/37).
+
+Independent review, verified signatures, exact-head CI, owner integration approval,
+real-agent containment acceptance and fresh-session adapter qualification remain
+required. No merge, deployment, scheduler edit, budget reset or frozen-lab change
+was made. The one authorized exchange creates no recurring messaging permission.
