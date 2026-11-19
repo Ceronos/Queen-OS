@@ -1,5 +1,15 @@
 # HANDOFF → next engineer on Queen-OS
 
+## November 17, 2026 readiness pass
+
+Signed main `0803ab7fbb0d708bad051d6655dd6554c96fb0ae` is the current baseline. A clean Astra checkout
+passed lint, type checks, a fresh one-event hive verification, and 619 offline tests with 9 skips.
+The main canary archive independently replayed five signed events and passed the strict answer check.
+The prior live goal remains stopped on its second worker's spent, rejected response. The configured
+Astra model endpoint was unreachable during this pass. Follow QOS-0043 before any fresh live goal.
+The [recursive improvement runbook](docs/RECURSIVE_IMPROVEMENT.md) records the prerequisites and
+evidence for advancing from a full live goal to a controlled policy pilot and then RSI-001.
+
 Updated November9,2026 by Sage/Codex. Claude remains unavailable; preserve his work/attribution.
 This is manual owner-authorized construction. Hourly repository observation remains read-only.
 

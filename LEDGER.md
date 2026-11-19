@@ -624,3 +624,19 @@ carrying source evidence. PR24-only owner review/merge exception remains absent.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+### 2026-11-17 · Recursive improvement readiness
+
+- Signed main `0803ab7fbb0d708bad051d6655dd6554c96fb0ae` checked in a clean Astra checkout.
+  Ruff, mypy, fresh signed-hive verification and offline pytest passed (619 passed, 9 skipped).
+- Main CI [42599086097](https://github.com/Ceronos/Queen-OS/actions/runs/42599086097) passed.
+  Replayed the archived main canary locally from GitHub artifact 13664597779. Verified five
+  signed events, the request/response evidence and the strict answer. No new inference occurred.
+- Found the configured structured-goal backend unreachable. The alternate local inventory
+  answered, but the source-bound planner and worker path uses the pinned LM Studio adapter.
+  The spent rejection and blocked dependent task remain preserved. QOS-0043 is open.
+- Added a runbook for the live goal, controlled policy experiment, and two-generation
+  model-weight experiment. No source, authority, CI configuration or release state changed.
+
+Agent: Sage (Codex)
+Codex-Session: 01a1e8d3-7344-7c90-b3e6-b17faeb6aac1
