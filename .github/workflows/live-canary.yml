@@ -85,7 +85,9 @@ jobs:
         id: live_pytest
         env:
           QUEEN_LIVE_TARGETS: ollama=${{ env.CANARY_MODEL }}
-        run: pytest -m live -rs -s tests/live
+          QUEEN_TEST_TELEMETRY_PATH: ${{ runner.temp }}/canary-test-evidence/events.jsonl
+          QUEEN_TEST_SELECTION: live
+        run: python -m pytest -p scripts.test_observer -m live -rs -s tests/live
       - name: CLI path (capability-minted, receipt-signed)
         id: cli_evidence
         run: |
@@ -138,6 +140,18 @@ jobs:
           CANARY_PHASE_CLI: ${{ steps.cli_evidence.outcome }}
           CANARY_PHASE_ANSWER: ${{ steps.answer.outcome }}
         run: python scripts/canary_runtime.py summary
+      - name: Audit canary pytest lifecycle closure
+        if: always()
+        run: |
+          python scripts/test_observer.py summarize --input "${{ runner.temp }}/canary-test-evidence/events.jsonl" --output "${{ runner.temp }}/canary-test-evidence/summary.json"
+      - name: Retain bounded canary test lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-lifecycle-canary-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/canary-test-evidence/
+          if-no-files-found: warn
+          retention-days: 14
       # Allowlist infrastructure metadata only. Model evidence keeps its original admission gate.
       - name: Retain runtime acquisition diagnostics
         if: always()
