@@ -14,6 +14,7 @@ from urllib.parse import unquote, urlsplit
 _LINK = re.compile(r"(?<!!)\[[^\]\n]+\]\((<[^>]+>|[^)\s]+)(?:\s+['\"][^)]*['\"])?\)")
 _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})([^\r\n]*)$")
 _BACKTICK_RUN = re.compile(r"`+")
+_ATX_HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)")
 
 
 def _mask_inline_code(content: str) -> str:
@@ -75,6 +76,12 @@ def _prose_only(content: str) -> str:
                 chunks.append(_mask_inline_code("".join(prose)))
                 prose.clear()
             chunks.append(line)
+            continue
+        if _ATX_HEADING.match(line):
+            if prose:
+                chunks.append(_mask_inline_code("".join(prose)))
+                prose.clear()
+            chunks.append(_mask_inline_code(line))
             continue
         prose.append(line)
     if prose:
