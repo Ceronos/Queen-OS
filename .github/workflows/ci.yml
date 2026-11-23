@@ -53,7 +53,10 @@ jobs:
           mypy
           mypy scripts/canary_runtime.py
       - name: Tests
-        run: pytest -m "not live" --ignore=tests/live
+        env:
+          QUEEN_TEST_TELEMETRY_PATH: ${{ runner.temp }}/queen-test-evidence/events.jsonl
+          QUEEN_TEST_SELECTION: not live
+        run: python -m pytest -p scripts.test_observer -m "not live" --ignore=tests/live
       - name: CLI smoke (real hive, real chain)
         shell: bash
         run: |
@@ -62,3 +65,15 @@ jobs:
           queen ledger tail "$RUNNER_TEMP/hive" -n 1
           queen host probe --hive "$RUNNER_TEMP/hive"
           queen ledger verify "$RUNNER_TEMP/hive"
+      - name: Audit pytest lifecycle closure
+        if: always()
+        run: |
+          python scripts/test_observer.py summarize --input "${{ runner.temp }}/queen-test-evidence/events.jsonl" --output "${{ runner.temp }}/queen-test-evidence/summary.json"
+      - name: Retain bounded pytest lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-lifecycle-${{ matrix.os }}-py${{ matrix.python }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/queen-test-evidence/
+          if-no-files-found: warn
+          retention-days: 14
