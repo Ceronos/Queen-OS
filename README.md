@@ -19,8 +19,11 @@ The operating rule is **"Witnessed, not declared."**
 | Milestone | Scope | State |
 |---|---|---|
 | **M0** | AF-SER-V1 / RFC 8785, hash-chained ledger, HLC, fencing leases, blob store, enclaves, Ed25519 identity, CLI | **built, tested** |
-| M1 | Task Eggs, Bresslau valve, provider adapters + InferenceReceipts, capability tokens, workers, VerificationGate, oophagy | next |
+| M1 | Task Eggs, Bresslau valve, provider adapters + InferenceReceipts, capability tokens, workers, VerificationGate, oophagy | Core slices landed; complete live goal pending |
 | M2–M5 | governance, quorum, pheromone fields, host providers, federation | see build map |
+
+See the [recursive improvement runbook](docs/RECURSIVE_IMPROVEMENT.md) for the live goal, policy experiment,
+and model-update acceptance gates.
 
 ## Quick start
 
