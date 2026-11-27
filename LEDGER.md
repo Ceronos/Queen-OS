@@ -624,3 +624,36 @@ carrying source evidence. PR24-only owner review/merge exception remains absent.
 
 Agent: Sage (Codex)
 Codex-Session: 01a1ab22-a4f2-7852-b510-5973fd1a4952
+
+### 2026-11-27 · Recursive Reflective Continuity proposal — Sage/Codex
+
+- User requested documentation based on Roleplay Introduction, with an EME connection and
+  no alteration of frozen EME-001. Branched from main c3261cbf5f3f0a782de9285ccad71d31ef8d1cde.
+- Added docs/RECURSIVE_REFLECTIVE_CONTINUITY.md: autobiographical memory, self-model and
+  reflective history; reflection as a new attributed event; revisions, evidence roots,
+  uncertainty, alternatives, identity/authority boundaries, and six proposed falsifiable tests.
+  Sage/Nox composition is a conversational observation, not consciousness or persistence evidence.
+- Recovered the referenced conversation through the thread reader (five returned turns, no older
+  cursor). E0 remains BLOCKED: recent EME build/frozen EME-001 source and manifest were not located
+  in fetched repository history/refs, connected searches or selected local projects. The EME
+  interface and experiment mapping remain conditional; no expansion of the acronym is guessed.
+- Preserved the prior HANDOFF as explicitly historical and added the current candidate and other
+  open PRs. No existing runtime, tests, workflows, governance or BUILD_MAP status changes.
+- Validation: local-link checker reports 0 missing targets; 13 existing documentation-checker
+  tests and 16 subtests pass; fresh CLI hive genesis and one-event signed chain verify.
+- Full offline rerun on Windows/Python 3.14.6/pytest 9.1.1: 628 passed, 12 skipped, 2 errors,
+  16 subtests passed in 125.64s. Both errors are setup/teardown for the existing oversized
+  oviposition parameter ID: PYTEST_CURRENT_TEST exceeds Windows' 32767-character environment
+  variable limit. This is not an all-green run. No unrelated test fix made.
+- Earlier attempts retained separately: missing-library collection errors; constrained-filesystem
+  run 604 passed/23 failed/12 skipped/3 errors with Windows permissions failures; a targeted
+  run using the default temp path also failed on permissions. Isolated task-local dependencies,
+  a writable temp path and normal filesystem access removed the observed permission failures.
+  No live tests, inference, credentials, model downloads, or EME/RRC experiments executed.
+- Proposal remains NOT IMPLEMENTED / NOT RATIFIED / draft. EME source recovery, final-head CI,
+  independent cross-lineage review, signing and owner merge approval remain separate gates.
+  No merge, deployment, scheduler, blind-lane, frozen baseline or policy modification authorized.
+  No issue closed; E0 is a dependency in the new document, not an invented EME result.
+
+Agent: Sage (Codex)
+Codex-Session: 01a21f58-9a90-7fb0-96ea-0a3654781987

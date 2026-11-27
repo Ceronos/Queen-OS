@@ -1,5 +1,43 @@
 # HANDOFF → next engineer on Queen-OS
 
+## Current documentation candidate — 2026-11-27
+
+Branch `codex/rrc-documentation-20261127` starts from main
+`c3261cbf5f3f0a782de9285ccad71d31ef8d1cde`. The user requested repository documentation
+for Recursive Reflective Continuity (RRC) based on the Roleplay Introduction conversation.
+See [RRC](docs/RECURSIVE_REFLECTIVE_CONTINUITY.md): three layers, reflection-as-history,
+source/revision/evidence discipline, persona and authority boundaries, alternative explanations,
+and six proposed falsifiable tests. This is NOT IMPLEMENTED / NOT RATIFIED; tests in the
+proposal are NOT RUN. No subjective-consciousness or continuous-personal-identity claim.
+
+**Unresolved dependency E0:** recent EME build and frozen EME-001 documentation were not
+located in the fetched repository refs, connected-source searches, or selected local project
+folders. Do not infer an EME implementation or freeze manifest from conversation text. Recover
+the authorized non-blind source pointer before claiming the EME inspection complete or making
+the adapter mapping concrete. EME-001 remains frozen; no baseline write, rerun or rescoring.
+
+This candidate changes RRC documentation, this handoff and an append-only LEDGER entry.
+No runtime, test, workflow, governance or build-map status is changed. The final PR description
+and latest LEDGER entry carry validation and publication state. Review the exact final SHA;
+independent cross-lineage review, signing, CI and owner merge approval remain required.
+
+Other open work is preserved: #27 test-evidence guide; #31/#35/#37 Astra bridge chain;
+#36 recursive-improvement runbook; historical #33/#34/#38 parser proposals; #42 lifecycle
+security receipts. Their existence is not incorporation or permission to run them. This branch
+does not stack on those drafts. Main includes #24, #28 and #45, so the November 9 status below
+is historical, not the current merge frontier. Its spent-worker and private-receipt boundaries
+remain relevant; this documentation task does not reopen that experiment.
+
+Next: resolve E0, review RRC, then separately propose implementation/preregistration if approved.
+Suite63 HOLD, DEP-007 isolation, protected House/frozen v65 boundaries, read-only hourlies and
+deployment/real-agent NO-GO remain unchanged. No scheduler, model or host action was requested
+by this proposal. Existing policy exceptions do not transfer to this PR.
+
+Agent: Sage (Codex)
+Codex-Session: 01a21f58-9a90-7fb0-96ea-0a3654781987
+
+## Historical handoff — November 9 (preserved; superseded for repository status)
+
 Updated November9,2026 by Sage/Codex. Claude remains unavailable; preserve his work/attribution.
 This is manual owner-authorized construction. Hourly repository observation remains read-only.
 
